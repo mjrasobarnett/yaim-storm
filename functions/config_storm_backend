@@ -1,0 +1,115 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_backend
+#
+# DESCRIPTION : This function start storm-backend service on a StoRM SE backend.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :       - Change ownership to storm-backend directory
+#               - Activate and restart service
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+function config_storm_backend_check () {
+
+  yaimlog INFO "No required variables to set."
+
+}
+
+function config_storm_backend_setenv () {
+
+#  yaimgridenv_set LCMAPS_LOG_FILE "${LCMAPS_LOG_FILE}"
+#  yaimgridenv_set LCAS_LOG_FILE "${LCAS_LOG_FILE}"
+  yaimlog DEBUG "This function currently doesn't set any environment variables."
+
+}
+
+function config_storm_backend () {
+
+  FUNCTION="config_storm_backend"
+
+  # Change ownership to storm-backend directory
+  if [ -d ${STORM_BE_DIR} ]; then
+    chown -R ${STORM_USER}:${STORM_USER} ${STORM_BE_DIR}
+  else
+    yaimlog ERROR "${FUNCTION}: StoRM backend directory ${STORM_BE_DIR} doesn't exist."
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+  fi
+
+  # temporary fix for version  1.5.1-2 -> 1.5.1-3
+  BACKEND_VERSION=`rpm -q --queryformat '%{VERSION}-%{RELEASE}' storm-backend-server`
+
+  #----------------------------------------------------------
+  # /etc/init.d/storm-backend - BEGIN
+  #----------------------------------------------------------
+  FILE="/etc/init.d/storm-backend"
+  # Create symbolic link
+  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/init.d/storm-backend"
+  ln -sf ${STORM_BE_DIR}/etc/init.d/storm-backend ${FILE}
+  #----------------------------------------------------------
+  # /etc/init.d/storm-backend - END
+  #----------------------------------------------------------
+  
+  #----------------------------------------------------------
+  # /etc/cron.d/storm-backend.cron - BEGIN
+  #----------------------------------------------------------
+  FILE="/etc/cron.d/storm-backend.cron"
+  # Create symbolic link
+  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/cron.d/storm-backend.cron"
+  ln -sf ${STORM_BE_DIR}/etc/cron.d/storm-backend.cron ${FILE}
+  #----------------------------------------------------------
+  # /etc/cron.d/storm-backend.cron - END
+  #---------------------------------------------------------- 
+
+  #----------------------------------------------------------
+  # /etc/logrotate.d/storm-backend.logrotate - BEGIN
+  #----------------------------------------------------------
+  FILE="/etc/logrotate.d/storm-backend.logrotate"
+  # Create symbolic link
+  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/logrotate.d/storm-backend.logrotate"
+  ln -sf ${STORM_BE_DIR}/etc/logrotate.d/storm-backend.logrotate ${FILE}
+  #----------------------------------------------------------
+  # /etc/cron.d/storm-backend.cron - END
+  #---------------------------------------------------------- 
+
+  # end temporary fix
+
+  # Activate and restart service
+  /sbin/chkconfig --add storm-backend
+  /sbin/chkconfig storm-backend on
+  yaimlog INFO "${FUNCTION}: Restart service."
+  /sbin/service storm-backend stop
+  /sbin/service storm-backend start
+
+  # Remove old backup
+  rm -f /etc/init.d/storm-backend\.*
+
+  # Exit with success
+  return 0
+
+}

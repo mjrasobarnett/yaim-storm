@@ -1,0 +1,828 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_gip_storm
+#
+# DESCRIPTION : This function configures the published information on a StoRM SE.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+# Get from config_gip_dpm in glite-yaim-dpm-4.0.6-1 and modified for StoRM
+function l_write_vo_info () {
+
+  tofile=$1
+  # get_owner
+  echo -n "get_owner =" >> ${tofile}
+  nvo=0
+  for VO in ${VOS}; do
+    echo -n " echo ${VO};" >> ${tofile}
+    nvo=1
+  done
+  if [ ${nvo} -eq 0 ]; then
+    echo " echo" >> ${tofile}
+  else
+    echo >> ${tofile}
+  fi
+  # get_acbr
+  echo -n "get_acbr =" >> ${tofile}
+  nvo=0
+  for VO in ${VOS}; do
+    echo -n " echo VO:${VO};" >> ${tofile}
+    nvo=1
+  done
+  if [ $nvo -eq 0 ]; then
+    echo " echo" >> ${tofile}
+  else
+    echo >> ${tofile}
+  fi
+
+  return 0
+
+}
+
+#
+# Used kB
+#
+function get_used_size_kb () {
+
+  FUNCTION="config_gip_storm"
+
+  # Quota on
+  if ! [ `echo $@ | wc -w` = 2 ] && [ "$3" == "true" ]; then
+    gpfs_quota_cmd="/usr/lpp/mmfs/bin/mmlsquota"
+    if ! [ -z "$4" ] && ! [ -z "$5" ]; then
+      used=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {print $3}' | sed 's/\..*//'`
+      if [ -z ${used} ]; then
+        yaimlog ERROR "${FUNCTION}: ${gpfs_quota_cmd} return no value; check GPFS partition."
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      # convert in kB (base 10)
+      used=$((${used}*1024/1000))
+    else
+      # Missing fileset, device or both
+      used=-1
+    fi
+  # Quota off
+  else
+    # Get values from the storm_be_ISAM database
+    total=`echo "SELECT total_size FROM storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    free=`echo "SELECT free_size FROM storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    if [ ! -z "${free}" ] && [ ! -z "${total}" ]; then
+      used=$((${total}-${free}))
+      # convert in kB (base 10)
+      used=$((${used}/1000))
+    else
+      # Missing sizes
+      used=-1
+    fi
+  fi
+
+  export $2=${used}
+
+  return 0
+
+}
+
+#
+# Used GB
+#
+function get_used_size_gb () {
+
+  FUNCTION="config_gip_storm"
+
+  # Quota on
+  if ! [ `echo $@ | wc -w` = 2 ] && [ "$3" == "true" ]; then
+    gpfs_quota_cmd="/usr/lpp/mmfs/bin/mmlsquota"
+    if ! [ -z "$4" ] && ! [ -z "$5" ]; then
+      used=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {print $3}' | sed 's/\..*//'`
+      if [ -z ${used} ]; then
+        yaimlog ERROR "${FUNCTION}: ${gpfs_quota_cmd} return no value; check GPFS partition."
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      # convert in GB (base 10)
+      used=$((${used}*1024/(1000*1000*1000)))
+    else
+      # Missing fileset or device or both
+      used=-1
+    fi
+  # Quota off
+  else
+    # Get values from the storm_be_ISAM database
+    total=`echo "SELECT total_size FROM storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    free=`echo "SELECT free_size FROM storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    if [ ! -z "${free}" ] && [ ! -z "${total}" ]; then
+      used=$((${total}-${free}))
+      # convert in GB (base 10)
+      used=$((${used}/(1000*1000*1000)))
+    else
+      # Missing sizes
+      used=-1
+    fi
+  fi
+
+  export $2=${used}
+
+  return 0
+
+}
+
+#
+# Free kB
+#
+function get_free_size_kb () {
+
+  FUNCTION="config_gip_storm"
+
+  # Quota on
+  if ! [ `echo $@ | wc -w` = 2 ] && [ "$3" == "true" ]; then
+    gpfs_quota_cmd="/usr/lpp/mmfs/bin/mmlsquota"
+    if ! [ -z "$4" ] && ! [ -z "$5" ]; then
+      total=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {printf $4}' | sed 's/\..*//'`
+      used=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {printf $3}' | sed 's/\..*//'`
+      if [ -z ${total} ] || [ -z ${used} ]; then
+        yaimlog ERROR "${FUNCTION}: ${gpfs_quota_cmd} return no value; check GPFS partition."
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      free=$((${total}-${used}))
+      # convert in kB (base 10)
+      free=$((${free}*1024/1000))
+    else
+      # Missing fileset or device or both
+      free=-1
+    fi
+  # Quota off
+  else
+    # Get values from the storm_be_ISAM database
+    free=`echo "SELECT free_size FROM storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    if [ ! -z "${free}" ]; then
+      # convert in kB (base 10)
+      free=$((${free}/1000))
+    else
+      # Missing sizes
+      free=-1
+    fi
+  fi
+
+  export $2=${free}
+
+  return 0
+
+}
+
+#
+# Free GB
+#
+function get_free_size_gb () {
+
+  FUNCTION="config_gip_storm"
+
+  # Quota on
+  if ! [ `echo $@ | wc -w` = 2 ] && [ "$3" == "true" ]; then
+    gpfs_quota_cmd="/usr/lpp/mmfs/bin/mmlsquota"
+    if ! [ -z "$4" ] && ! [ -z "$5" ]; then
+      total=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {printf $4}' | sed 's/\..*//'`
+      used=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {printf $3}' | sed 's/\..*//'`
+      if [ -z ${total} ] || [ -z ${used} ]; then
+        yaimlog ERROR "${FUNCTION}: ${gpfs_quota_cmd} return no value; check GPFS partition."
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      free=$((${total}-${used}))
+      # convert in GB (base 10)
+      free=$((${free}*1024/(1000*1000*1000)))
+    else
+      # Missing fileset or device or both
+      free=-1
+    fi
+  # Quota off
+  else
+    # Get values from the storm_be_ISAM database
+    free=`echo "SELECT free_size from storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    if [ ! -z "${free}" ]; then
+      # convert in GB (base 10)
+      free=$((${free}/(1000*1000*1000)))
+    else
+      # Missing sizes
+      free=-1
+    fi
+  fi
+
+  export $2=${free}
+
+  return 0
+
+}
+
+#
+# Total kB
+#
+function get_total_size_kb () {
+
+  FUNCTION="config_gip_storm"
+
+  # Quota on
+  if ! [ `echo $@ | wc -w` = 2 ] && [ "$3" == "true" ]; then
+    gpfs_quota_cmd="/usr/lpp/mmfs/bin/mmlsquota"
+    if ! [ -z "$4" ] && ! [ -z "$5" ]; then
+      total=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {printf $4}' | sed 's/\..*//'`
+      if [ -z ${total} ]; then
+        yaimlog ERROR "${FUNCTION}: ${gpfs_quota_cmd} return no value; check GPFS partition."
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      # convert in kB (base 10)
+      total=$((${total}*1024/1000))
+    else
+      # Missing fileset or device or both
+      total=-1
+    fi
+  # Quota off
+  else
+    # Get values from the storm_be_ISAM database
+    total=`echo "SELECT total_size FROM storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    if [ ! -z "${total}" ]; then
+      # convert in kB (base 10)
+      total=$((${total}/1000))
+    else
+      # Missing sizes
+      total=-1
+    fi
+  fi
+
+  export $2=${total}
+
+  return 0
+
+}
+
+#
+# Total GB
+#
+function get_total_size_gb () {
+
+  FUNCTION="config_gip_storm"
+
+  # Quota on
+  if ! [ `echo $@ | wc -w` = 2 ] && [ "$3" == "true" ]; then
+    gpfs_quota_cmd="/usr/lpp/mmfs/bin/mmlsquota"
+    if ! [ -z "$4" ] && ! [ -z "$5" ]; then
+      total=`${gpfs_quota_cmd} -j $4 $5 | awk 'NR==3 {printf $4}' | sed 's/\..*//'`
+      if [ -z ${total} ]; then
+        yaimlog ERROR "${FUNCTION}: ${gpfs_quota_cmd} return no value; check GPFS partition."
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      # convert in GB (base 10)
+      total=$((${total}*1024/(1000*1000*1000)))
+    else
+      # Missing fileset or device or both
+      total=-1
+    fi
+  # Quota off
+  else
+    # Get values from the storm_be_ISAM database
+    total=`echo "SELECT total_size FROM storage_space WHERE space_file='$1' limit 1;" | mysql --user=${STORM_USER} --password=${STORM_DB_PWD} -N storm_be_ISAM`   # in B
+    if [ ! -z "${total}" ]; then
+      # convert in GB (base 10)
+      total=$((${total}/(1000*1000*1000)))
+    else
+      # Missing sizes
+      total=-1
+    fi
+  fi
+
+  export $2=${total}
+
+  return 0
+
+}
+
+function config_gip_storm_check () {
+
+  requires $1 SITE_NAME STORM_BACKEND_HOST STORM_DEFAULT_ROOT STORM_FRONTEND_PATH \
+              STORM_FRONTEND_PORT STORM_FRONTEND_PUBLIC_HOST VOS
+  return $?
+
+}
+
+function config_gip_storm_setenv () {
+
+  yaimgridenv_set STORM_BACKEND_HOST ${STORM_BACKEND_HOST}
+  yaimgridenv_set STORM_FRONTEND_PUBLIC_HOST ${STORM_FRONTEND_PUBLIC_HOST}
+  yaimgridenv_set STORM_FRONTEND_PORT ${STORM_FRONTEND_PORT}
+  yaimgridenv_set STORM_FRONTEND_PATH ${STORM_FRONTEND_PATH}
+
+}
+
+function config_gip_storm () {
+
+  FUNCTION="config_gip_storm"
+
+  # Manage variables
+  STORM_FRONTEND_ENDPOINT="httpg://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}"
+
+  yaimlog INFO "${FUNCTION}: Static service information"
+  #----------------------------------------------------------------
+  # ${INSTALL_ROOT}/glite/etc/gip/provider/service-srm2.2 - BEGIN
+  #----------------------------------------------------------------
+  FILE="${GLITE_LOCATION}/etc/gip/provider/service-srm2.2"
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+  cat > ${FILE} << EOF
+#!/bin/sh
+. ${INSTALL_ROOT}/glite/etc/profile.d/grid-env.sh
+EOF
+
+  cat >> ${FILE} << EOF
+${INSTALL_ROOT}/glite/libexec/glite-info-service ${INSTALL_ROOT}/glite/etc/gip/glite-info-service-srm2.2.conf ${SITE_NAME} ${STORM_FRONTEND_ENDPOINT}
+EOF
+
+  # Set execute permissions
+  chmod +x ${FILE}
+
+  # Configuration file for SRM v2.2 service reporter
+  FILE="${GLITE_LOCATION}/etc/gip/glite-info-service-srm2.2.conf"
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+  cat > ${FILE} << EOF
+init = ${GLITE_LOCATION}/libexec/glite-info-service-storm init
+service_type = SRM
+get_version = echo \${GLITE_INFO_SERVICE_VERSION}
+get_endpoint = echo \${GLITE_INFO_SERVICE_ENDPOINT}
+get_status = ${GLITE_LOCATION}/libexec/glite-info-service-test SRM_V2 && ${GLITE_LOCATION}/libexec/glite-info-service-storm status
+WSDL_URL = http://sdm.lbl.gov/srm-wg/srm.v2.2.wsdl
+semantics_URL = http://sdm.lbl.gov/srm-wg/doc/SRM.v2.2.html
+get_starttime = perl -e '@st=stat("/var/run/storm-backend.pid");print "@st[10]\n";'
+get_data = echo
+get_services = echo
+EOF
+
+  # Run function to complete file
+  l_write_vo_info ${FILE}
+  #----------------------------------------------------------------
+  # ${INSTALL_ROOT}/glite/etc/gip/provider/service-srm2.2 - END
+  #----------------------------------------------------------------
+
+  yaimlog INFO "${FUNCTION}: Static storage information"
+  #----------------------------------------------------------------
+  # ${GLITE_LOCATION}/etc/gip/ldif/static-file-StoRM.ldif - BEGIN
+  #----------------------------------------------------------------
+  FILE="${GLITE_LOCATION}/etc/gip/ldif/static-file-StoRM.ldif"   # Configuration filename
+  FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"                     # Backup configuration filename (if needed)
+  FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"                 # New configuration filename (if needed)
+
+  # Configuration file management
+  STORM_INFO_OVERWRITE=`echo ${STORM_INFO_OVERWRITE} | tr '[:upper:]' '[:lower:]'`   # convert in lowercase
+  # If overwrite is enabled, create backup
+  if [ "${STORM_INFO_OVERWRITE}" = "true" ]; then
+    if [ -e ${FILE} ]; then
+      yaimlog DEBUG "${FUNCTION}: Overwrite old configuration file ${FILE}"
+      yaimlog DEBUG "${FUNCTION}: Backup old configuration file in ${FILE_B}"
+      mv ${FILE} ${FILE_B}
+    fi
+  # Else if overwrite is disabled, create yaimnew
+  else
+    yaimlog DEBUG "${FUNCTION}: Not overwrite old configuration file ${FILE}"
+    yaimlog DEBUG "${FUNCTION}: Create new configuration file in ${FILE_N}"
+    FILE="${FILE_N}"
+  fi
+  touch ${FILE}
+
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+
+  # Remove oldest backup file
+  yaimlog DEBUG "${FUNCTION}: Removing old backup files"
+  find `dirname "${FILE}"` -ctime +2 -name 'static-file-StoRM.ldif.bkp*' -exec rm {} \;
+
+  # Set permissions
+  chmod 644 ${FILE}
+
+  # Prepare need variables
+  for SA in ${STORM_STORAGEAREA_LIST}; do
+
+    # Convert case
+    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+
+    # Remove DNS-like characters from SA_UPP names
+    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+
+    x=STORM_${SA_UPP}_ROOT;            SA_ROOT=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
+    x=STORM_${SA_UPP}_QUOTA;           SA_QUOTA=${!x}
+    x=STORM_${SA_UPP}_QUOTA_FILESET;   SA_FILESET=${!x}
+    x=STORM_${SA_UPP}_QUOTA_DEVICE;    SA_DEVICE=${!x}
+    x=STORM_${SA_UPP}_VONAME;          SA_VONAME=${!x:-${SA_LOW}}
+
+    # Get size values on SA_ROOT (in GB)
+    get_used_size_gb  ${SA_ROOT} PARAMETER ${SA_QUOTA} ${SA_FILESET} ${SA_DEVICE}
+    hash_insert SA_USED_SIZE_GB  ${SA_UPP} ${PARAMETER}
+    get_free_size_gb  ${SA_ROOT} PARAMETER ${SA_QUOTA} ${SA_FILESET} ${SA_DEVICE}
+    hash_insert SA_FREE_SIZE_GB  ${SA_UPP} ${PARAMETER}
+    get_total_size_gb ${SA_ROOT} PARAMETER ${SA_QUOTA} ${SA_FILESET} ${SA_DEVICE}
+    hash_insert SA_TOTAL_SIZE_GB ${SA_UPP} ${PARAMETER}
+    # Get size values on SA_ROOT (in KB)
+    get_used_size_kb  ${SA_ROOT} PARAMETER ${SA_QUOTA} ${SA_FILESET} ${SA_DEVICE}
+    hash_insert SA_USED_SIZE_KB  ${SA_UPP} ${PARAMETER}
+    get_free_size_kb  ${SA_ROOT} PARAMETER ${SA_QUOTA} ${SA_FILESET} ${SA_DEVICE}
+    hash_insert SA_FREE_SIZE_KB  ${SA_UPP} ${PARAMETER}
+
+    # Prepare per-VO and global values
+    PERVO_VONAME_INDEX=`echo ${SA_VONAME} | sed -e 's/-//g' -e 's/\.//g'`
+    # Add VONAME if missing
+    if ! [[ "${PERVO_VONAMES}" =~ "${SA_VONAME}" ]]; then
+      PERVO_VONAMES="${PERVO_VONAMES} ${SA_VONAME}"
+      x=STORM_${SA_UPP}_ACCESSPOINT;   hash_insert PERVO_ACCESSPOINT ${PERVO_VONAME_INDEX} ${!x:-/${SA_LOW}}
+    fi
+    # Sum size values for VONAME and global(in GB)
+    x=`hash_find PERVO_USED_SIZE_GB ${PERVO_VONAME_INDEX}`
+    y=`hash_find SA_USED_SIZE_GB ${SA_UPP}`
+    hash_insert PERVO_USED_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
+    let GLOBAL_USED_SIZE_GB+=$y
+
+    x=`hash_find PERVO_FREE_SIZE_GB ${PERVO_VONAME_INDEX}`
+    y=`hash_find SA_FREE_SIZE_GB ${SA_UPP}`
+    hash_insert PERVO_FREE_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
+    let GLOBAL_FREE_SIZE_GB+=$y
+
+    x=`hash_find PERVO_TOTAL_SIZE_GB ${PERVO_VONAME_INDEX}`
+    y=`hash_find  SA_TOTAL_SIZE_GB ${SA_UPP}`
+    hash_insert PERVO_TOTAL_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
+    let GLOBAL_TOTAL_SIZE_GB+=$y
+
+    # Sum size values for VONAME (in KB)
+    x=`hash_find PERVO_USED_SIZE_KB ${PERVO_VONAME_INDEX}`
+    y=`hash_find SA_USED_SIZE_KB ${SA_UPP}`
+    hash_insert PERVO_USED_SIZE_KB ${PERVO_VONAME_INDEX} $((x+y))
+    let GLOBAL_USED_SIZE_KB+=$y
+
+    x=`hash_find PERVO_FREE_SIZE_KB ${PERVO_VONAME_INDEX}`
+    y=`hash_find SA_FREE_SIZE_KB ${SA_UPP}`
+    hash_insert  PERVO_FREE_SIZE_KB ${PERVO_VONAME_INDEX} $((x+y))
+    let GLOBAL_FREE_SIZE_KB+=$y
+
+  done
+
+  #==========================================================
+  # Create GlueSE entries
+
+  yaimlog DEBUG "${FUNCTION}: Creating GlueSEUniqueID entries"
+  cat >> ${FILE} << EOF
+#
+# GlueSEUniqueID
+#
+dn: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSETop
+objectClass: GlueSE
+objectClass: GlueInformationService
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueSEUniqueID: ${STORM_FRONTEND_PUBLIC_HOST}
+GlueSEName: ${SITE_NAME}:srm_v2
+GlueSEArchitecture: multidisk
+GlueSEStatus: Production
+GlueSEImplementationName: StoRM
+GlueSEImplementationVersion: `rpm -q --queryformat='%{VERSION}' storm-backend-server`
+GlueSESizeTotal: $((GLOBAL_TOTAL_SIZE_GB))
+GlueSESizeFree: $((GLOBAL_FREE_SIZE_GB))
+GlueSETotalOnlineSize: $((GLOBAL_TOTAL_SIZE_GB))
+GlueSEUsedOnlineSize: $((GLOBAL_USED_SIZE_GB))
+GlueSETotalNearlineSize: 0
+GlueSEUsedNearlineSize: 0
+GlueInformationServiceURL: ldap://${STORM_BACKEND_HOST}:2170/mds-vo-name=resource,o=grid
+GlueForeignKey: GlueSiteUniqueID=${SITE_NAME}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+  #==========================================================
+
+  #==========================================================
+  # Create GlueSA entries
+
+  for SA in ${STORM_STORAGEAREA_LIST}; do
+
+    # Convert case
+    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+
+    # Remove DNS-like characters from SA_UPP names
+    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+
+    x=STORM_${SA_UPP}_ACCESSPOINT;     SA_ACCESSPOINT=${!x:-/${SA_LOW}}
+    x=STORM_${SA_UPP}_TOKEN;           SA_TOKEN=${!x}
+    x=STORM_${SA_UPP}_VONAME;          SA_VONAME=${!x:-${SA_LOW}}
+    x=STORM_${SA_UPP}_STORAGECLASS;    SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
+    # Convert in uppercase
+    SA_STORAGECLASS=`echo ${SA_STORAGECLASS} | tr '[:lower:]' '[:upper:]'`
+
+    # Check the STORAGECLASS
+    SA_RETENTION_POLICY="replica"                                         # default
+    SA_ACCESS_LATENCY="online"                                            # default
+    SA_INSTALLED_ONLINE_CAPACITY=`hash_find SA_TOTAL_SIZE_GB ${SA_UPP}`   # default
+    SA_INSTALLED_NEARLINE_CAPACITY=0                                      # default
+    if ! [ -z "${SA_STORAGECLASS}" ]; then
+      case ${SA_STORAGECLASS} in
+        "T1D0")
+          SA_RETENTION_POLICY="custodial"
+          SA_ACCESS_LATENCY="nearline"
+          SA_INSTALLED_ONLINE_CAPACITY=0
+          SA_INSTALLED_NEARLINE_CAPACITY=`hash_find SA_TOTAL_SIZE_GB ${SA_UPP}`
+          ;;
+        "T1D1")
+          SA_RETENTION_POLICY="custodial"
+          SA_ACCESS_LATENCY="online"
+          SA_INSTALLED_ONLINE_CAPACITY=`hash_find SA_TOTAL_SIZE_GB ${SA_UPP}`
+          SA_INSTALLED_NEARLINE_CAPACITY=0
+          ;;
+        "T0D1")
+          SA_RETENTION_POLICY="replica"
+          SA_ACCESS_LATENCY="online"
+          SA_INSTALLED_ONLINE_CAPACITY=`hash_find SA_TOTAL_SIZE_GB ${SA_UPP}`
+          SA_INSTALLED_NEARLINE_CAPACITY=0
+          ;;
+        *)
+          SA_RETENTION_POLICY="replica"
+          SA_ACCESS_LATENCY="online"
+          SA_INSTALLED_ONLINE_CAPACITY=`hash_find SA_TOTAL_SIZE_GB ${SA_UPP}`
+          SA_INSTALLED_NEARLINE_CAPACITY=0
+          ;;
+      esac
+    fi
+
+    yaimlog DEBUG "${FUNCTION}: Creating GlueSALocalID entries for ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY} SA (${SA_VONAME} VO)"
+    cat >> ${FILE} << EOF
+#
+# GlueSALocalID ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY} SA (${SA_VONAME} VO)
+#
+dn: GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY},GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSATop
+objectClass: GlueSA
+objectClass: GlueSAPolicy
+objectClass: GlueSAState
+objectClass: GlueSAAccessControlBase
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueSALocalID: ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
+GlueSAName: Reserved space for ${SA_VONAME} VO
+GlueSATotalOnlineSize: $((`hash_find SA_TOTAL_SIZE_GB ${SA_UPP}`))
+GlueSAUsedOnlineSize: $((`hash_find SA_USED_SIZE_GB ${SA_UPP}`))
+GlueSAFreeOnlineSize: $((`hash_find SA_FREE_SIZE_GB ${SA_UPP}`))
+GlueSAReservedOnlineSize: $((`hash_find SA_TOTAL_SIZE_GB ${SA_UPP}`))
+GlueSACapability: InstalledOnlineCapacity=$((SA_INSTALLED_ONLINE_CAPACITY))
+GlueSACapability: InstalledNearlineCapacity=$((SA_INSTALLED_NEARLINE_CAPACITY))
+GlueSATotalNearlineSize: 0
+GlueSAUsedNearlineSize: 0
+GlueSAFreeNearlineSize: 0
+GlueSAReservedNearlineSize: 0
+GlueSARetentionPolicy: ${SA_RETENTION_POLICY}
+GlueSAAccessLatency: online
+GlueSAExpirationMode: neverExpire
+GlueSAPolicyFileLifeTime: permanent
+GlueSAType: permanent
+GlueSAStateAvailableSpace: $((`hash_find SA_FREE_SIZE_KB ${SA_UPP}`))
+GlueSAStateUsedSpace: $((`hash_find SA_USED_SIZE_KB ${SA_UPP}`))
+GlueSAAccessControlBaseRule: VO:${SA_VONAME}
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+
+    if [ -z ${SA_TOKEN} ]; then
+      yaimlog DEBUG "${FUNCTION}: Creating GlueVOInfoLocalID entries for ${SA_VONAME} VO (no token)"
+      cat >> ${FILE} << EOF
+#
+# GlueVOInfoLocalID ${SA_VONAME}
+#
+dn: GlueVOInfoLocalID=${SA_VONAME},GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY},GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSATop
+objectClass: GlueVOInfo
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueVOInfoLocalID: ${SA_VONAME}
+GlueVOInfoPath: ${SA_ACCESSPOINT}
+GlueVOInfoAccessControlBaseRule: VO:${SA_VONAME}
+GlueChunkKey: GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+    else
+      yaimlog DEBUG "${FUNCTION}: Creating GlueVOInfoLocalID entries for ${SA_VONAME} VO (${SA_TOKEN} token)"
+      cat >> ${FILE} << EOF
+#
+# GlueVOInfoLocalID ${SA_VONAME}:${SA_TOKEN}
+#
+dn: GlueVOInfoLocalID=${SA_VONAME}:${SA_TOKEN},GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY},GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSATop
+objectClass: GlueVOInfo
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueVOInfoLocalID: ${SA_VONAME}:${SA_TOKEN}
+GlueVOInfoPath: ${SA_ACCESSPOINT}
+GlueVOInfoTag: ${SA_TOKEN}
+GlueVOInfoAccessControlBaseRule: VO:${SA_VONAME}
+GlueChunkKey: GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+    fi
+
+  done
+
+  #==========================================================
+
+  #==========================================================
+  # Create GlueSEControlProtocol entries
+
+  yaimlog DEBUG "${FUNCTION}: Creating GlueSEControlProtocolLocalID entries for srm_v2.2 protocol"
+  cat >> ${FILE} << EOF
+#
+# GlueSEControlProtocolLocalID srm_v2.2
+#
+dn: GlueSEControlProtocolLocalID=srm_v2.2,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSETop
+objectClass: GlueSEControlProtocol
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueSEControlProtocolType: SRM
+GlueSEControlProtocolLocalID: srm_v2.2
+GlueSEControlProtocolVersion: 2.2.0
+GlueSEControlProtocolEndpoint: ${STORM_FRONTEND_ENDPOINT}
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+  #==========================================================
+
+  #==========================================================
+  # Create GlueSEAccessProtocol entries
+
+  # Convert in lowercase
+  STORM_INFO_FILE_SUPPORT=`echo ${STORM_INFO_FILE_SUPPORT} | tr '[:upper:]' '[:lower:]'`
+  STORM_INFO_RFIO_SUPPORT=`echo ${STORM_INFO_RFIO_SUPPORT} | tr '[:upper:]' '[:lower:]'`
+  STORM_INFO_GRIDFTP_SUPPORT=`echo ${STORM_INFO_GRIDFTP_SUPPORT} | tr '[:upper:]' '[:lower:]'`
+  STORM_INFO_ROOT_SUPPORT=`echo ${STORM_INFO_ROOT_SUPPORT} | tr '[:upper:]' '[:lower:]'`
+
+  if [ ${STORM_INFO_FILE_SUPPORT} = "true" ]; then
+    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for file protocol"
+    cat >> ${FILE} << EOF
+#
+# GlueSEAccessProtocolLocalID file
+#
+dn: GlueSEAccessProtocolLocalID=file,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSETop
+objectClass: GlueSEAccessProtocol
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueSEAccessProtocolType: file
+GlueSEAccessProtocolLocalID: file
+GlueSEAccessProtocolVersion: 1.0.0
+GlueSEAccessProtocolSupportedSecurity: GSI
+GlueSEAccessProtocolMaxStreams: 1
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+  fi
+
+  if [ ${STORM_INFO_RFIO_SUPPORT} = "true" ]; then
+    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for rfio protocol"
+    cat >> ${FILE} << EOF
+#
+# GlueSEAccessProtocolLocalID rfio
+#
+dn: GlueSEAccessProtocolLocalID=rfio,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSETop
+objectClass: GlueSEAccessProtocol
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueSEAccessProtocolType: rfio
+GlueSEAccessProtocolLocalID: rfio
+GlueSEAccessProtocolVersion: 1.0.0
+GlueSEAccessProtocolSupportedSecurity: GSI
+GlueSEAccessProtocolMaxStreams: 1
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+  fi
+
+  if [ ${STORM_INFO_GRIDFTP_SUPPORT} = "true" ]; then
+    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for gsiftp protocol"
+    cat >> ${FILE} << EOF
+#
+# GlueSEAccessProtocolLocalID gsiftp
+#
+dn: GlueSEAccessProtocolLocalID=gsiftp,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSETop
+objectClass: GlueSEAccessProtocol
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueSEAccessProtocolType: gsiftp
+GlueSEAccessProtocolLocalID: gsiftp
+GlueSEAccessProtocolVersion: 1.0.0
+GlueSEAccessProtocolSupportedSecurity: GSI
+GlueSEAccessProtocolMaxStreams: 10
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+
+EOF
+  fi
+
+  if [ ${STORM_INFO_ROOT_SUPPORT} = "true" ]; then
+    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for root protocol"
+    cat >> ${FILE} << EOF
+#
+# GlueSEAccessProtocolLocalID root
+#
+dn: GlueSEAccessProtocolLocalID=root,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
+objectClass: GlueSETop
+objectClass: GlueSEAccessProtocol
+objectClass: GlueKey
+objectClass: GlueSchemaVersion
+GlueSEAccessProtocolType: root
+GlueSEAccessProtocolLocalID: root
+GlueSEAccessProtocolVersion: 1.0.0
+GlueSEAccessProtocolSupportedSecurity: GSI
+GlueSEAccessProtocolMaxStreams: 1
+GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
+GlueSchemaVersionMajor: 1
+GlueSchemaVersionMinor: 3
+EOF
+  fi
+  #==========================================================
+
+  yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
+  #----------------------------------------------------------------
+  # ${GLITE_LOCATION}/etc/gip/ldif/static-file-StoRM.ldif - END
+  #----------------------------------------------------------------
+
+  yaimlog INFO "${FUNCTION}: Dynamic storage information"
+  #--------------------------------------------------------------------
+  # ${GLITE_LOCATION}/etc/gip/plugin/glite-info-dynamic-storm - BEGIN
+  #--------------------------------------------------------------------
+  # Create configuration file for dynamic information provider
+  FILE="${STORM_BE_DIR}/etc/storm-yaim-variables.conf"
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+  set | egrep '^STORM|^SITE_NAME' | sort > ${FILE}
+  # Set permissions (only STORM_USER can read)
+  chmod 450 ${FILE}
+
+  # Install dynamic script pointing to gip plugin
+  WRAPPER="${GLITE_LOCATION}/etc/gip/plugin/glite-info-dynamic-storm"
+  yaimlog INFO "${FUNCTION}: Creating ${WRAPPER} ..."
+  cat > ${WRAPPER} << EOF
+#! /bin/sh
+${GLITE_LOCATION}/libexec/glite-info-dynamic-storm ${FILE}
+EOF
+
+  # Set permissions
+  chmod 755 ${WRAPPER}
+  #--------------------------------------------------------------------
+  # ${GLITE_LOCATION}/etc/gip/plugin/glite-info-dynamic-storm - END
+  #--------------------------------------------------------------------
+
+  # Remove old cron replaced by new dynamic information provider
+  rm -f /etc/cron.d/glite-info-dynamic-storm
+
+  # Exit with success
+  return 0
+
+}

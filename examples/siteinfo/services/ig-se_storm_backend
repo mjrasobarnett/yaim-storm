@@ -1,0 +1,204 @@
+#########################################
+# StoRM backend configuration variables #
+#########################################
+
+# The following variables will be considered only during
+# the configuration of the ig_SE_storm_backend element.
+#
+# More information here: http://igrelease.forge.cnaf.infn.it/doku.php?id=doc:guides:site-info-variables
+# (look at "SE StoRM Backend" section)
+
+# StoRM backend host
+STORM_BACKEND_HOST=my-storm-backend.$MY_DOMAIN
+# StoRM storage path
+STORM_DEFAULT_ROOT=/storage
+
+# General settings
+#---------------------------------------------------------
+# StoRM Backend service user.
+# OPTIONAL - Default value: storm
+#STORM_USER=storm
+# Host certificate directory for StoRM Backend service.
+# OPTIONAL - Default value: /etc/grid-security/${STORM_USER}
+#STORM_CERT_DIR=/etc/grid-security/${STORM_USER}
+# Directory used to exchange proxies.
+# OPTIONAL - Default value: ${STORM_BE_DIR}/tmp
+#STORM_PROXY_HOME=${STORM_BE_DIR}/tmp
+# StoRM Frontend service public host.
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
+STORM_FRONTEND_PUBLIC_HOST=${STORM_BACKEND_HOST}
+# StoRM Frontend service host list: SRM endpoints can be more than one virtual host, also different than STORM_FRONTEND_PUBLIC_HOSTi
+# (e.g. dynamic DNS for multiple StoRM Frontend).
+# OPTIONAL - Default value: ${STORM_FRONTEND_PUBLIC_HOST}
+STORM_FRONTEND_HOST_LIST=${STORM_FRONTEND_PUBLIC_HOST}
+# StoRM Frontend service port.
+# OPTIONAL - Default value: 8444
+#STORM_FRONTEND_PORT=8444
+# StoRM Frontend service path.
+# OPTIONAL - Default value: /srm/managerv2
+#STORM_FRONTEND_PATH=/srm/managerv2
+# StoRM SURL endpoint list.
+# OPTIONAL - Default value: srm://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}
+#STORM_SURL_ENDPOINT_LIST="srm://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}"
+
+# Database settings
+#---------------------------------------------------------
+# Host for database connection.
+# OPTIONAL - Default value: localhost
+#STORM_DB_HOST=localhost
+# User for database connection.
+# OPTIONAL - Default value: storm
+#STORM_DB_USER=storm
+# Password for database connection.
+# COMPULSORY - No default value.
+STORM_DB_PWD=
+
+# Configuration files settings
+#---------------------------------------------------------
+# Set the following parameters to tell YAIM if overwrite each configuration file
+# (namespace.xml, static-file-StoRM.ldif) at every reconfiguration.
+# OPTIONAL - Available values: [true|false] - Default value: true
+#STORM_NAMESPACE_OVERWRITE=true
+#STORM_INFO_OVERWRITE=true
+
+# Managed SURL default ports
+#---------------------------------------------------------
+# comma-separated list of managed SURL's defauilt ports.
+# These entries are used to check the SURL validity.
+# storm.service.SURL.default-ports = <surl-port>
+# OPTIONAL - Default value: 8444
+#STORM_SERVICE_SURL_DEF_PORTS=8444
+
+# Protocols support
+#---------------------------------------------------------
+# If set to 'false', the following variables prevent the corresponding protocol
+# to be published by the StoRM information provider.
+# Protocol: file
+# OPTIONAL - Available values: [true|false] - Default value: true
+#STORM_INFO_FILE_SUPPORT=true
+# Protocol: gridftp
+# OPTIONAL - Available values: [true|false] - Default value: true
+#STORM_INFO_GRIDFTP_SUPPORT=true
+# Protocol: rfio
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_INFO_RFIO_SUPPORT=false
+# Protocol: root
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_INFO_ROOT_SUPPORT=false
+
+# Checksum support
+#---------------------------------------------------------
+# Enable the support to checksum agents.
+# OPTIONAL - Default value: false
+#STORM_CKSUM_SUPPORT=false
+# Algorithm used by checksum agents.
+# OPTIONAL - Available values: [Adler32|CRC32|MD2|MD5|SHA-1|SHA-256|SHA-384|SHA-512] - Default value: Adler32
+#STORM_CKSUM_ALGORITHM="Adler32"
+# Checksum agents list.
+# ATTENTION: this variable define a list of three values comma-separated: hostname,status_port,service_port e.g.:
+# STORM_CKSUM_SERVICE_LIST="host1,status_port1,service_port1 host2,status_port2,service_port2"
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST},9995,9996
+#STORM_CKSUM_SERVICE_LIST=${STORM_BACKEND_HOST},9995,9996
+
+# Storage Areas settings
+#---------------------------------------------------------
+# List of supported Storage Areas.
+# Usually at least one Storage Area for each VO specified in VOS should be created. (e.g. STORM_STORAGEAREA_LIST="SA1 SA2 SA3").
+# OPTIONAL - Default value: ${VOS}
+STORM_STORAGEAREA_LIST=${VOS}
+
+# Default Storage Areas settings
+#---------------------------------------------------------
+# NOTE: you may change the settings for each SA acting on STORM_<SA>_* variables.
+# File system type.
+# OPTIONAL - Available values: [posixfs|xfs|gpfs] - Default value: posixfs
+#STORM_FSTYPE=posixfs
+# ACL enforcing mechanism mode.
+# OPTIONAL - Available values: [aot|jit] (use aot for WLCG experiments) - Default value: aot
+#STORM_ACLMODE=aot
+# Authorization mechanism.
+# OPTIONAL - Available values: [permit-all|deny-all|<filename>] - Default value: permit-all
+#STORM_AUTH=permit-all
+# Limit Maximum available space on the Storage Area.
+# OPTIONAL - Available values: [true|false] - Default value: true
+#STORM_SIZE_LIMIT=true
+# Load balancing strategy for GRIDFTP servers pool.
+# OPTIONAL - Available values: [round-robin|random|weight|metric-1|metric-2] - Default value: round-robin
+#STORM_GRIDFTP_POOL_STRATEGY=round-robin
+# GRIDFTP servers pool list. ATTENTION: this variable define a list of pair values comma-separated: hostname,weight, e.g.:
+# STORM_GRIDFTP_POOL_LIST="host1,weight1 host2,weight2 host3,weight3"
+# Weight has 0-100 range; if not specified, weight will be 100.
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
+STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
+# Rfio server.
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
+STORM_RFIO_HOST=${STORM_BACKEND_HOST}
+# Root server.
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
+STORM_ROOT_HOST=${STORM_BACKEND_HOST}
+# Storage Class type.
+# OPTIONAL - Available values: [T0D1|T1D0|T1D1|<null>] - No default value.
+#STORM_STORAGECLASS=
+
+# Optional Storage Areas settings
+#---------------------------------------------------------
+# ATTENTION: for the DNS-like names (using special characters as "." (dot), "-" (minus)) you have to remove the ".". "-".
+#            e.g. for STORM_STORAGEAREA_LIST="enmr.eu" SA1 should be ENMREU like:
+#            STORM_ENMREU_VONAME=enmr.eu
+#
+# **COMPULSORY** variables for **EACH** Storage Area listed above (e.g. here "SA1" case is considered):
+# STORM_SA1_VONAME:                 Name of the VO that will use the Storage Area.
+#
+# **OPTIONAL** variables for **EACH** Storage Area listed above (e.g. here "SA1" case is considered):
+# STORM_SA1_ACCESSPOINT:            Path exposed by the SRM into the SURL. Default value: /sa1
+# STORM_SA1_ACLMODE:                See STORM_ACLMODE definition. Default values: ${STORM_ACLMODE}
+# STORM_SA1_AUTH:                   See STORM_AUTH definition. Default values: ${STORM_AUTH}
+# STORM_SA1_DEFAULT_ACL_LIST        A list of ACL entries that specifies a set of local groups with correspondig permissions (R,W,RW)
+#                                   using the following syntax: groupname1:permissions1 [groupname2:permissions2 [...]]. No default value.
+# STORM_SA1_FILE_SUPPORT   :
+# STORM_SA1_GRIDFTP_SUPPORT:        Enable the corresponding protocol.
+# STORM_SA1_RFIO_SUPPORT   :        Default value: ${STORM_INFO_<PROTOCOL>_SUPPORT}
+# STORM_SA1_ROOT_SUPPORT   :
+# STORM_SA1_FSTYPE:                 See STORM_FSTYPE definition. Default value: ${STORM_FSTYPE}
+# STORM_SA1_GRIDFTP_POOL_LIST:      See STORM_GRIDFTP_POOL_LIST definition. Default value: ${STORM_GRIDFTP_POOL_LIST}
+# STORM_SA1_GRIDFTP_POOL_STRATEGY:  See STORM_GRIDFTP_POOL_STRATEGY definition. Default value: ${STORM_GRIDFTP_POOL_STRATEGY}
+# STORM_SA1_QUOTA:                  Enables the quota management for the Storage Area and it works only on GPFS filesystem.
+#                                   Available values: [true|false] - Default value: false
+#   **COMPULSORY** variables if STORM_SA1_QUOTA is set:
+#   STORM_SA1_QUOTA_DEVICE:         GPFS device on which the quota is enabled. No default value.
+#   GPFS quota scope. Only one of the following three will be used (the first one with the highest priority). No default value.
+#   STORM_SA1_QUOTA_USER:           GPFS quota scope: user (priority 3).
+#   STORM_SA1_QUOTA_GROUP:          GPFS quota scope: group (priority 2).
+#   STORM_SA1_QUOTA_FILESET:        GPFS quota scope: fileset (priority 1).
+# STORM_SA1_RFIO_HOST:              See STORM_RFIO_HOST definition. Default value: ${STORM_RFIO_HOST}
+# STORM_SA1_ROOT:                   Physical storage path for the VO. Default value: ${STORM_DEFAULT_ROOT}/sa1
+# STORM_SA1_ROOT_HOST:              See STORM_ROOT_HOST definition. Default value: ${STORM_ROOT_HOST}
+# STORM_SA1_SIZE_LIMIT:             See STORM_SIZE_LIMIT definition. Default value: ${STORM_SIZE_LIMIT}
+# STORM_SA1_STORAGECLASS:           See STORM_STORAGECLASS definition. Available values: [T0D1|T1D0|T1D1|<null>] - No default value.
+# STORM_SA1_TOKEN:                  Storage Area token, e.g: LHCb_RAW, INFNGRID_DISK, etc. No default value.
+#
+##############################################################################
+# Modified by M. David (david@lip.pt) on 12 Oct. 2010
+# added the variable STORM_<SA>_ONLINE_SIZE 
+# to be a configurable parameter for the total online size of any given SA
+#
+##############################################################################
+# STORM_SA1_ONLINE_SIZE: 	    value XXXX in GB. No default value.
+
+#-------------------------------------------------------
+# Example for a Storage Area "INFNGRID":
+#STORM_STORAGEAREA_LIST="infngrid"
+# **COMPULSORY** variables
+STORM_INFNGRID_VONAME=infngrid
+# **OPTIONAL** variables
+#STORM_INFNGRID_ROOT=$STORM_DEFAULT_ROOT/infngrid
+#STORM_INFNGRID_ACCESSPOINT=/infngrid
+#STORM_INFNGRID_TOKEN=INFNGRID_TOKEN
+#STORM_INFNGRID_FSTYPE=posixfs
+#STORM_INFNGRID_ACLMODE=aot
+#STORM_INFNGRID_GRIDFTP=my-storm-gridftp.$MY_DOMAIN
+#STORM_INFNGRID_RFIO=my-rfio.$MY_DOMAIN
+#STORM_INFNGRID_STORAGECLASS=T1D1
+#STORM_INFNGRID_QUOTA=true
+#STORM_INFNGRID_QUOTA_DEVICE=gpfs
+#STORM_INFNGRID_ONLINE_SIZE=1000

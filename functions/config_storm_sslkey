@@ -1,0 +1,103 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_sslkey
+#
+# DESCRIPTION : This function configures SSL-KEY for ECAR system on a StoRM SE.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+function config_storm_sslkey_check () {
+
+  requires $1 JAVA_LOCATION
+  return $?
+
+}
+
+function config_storm_sslkey_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_sslkey () {
+
+  if [ -z $STORM_ECAR_ENDPOINT ]; then
+    yaimlog INFO "ECAR system not used. Skip SSL_Key configuration."
+    return 0
+  fi
+
+  STORM_BE_CONFIG=/etc/sysconfig/storm-backend
+  if ! [ -f $STORM_BE_CONFIG ]; then
+    yaimlog ERROR "Unable to load STORM configuration from $STORM_BE_CONFIG. Exiting."
+    return 1
+  fi
+  source $STORM_BE_CONFIG
+
+  if which keytool >&/dev/null; then
+    keytool=keytool
+  else
+    keytool=$JAVA_LOCATION/jre/bin/keytool
+    if ! [ -x $keytool ]; then
+      yaimlog ERROR "Unable to find the keytool executable."
+      yaimlog ERROR "Please check \$JAVA_LOCATION in your site-info.def."
+      return 1
+    fi
+  fi
+
+  if [ "$ENABLE_SSL" == yes ]; then
+    for env in SSL_TRUST_STORE SSL_TRUST_STORE_PWD SSL_KEY_STORE SSL_KEY_STORE_PWD; do
+      if [ -z "${!env}" ]; then
+        yaimlog ERROR "\$env required variable not found."
+        yaimlog ERROR "Check /etc/sysconfig/storm-backend file. Exiting."
+        return 1
+      fi
+    done
+    yaimlog INFO "Creating keystore..."
+    for f in /etc/grid-security/certificates/*.0; do
+      x=`openssl x509 -in  $f -noout -subject|sed 's/subject= //;s/ /_/g'`
+      yaimlog INFO "Adding certificate for $x"
+      if $keytool -import -alias $x -file $f -keystore $SSL_TRUST_STORE -storepass $SSL_TRUST_STORE_PWD -noprompt >&/dev/null; then
+        yaimlog INFO "Done."
+      else
+        yaimlog INFO "Error."
+      fi
+    done
+
+    yaimlog INFO "Creating keyring..."
+    TMP=`mktemp`
+    if ! [ -f "$TMP" ]; then
+      yaimlog ERROR "Unable to create temporary file. Exiting."
+      return 2
+    fi
+    openssl x509 -in /etc/grid-security/hostcert.pem > $TMP
+    cat /etc/grid-security/hostkey.pem >> $TMP
+    openssl pkcs12 -in $TMP -export -out $SSL_KEY_STORE -passout pass:$SSL_KEY_STORE_PWD
+    rm $TMP
+  fi
+
+  return 0
+
+}

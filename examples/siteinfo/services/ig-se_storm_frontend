@@ -1,0 +1,85 @@
+##########################################
+# StoRM frontend configuration variables #
+##########################################
+
+# The following variables will be considered only during
+# the configuration of the ig_SE_storm_frontend element.
+#
+# More information here: http://igrelease.forge.cnaf.infn.it/doku.php?id=doc:guides:site-info-variables
+# (look at "SE StoRM Frontend" section)
+
+# General settings
+#---------------------------------------------------------
+# StoRM Frontend service user.
+# OPTIONAL - Default value: storm
+#STORM_USER=storm
+# Host certificate directory for StoRM Frontend service.
+# OPTIONAL - Default value: /etc/grid-security/${STORM_USER}
+#STORM_CERT_DIR=/etc/grid-security/${STORM_USER}
+# Directory used to exchange proxies.
+# OPTIONAL - Default value: ${STORM_BE_DIR}/tmp
+#STORM_PROXY_HOME=${STORM_BE_DIR}/tmp
+
+# Database settings
+#---------------------------------------------------------
+# Host for database connection.
+# OPTIONAL - Default value: localhost
+#STORM_DB_HOST=localhost
+# User for database connection.
+# OPTIONAL - Default value: storm
+#STORM_DB_USER=storm
+# Password for database connection.
+# COMPULSORY - No default value.
+STORM_DB_PWD=
+
+# Configuration files settings
+#---------------------------------------------------------
+# Set the following parameters to tell YAIM if overwrite each configuration file
+# (storm-frontend.conf) at every reconfiguration.
+# OPTIONAL - Available values: [true|false] - Default value: true
+#STORM_FRONTEND_OVERWRITE=true
+
+# Frontend general settings
+#---------------------------------------------------------
+# Max number of threads to manage user's requests.
+# OPTIONAL - Default value: 50
+#STORM_FE_THREADS_NUMBER=50
+# Max number of request pending in the Threads queue.
+# OPTIONAL - Default value: 200
+#STORM_FE_THREADS_MAXPENDING=200
+# Max number of request pending in the GSOAP queue.
+# OPTIONAL - Default value: 2000
+#STORM_FE_GSOAP_MAXPENDING=2000
+
+# Log settings
+#---------------------------------------------------------
+# StoRM Frontend log level.
+# OPTIONAL - Available values: [KNOWN|ERROR|WARNING|INFO|DEBUG|DEBUG2] - Default value: INFO
+#STORM_FE_LOG_LEVEL=INFO
+
+# Security settings
+#---------------------------------------------------------
+# Disable the check in gridmapfile for client DN.
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_FE_DISABLE_MAPPING=false
+# Disable the check in gridmapfile for client VOMS attributes.
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_FE_DISABLE_VOMSCHECK=false
+
+# Backend XMLRPC server settings
+#---------------------------------------------------------
+# StoRM Backend XMLRPC server hostname.
+# OPTIONAL - Default value: localhost
+#STORM_FE_BE_XMLRPC_HOST=localhost
+# StoRM Backend XMLRPC server port.
+# OPTIONAL - Default value: 8080
+#STORM_FE_BE_XMLRPC_PORT=8080
+# StoRM Backend XMLRPC server path.
+# OPTIONAL - Default value: /RPC2
+#STORM_FE_BE_XMLRPC_PATH=/RPC2
+
+# WSDL settings
+#---------------------------------------------------------
+# WSDL to be returned to a GET request.
+# OPTIONAL - Default value: ${STORM_FE_DIR}/wsdl/srm.v2.2.wsdl
+#STORM_FE_WSDL=${STORM_FE_DIR}/wsdl/srm.v2.2.wsdl

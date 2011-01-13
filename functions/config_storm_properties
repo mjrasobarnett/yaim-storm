@@ -1,0 +1,172 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_properties
+#
+# DESCRIPTION : This function configures storm.properties file on a StoRM SE.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+function config_storm_properties_check () {
+
+  requires $1 MYSQL_PASSWORD STORM_DB_HOST STORM_DB_PWD STORM_DB_USER \
+              STORM_FRONTEND_HOST_LIST STORM_PROXY_HOME
+  return $?
+
+}
+
+function config_storm_properties_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_properties () {
+
+  FUNCTION="config_storm_properties"
+
+JARDIR="${STORM_BE_DIR}/lib"
+if [ ! -f ${JABDIR}/mysql-connector-java-5.1.13-bin.jar ]; then
+  # Download needed jar file
+  URL="http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.13.tar.gz/from/http://mi.mirror.garr.it/mirrors/MySQL/"
+  JAR="mysql-connector-java-5.1.13-bin.jar"
+  TMPFILE=`mktemp`
+  yaimlog DEBUG "${FUNCTION}: Download mysql-connector-java tar.gz"
+  wget --quiet -O ${TMPFILE} ${URL}
+  JARFILE="`tar -tzf ${TMPFILE} | fgrep ${JAR}`"
+  yaimlog DEBUG "${FUNCTION}: Untar ${JARFILE}"
+  tar -xzf ${TMPFILE} ${JARFILE}
+  yaimlog DEBUG "${FUNCTION}: Move to ${JARDIR}/${JAR}"
+  mv -f ${JARFILE} ${JARDIR}/${JAR}
+  chown ${STORM_USER}:${STORM_USER} ${JARDIR}/${JAR}
+  chmod 644 ${JARDIR}/${JAR}
+  rm -f ${TMPFILE}
+fi
+
+  #----------------------------------------------------------
+  # /etc/sysconfig/storm-backend - BEGIN
+  #----------------------------------------------------------
+  FILE="/etc/sysconfig/storm-backend"
+  # Create symbolic link
+  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/sysconfig/storm-backend"
+  ln -sf ${STORM_BE_DIR}/etc/sysconfig/storm-backend ${FILE}
+  # Set STORM_BE_USER
+  yaimlog DEBUG "${FUNCTION}: Set \$STORM_BE_USER to ${STORM_USER}"
+  set_value "export STORM_BE_USER" "${STORM_USER}" ${FILE}
+  #----------------------------------------------------------
+  # /etc/sysconfig/storm-backend - END
+  #----------------------------------------------------------
+
+  yaimlog INFO "${FUNCTION}: Configuration file"
+  #----------------------------------------------------------
+  # ${STORM_BE_DIR}/etc/storm.properties - BEGIN
+  #----------------------------------------------------------
+  FILE="${STORM_BE_DIR}/etc/storm.properties"     # Configuration filename
+  FILE_T="${FILE}.template"                       # Template configuration filename
+  FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"      # Backup configuration filename (if needed)
+  FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"  # New configuration filename (if needed)
+  
+  # Configuration file management
+  # If not exists, create it from template
+  if [ ! -f ${FILE} ]; then
+    yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} from template ${FILE_T}"
+    cp ${FILE_T} ${FILE}
+  # Check storm.properties.version
+  else
+    yaimlog DEBUG "${FUNCTION}: Check template version"
+    get_value "storm.properties.version" ${FILE};     file_ver=${value}
+    get_value "storm.properties.version" ${FILE_T};   file_t_ver=${value}
+    # If equal, backup and write on old file
+    if [ "${file_ver}" == "${file_t_ver}" ]; then
+      yaimlog DEBUG "${FUNCTION}: Same version, overwrite old configuration file ${FILE}"
+      yaimlog DEBUG "${FUNCTION}: Backup old configuration file in ${FILE_B}"
+      cp ${FILE} ${FILE_B}
+    # If not equal (different or NULL), backup old file and create new from template
+    else
+      yaimlog DEBUG "${FUNCTION}: Different or null version, create ${FILE} from template ${FILE_T}"
+      yaimlog DEBUG "${FUNCTION}: Backup old configuration file in ${FILE_B}"
+      mv ${FILE} ${FILE_B}
+      cp ${FILE_T} ${FILE}
+    fi
+  fi
+
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+
+  # Remove oldest backup file
+  yaimlog DEBUG "${FUNCTION}: Removing old backup files."
+  find `dirname "${FILE}"` -ctime +2 -name 'storm.properties.bkp*' -exec rm {} \;
+
+  # Set permissions
+  chmod 644 ${FILE}
+
+  #==========================================================
+  # Set default (not in defaults/ because use variables set in services/ file)
+  STORM_SURL_ENDPOINT_LIST=${!STORM_SURL_ENDPOINT_LIST:-srm://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}}
+  # Convert in lowercase
+  STORM_CKSUM_SUPPORT=`echo ${STORM_CKSUM_SUPPORT} | tr '[:upper:]' '[:lower:]'`
+  # Convert spaces to commas
+  STORM_SURL_ENDPOINT_LIST=`echo ${STORM_SURL_ENDPOINT_LIST} | sed -e 's/ /,/g'`
+
+  set_value "storm.service.FE-list.hostnames"   "${STORM_FRONTEND_HOST_LIST}"            ${FILE}
+  set_value "storm.service.FE-public.hostname"  "${STORM_FRONTEND_PUBLIC_HOST}"          ${FILE}
+  set_value "storm.service.SURL.endpoint"       "${STORM_SURL_ENDPOINT_LIST}"            ${FILE}
+  set_value "storm.service.request-db.host"     "${STORM_DB_HOST}"                       ${FILE}
+  set_value "storm.service.request-db.username" "${STORM_DB_USER}"                       ${FILE}
+  set_value "storm.service.request-db.passwd"   "${STORM_DB_PWD}"                        ${FILE}
+  set_value "proxy.home"                        "${STORM_PROXY_HOME}"                    ${FILE}
+  set_value "storm.service.SURL.default-ports"  "${STORM_SERVICE_SURL_DEF_PORTS:-8444}"  ${FILE}
+
+  if [ "x${STORM_CKSUM_SUPPORT}" == "xtrue" ]; then
+    HOSTNAMES=`echo ${STORM_CKSUM_SERVICE_LIST}     | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $1}' | sed s/[[:space:]]*,$//`
+    STATUS_PORTS=`echo ${STORM_CKSUM_SERVICE_LIST}  | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $2}' | sed s/[[:space:]]*,$//`
+    SERVICE_PORTS=`echo ${STORM_CKSUM_SERVICE_LIST} | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $3}' | sed s/[[:space:]]*,$//`
+    # Set default values
+    HOSTNAMES=${HOSTNAMES:-${STORM_BACKEND_HOST}}
+    STATUS_PORTS=${STATUS_PORTS:-9995}
+    SERVICE_PORTS=${SERVICE_PORTS:-9996}
+    STATUS_PORTS=`echo ${STATUS_PORTS} | \
+                  awk 'BEGIN {FS=","; ORS=","} {for (i=1; i<NF+1; i++) {if ($(i)=="") print("9995"); else print($(i));}}' | sed 's/,$//'`
+    SERVICE_PORTS=`echo ${SERVICE_PORTS} | \
+                   awk 'BEGIN {FS=","; ORS=","} {for (i=1; i<NF+1; i++) {if ($(i)=="") print("9996"); else print($(i));}}' | sed 's/,$//'`
+    set_value "checksum.enabled"                "${STORM_CKSUM_SUPPORT}"        ${FILE}
+    set_value "checksum.algorithm"              "${STORM_CKSUM_ALGORITHM}"      ${FILE}
+    set_value "checksum.server.hostnames"       "${HOSTNAMES}"                  ${FILE}
+    set_value "checksum.server.status_ports"    "${STATUS_PORTS}"               ${FILE}
+    set_value "checksum.server.service_ports"   "${SERVICE_PORTS}"              ${FILE}
+  else
+    set_value "checksum.enabled"                "false"        ${FILE}
+  fi
+  #==========================================================
+
+  yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
+  #----------------------------------------------------------
+  # ${STORM_BE_DIR}/etc/storm.properties - END
+  #----------------------------------------------------------
+
+  # Exit with success
+  return 0
+
+}

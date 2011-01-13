@@ -1,0 +1,194 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_frontend
+#
+# DESCRIPTION : This function start storm-frontend service on a StoRM 1.5.0 SE frontend.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :       
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+function config_storm_frontend_check () {
+
+  requires $1 STORM_DB_HOST STORM_DB_PWD STORM_DB_USER STORM_PROXY_HOME
+  return $?
+
+}
+
+function config_storm_frontend_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_frontend () {
+
+  FUNCTION="config_storm_frontend"
+
+  # Convert in lowercase
+  STORM_FE_DISABLE_MAPPING=`echo ${STORM_FE_DISABLE_MAPPING} | tr '[:upper:]' '[:lower:]'`
+  STORM_FE_DISABLE_VOMSCHECK=`echo ${STORM_FE_DISABLE_VOMSCHECK} | tr '[:upper:]' '[:lower:]'`
+
+  # Check yaim configuration targets
+  yaimlog INFO "${FUNCTION}: Checking connection StoRM backend database"
+  mysql -h ${STORM_DB_HOST} -u ${STORM_DB_USER} -p${STORM_DB_PWD} -e "use storm_db;"
+  if [ $? != 0 ]; then
+    yaimlog ERROR "${FUNCTION}: Failed!"
+    if [ "${STORM_DB_HOST}" = "`hostname -f`" ] || [ "${STORM_DB_HOST}" = "localhost" ]; then
+      yaimlog INFO "${FUNCTION}: You are configuring both StoRM frontend and backend on this host"
+      yaimlog INFO "${FUNCTION}: Please ensure that yaim script '-n' arguments are in the right order:"
+      yaimlog INFO "${FUNCTION}: [...] -n SE_storm_backend -n SE_storm_frontend [...]"
+      yestr ${YEX_CONFTARGET}
+      yaimlog ERROR "${YERRORSTR}"
+      exit ${YEX_CONFTARGET}
+    else
+      yaimlog ERROR "${FUNCTION}: You are configuring only a StoRM frontend on this host"
+      yaimlog ERROR "${FUNCTION}: Please ensure that StoRM backend is already configured on ${STORM_DB_HOST}"
+      yestr ${YEX_CONFTARGET}
+      yaimlog ERROR "${YERRORSTR}"
+      exit ${YEX_CONFTARGET}
+    fi
+  else
+    yaimlog INFO "${FUNCTION}: Ok!"
+  fi
+
+  yaimlog INFO "${FUNCTION}: Configuration file"
+  #----------------------------------------------------------
+  # ${STORM_FE_DIR}/etc/storm-frontend.conf - BEGIN
+  #----------------------------------------------------------
+  FILE="${STORM_FE_DIR}/etc/storm-frontend.conf"   # Configuration filename
+  FILE_T="${FILE}.template"                        # Template configuration filename
+  FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"       # Backup configuration filename (if needed)
+  FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"   # New configuration filename (if needed)
+
+  # Configuration file management
+  STORM_FRONTEND_OVERWRITE=`echo ${STORM_FRONTEND_OVERWRITE} | tr '[:upper:]' '[:lower:]'`   # convert in lowercase
+  # If not exists, create it from template
+  if [ ! -f ${FILE} ]; then
+    yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} from template ${FILE_T}."
+    cp ${FILE_T} ${FILE}
+  # Else if overwrite is enabled, create backup
+  elif [ "${STORM_FRONTEND_OVERWRITE}" = "true" ]; then
+    yaimlog DEBUG "${FUNCTION}: Overwrite old configuration file ${FILE}"
+    yaimlog DEBUG "${FUNCTION}: Backup old configuration file in ${FILE_B}"
+    cp ${FILE} ${FILE_B}
+  # Else if overwrite is disabled, create yaimnew
+  else
+    yaimlog DEBUG "${FUNCTION}: Not overwrite old configuration file ${FILE}"
+    yaimlog DEBUG "${FUNCTION}: Create new configuration file in ${FILE_N}"
+    FILE="${FILE_N}"
+    touch ${FILE}
+  fi
+
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+
+  # Remove oldest backup file
+  yaimlog DEBUG "${FUNCTION}: Removing old backup files"
+  find `dirname "${FILE}"` -ctime +2 -name 'storm-frontend.bkp*' -exec rm {} \;
+
+  # Set permissions
+  chmod 644 ${FILE}
+
+  #==========================================================
+  set_value "db.host"                      "${STORM_DB_HOST}"                           ${FILE}
+  set_value "db.user"                      "${STORM_DB_USER}"                           ${FILE}
+  set_value "db.passwd"                    "${STORM_DB_PWD}"                            ${FILE}
+  set_value "fe.port"                      "${STORM_FRONTEND_PORT}"                     ${FILE}
+  set_value "fe.threadpool.threads.number" "${STORM_FE_THREADS_NUMBER}"                 ${FILE}
+  set_value "fe.gsoap.maxpending"          "${STORM_FE_GSOAP_MAXPENDING}"               ${FILE}
+  set_value "log.filename"                 "${STORM_FE_DIR}/var/log/storm-frontend.log" ${FILE}
+  set_value "log.debuglevel"               "${STORM_FE_LOG_LEVEL}"                      ${FILE}
+  set_value "security.disable.mapping"     "${STORM_FE_DISABLE_MAPPING}"                ${FILE}
+  set_value "security.disable.vomscheck"   "${STORM_FE_DISABLE_VOMSCHECK}"              ${FILE}
+  set_value "be.recalltable.port"          "9998"                                       ${FILE}
+  set_value "be.xmlrpc.host"               "${STORM_FE_BE_XMLRPC_HOST}"                 ${FILE}
+  set_value "be.xmlrpc.port"               "${STORM_FE_BE_XMLRPC_PORT}"                 ${FILE}
+  set_value "be.xmlrpc.path"               "${STORM_FE_BE_XMLRPC_PATH}"                 ${FILE}
+  set_value "proxy.dir"                    "${STORM_PROXY_HOME}"                        ${FILE}
+  set_value "proxy.user"                   "${STORM_USER}"                              ${FILE}
+  set_value "wsdl.file"                    "${STORM_FE_WSDL}"                           ${FILE}
+  #==========================================================
+
+  yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
+  #----------------------------------------------------------
+  # ${STORM_FE_DIR}/etc/storm-frontend.conf - END
+  #----------------------------------------------------------
+
+  # Change ownership to storm-frontend directory
+  if [ -d ${STORM_FE_DIR} ]; then
+    chown -R ${STORM_USER}:${STORM_USER} ${STORM_FE_DIR}
+  else
+    yaimlog ERROR "${FUNCTION}: StoRM frontend directory ${STORM_FE_DIR} doesn't exist"
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+  fi
+
+  #----------------------------------------------------------
+  # /etc/init.d/storm-frontend - BEGIN
+  #----------------------------------------------------------
+  FILE="/etc/init.d/storm-frontend"
+  # Create symbolic link
+  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_FE_DIR}/etc/init.d/storm-frontend"
+  ln -sf ${STORM_FE_DIR}/etc/init.d/storm-frontend ${FILE}
+  #----------------------------------------------------------
+  # /etc/init.d/storm-frontend - END
+  #----------------------------------------------------------
+
+  #----------------------------------------------------------
+  # /etc/cron.d/storm-frontend.cron - BEGIN
+  #----------------------------------------------------------
+  FILE="/etc/cron.d/storm-frontend.cron"
+  # Create symbolic link
+  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_FE_DIR}/etc/cron.d/storm-frontend.cron"
+  ln -sf ${STORM_FE_DIR}/etc/cron.d/storm-frontend.cron ${FILE}
+  #----------------------------------------------------------
+  # /etc/cron.d/storm-frontend.cron - END
+  #---------------------------------------------------------- 
+
+  #----------------------------------------------------------
+  # /etc/logrotate.d/storm-frontend.logrotate - BEGIN
+  #----------------------------------------------------------
+  FILE="/etc/logrotate.d/storm-frontend.logrotate"
+  # Create symbolic link
+  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_FE_DIR}/etc/logrotate.d/storm-frontend.logrotate"
+  ln -sf ${STORM_FE_DIR}/etc/logrotate.d/storm-frontend.logrotate ${FILE}
+  #----------------------------------------------------------
+  # /etc/cron.d/storm-frontend.cron - END
+  #---------------------------------------------------------- 
+
+  # Activate and restart service 
+  /sbin/chkconfig --add storm-frontend
+  /sbin/chkconfig storm-frontend on
+  yaimlog INFO "${FUNCTION}: Restart service"
+  /sbin/service storm-frontend stop
+  /sbin/service storm-frontend start
+
+  # Exit with success
+  return 0
+
+}

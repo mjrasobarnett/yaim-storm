@@ -1,0 +1,64 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_rfio
+#
+# DESCRIPTION : This function configures rfio on a StoRM SE.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+function config_storm_rfio_check () {
+
+  yaimlog INFO "No required variables to set."
+
+}
+
+function config_storm_rfio_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_rfio () {
+
+  FUNCTION="config_storm_rfio"
+
+  yaimlog INFO "${FUNCTION}: Configuring RFIO for StoRM"
+  [ -f /etc/shift.conf ] || touch /etc/shift.conf
+  egrep -q 'ISREMOTE[[:space:]]+CALLS' /etc/shift.conf
+
+  if [ $? = 0 ]; then
+    if egrep -q '^[[:space:]]*ISREMOTE[[:space:]]+CALLS[[:space:]]+NO' /etc/shift.conf; then
+      return 0
+    else
+      sed -i 's/^.*ISREMOTE[[:space:]]*CALLS.*/ISREMOTE CALLS NO/g' /etc/shift.conf
+    fi
+  else
+    echo 'ISREMOTE CALLS NO' >> /etc/shift.conf
+  fi
+
+  return 0
+
+}

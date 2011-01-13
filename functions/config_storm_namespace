@@ -1,0 +1,497 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_namespace
+#
+# DESCRIPTION : This function configures storage area namespaces on a StoRM SE.
+#
+# AUTHORS :     grid-release@infn.it
+#		M. David (david@lip.pt)
+#
+# NOTES :
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+function get_total_size () {
+
+  total=`df --block-size=1G -P $1 | sed 1d | awk '{print $2}'`
+  # if empty set 
+  if [ -z "$total" ]; then total=1; fi
+
+  export $2=$total
+
+  return 0
+
+}
+
+function config_storm_namespace_check () {
+
+  requires $1 STORM_BACKEND_HOST STORM_DEFAULT_ROOT VOS
+  return $?
+
+}
+
+function config_storm_namespace_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_namespace () {
+
+  FUNCTION="config_storm_namespace"
+
+  yaimlog INFO "${FUNCTION}: Configuration file"
+  #----------------------------------------------------------
+  # ${STORM_BE_DIR}/etc/namespace.xml - BEGIN
+  #----------------------------------------------------------
+  FILE="${STORM_BE_DIR}/etc/namespace.xml"        # Configuration filename
+  FILE_T="${FILE}.template"                       # Template configuration filename
+  FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"      # Backup configuration filename (if needed)
+  FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"  # New configuration filename (if needed)
+  
+  # Configuration file management
+  STORM_NAMESPACE_OVERWRITE=`echo ${STORM_NAMESPACE_OVERWRITE} | tr '[:upper:]' '[:lower:]'`   # convert in lowercase
+  # If not exists, create it from template (can it be possible?)
+  if [ ! -f ${FILE} ]; then
+    yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} from template ${FILE_T}"
+    cp ${FILE_T} ${FILE}
+  # Else if overwrite is enabled, create backup
+  elif [ "${STORM_NAMESPACE_OVERWRITE}" = "true" ]; then
+    yaimlog DEBUG "${FUNCTION}: Overwrite old configuration file ${FILE}"
+    yaimlog DEBUG "${FUNCTION}: Backup old configuration file in ${FILE_B}."
+    cp ${FILE} ${FILE_B}
+  # Else if overwrite is disabled, create yaimnew
+  else
+    yaimlog DEBUG "${FUNCTION}: Not overwrite old configuration file ${FILE}"
+    yaimlog DEBUG "${FUNCTION}: Create new configuration file in ${FILE_N}"
+    FILE="${FILE_N}"
+    touch ${FILE}
+  fi
+
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+
+  # Remove oldest backup file
+  yaimlog DEBUG "${FUNCTION}: Removing old backup files"
+  find `dirname "${FILE}"` -ctime +2 -name 'namespace.xml.bkp*' -exec rm {} \;
+
+  # Set permissions
+  chmod 644 ${FILE}
+
+  #==========================================================
+  # Configuration file creation
+  yaimlog DEBUG "${FUNCTION}: Create header"
+  cat > ${FILE} << EOF
+<namespace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="namespace-1.5.0.xsd" version="1.5.0">
+  <filesystems>
+EOF
+
+  # Convert in lowercase
+  STORM_INFO_FILE_SUPPORT=`echo $STORM_INFO_FILE_SUPPORT | tr '[:upper:]' '[:lower:]'`
+  STORM_INFO_RFIO_SUPPORT=`echo $STORM_INFO_RFIO_SUPPORT | tr '[:upper:]' '[:lower:]'`
+  STORM_INFO_GRIDFTP_SUPPORT=`echo $STORM_INFO_GRIDFTP_SUPPORT | tr '[:upper:]' '[:lower:]'`
+  STORM_INFO_ROOT_SUPPORT=`echo $STORM_INFO_ROOT_SUPPORT | tr '[:upper:]' '[:lower:]'`
+
+  for SA in $STORM_STORAGEAREA_LIST; do
+
+    # Convert case
+    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+
+    # Remove DNS-like characters from SA_UPP names
+    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+
+    x=STORM_${SA_UPP}_ROOT;                    SA_ROOT=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
+    x=STORM_${SA_UPP}_FSTYPE;                  SA_FSTYPE=${!x:-${STORM_FSTYPE}}
+    y=`echo ${SA_FSTYPE} | tr '[:upper:]' '[:lower:]'`
+    case "$y" in
+      posixfs)
+        SA_FSTYPE=ext3
+        SA_FSDRIVER=posixfs
+        SA_FSSPACESYSTEM=MockSpaceSystem
+        ;;
+      xfs)
+        SA_FSTYPE=xfs
+        SA_FSDRIVER=xfs
+        SA_FSSPACESYSTEM=XFSSpaceSystem
+        ;;
+      gpfs)
+        SA_FSTYPE=gpfs
+        SA_FSDRIVER=gpfs
+        SA_FSSPACESYSTEM=GPFSSpaceSystem
+        ;;
+      *)
+        yaimlog ERROR "${FUNCTION}: Invalid filesystem type '${SA_FSTYPE}'"
+        yaimlog ERROR "${FUNCTION}: Please check $x variable in your site-info.def"
+        return 1
+    esac
+    x=STORM_${SA_UPP}_ACLMODE;                 SA_ACLMODE=${!x:-${STORM_ACLMODE}}
+    y=`echo ${SA_ACLMODE} | tr '[:upper:]' '[:lower:]'`
+    case "$y" in
+      aot)
+        SA_ACLMODE=AoT
+        ;;
+      jit)
+        SA_ACLMODE=JiT
+        ;;
+      *)
+        yaimlog ERROR "${FUNCTION}: Invalid ACL mode ${SA_ACLMODE}"
+        yaimlog ERROR "${FUNCTION}: Please check $x variable in your site-info.def"
+        return 1
+    esac
+    # NOTE: Temporary re-enable default token on namespace
+    x=STORM_${SA_UPP}_TOKEN;                   SA_TOKEN=${!x:-${SA_UPP}_TOKEN}
+    x=STORM_${SA_UPP}_STORAGECLASS;            SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
+    x=STORM_${SA_UPP}_QUOTA;                   SA_QUOTA=${!x:-false}
+    x=STORM_${SA_UPP}_QUOTA_DEVICE;            SA_QUOTA_DEVICE=${!x}
+    x=STORM_${SA_UPP}_QUOTA_USER;              SA_QUOTA_USER=${!x}
+    x=STORM_${SA_UPP}_QUOTA_GROUP;             SA_QUOTA_GROUP=${!x}
+    x=STORM_${SA_UPP}_QUOTA_FILESET;           SA_QUOTA_FILESET=${!x}
+    x=STORM_${SA_UPP}_GRIDFTP_POOL_STRATEGY;   SA_GRIDFTP_POOL_STRATEGY=${!x:-${STORM_GRIDFTP_POOL_STRATEGY}}
+    x=STORM_${SA_UPP}_GRIDFTP_POOL_LIST;       SA_GRIDFTP_POOL_LIST=${!x:-${STORM_GRIDFTP_POOL_LIST}}
+    x=STORM_${SA_UPP}_RFIO_HOST;               SA_RFIO_HOST=${!x:-${STORM_RFIO_HOST}}
+    x=STORM_${SA_UPP}_ROOT_HOST;               SA_ROOT_HOST=${!x:-${STORM_ROOT_HOST}}
+    x=STORM_${SA_UPP}_FILE_SUPPORT;            SA_FILE_SUPPORT=${!x:-${STORM_INFO_FILE_SUPPORT}}
+    x=STORM_${SA_UPP}_GRIDFTP_SUPPORT;         SA_GRIDFTP_SUPPORT=${!x:-${STORM_INFO_GRIDFTP_SUPPORT}}
+    x=STORM_${SA_UPP}_RFIO_SUPPORT;            SA_RFIO_SUPPORT=${!x:-${STORM_INFO_RFIO_SUPPORT}}
+    x=STORM_${SA_UPP}_ROOT_SUPPORT;            SA_ROOT_SUPPORT=${!x:-${STORM_INFO_ROOT_SUPPORT}}
+    x=STORM_${SA_UPP}_AUTH;                    SA_AUTH=${!x:-${STORM_AUTH}}
+    x=STORM_${SA_UPP}_DEFAULT_ACL_LIST;        SA_DEFAULT_ACL_LIST=${!x}
+    x=STORM_${SA_UPP}_SIZE_LIMIT;              SA_SIZE_LIMIT=${!x:-${STORM_SIZE_LIMIT}}
+    # Convert in lowercase
+    SA_SIZE_LIMIT=`echo ${SA_SIZE_LIMIT} | tr '[:upper:]' '[:lower:]'`
+    # Convert in uppercase
+    SA_STORAGECLASS=`echo ${SA_STORAGECLASS} | tr '[:lower:]' '[:upper:]'`
+
+    get_total_size ${SA_ROOT} TOTALSIZE
+
+##################################################################################
+# Start: added by M. David (david@lip.pt)
+
+    x=STORM_${SA_UPP}_ONLINE_SIZE;           SA_ONLINE_SIZE=${!x}
+
+    if [ ! -z ${SA_ONLINE_SIZE} ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} total online size (${SA_ONLINE_SIZE})"
+      TOTALSIZE=${SA_ONLINE_SIZE}
+    fi
+
+# End
+##################################################################################
+
+
+
+    yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} filesystem"
+    cat >> ${FILE} << EOF
+    <filesystem name="${SA_UPP}-FS" fs_type="${SA_FSTYPE}">
+EOF
+
+    if ! [ -z "${SA_TOKEN}" ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} space-token-description (${SA_TOKEN})"
+      cat >> ${FILE} << EOF	
+      <space-token-description>${SA_TOKEN}</space-token-description>
+EOF
+    fi
+
+    # Check the STORAGECLASS
+    SA_RETENTION_POLICY="replica"   # default
+    SA_ACCESS_LATENCY="online"      # default
+    if ! [ -z "${SA_STORAGECLASS}" ]; then
+      case ${SA_STORAGECLASS} in
+        "T1D0")
+          SA_RETENTION_POLICY="custodial"
+          SA_ACCESS_LATENCY="nearline"
+          ;;
+        "T1D1")
+          SA_RETENTION_POLICY="custodial"
+          SA_ACCESS_LATENCY="online"
+          ;;
+        "T0D1")
+          SA_RETENTION_POLICY="replica"
+          SA_ACCESS_LATENCY="online"
+          ;;
+        *)
+          SA_RETENTION_POLICY="replica"
+          SA_ACCESS_LATENCY="online"
+          ;;
+      esac
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} storage-class (${SA_STORAGECLASS}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY})"
+      cat >> ${FILE} << EOF
+      <storage-class>${SA_STORAGECLASS}</storage-class>
+EOF
+    fi
+
+    cat >> ${FILE} << EOF
+      <root>${SA_ROOT}</root>
+      <filesystem-driver>it.grid.storm.filesystem.swig.${SA_FSDRIVER}</filesystem-driver>
+      <spacesystem-driver>it.grid.storm.filesystem.${SA_FSSPACESYSTEM}</spacesystem-driver>
+      <storage-area-authz>
+EOF
+    if ( echo " ${SA_AUTH} " | egrep -q "permit-all|deny-all" ); then
+      cat >> ${FILE} << EOF
+         <fixed>${SA_AUTH}</fixed>
+EOF
+    else
+      cat >> ${FILE} << EOF
+         <authz-db>${SA_AUTH}</authz-db>
+EOF
+    fi
+    cat >> ${FILE} << EOF
+      </storage-area-authz>
+      <properties>
+          <RetentionPolicy>${SA_RETENTION_POLICY}</RetentionPolicy>
+          <AccessLatency>${SA_ACCESS_LATENCY}</AccessLatency>
+          <ExpirationMode>neverExpire</ExpirationMode>
+          <TotalOnlineSize unit="GB" limited-size="${SA_SIZE_LIMIT}">$TOTALSIZE</TotalOnlineSize>
+          <TotalNearlineSize unit="GB">0</TotalNearlineSize>
+      </properties>
+      <capabilities>
+        <aclMode>${SA_ACLMODE}</aclMode>
+EOF
+
+    if ! [ -z "${SA_DEFAULT_ACL_LIST}" ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} default-acl"
+      cat >> ${FILE} << EOF
+        <default-acl>
+EOF
+
+      for group_permission in ${SA_DEFAULT_ACL_LIST}; do
+        # Get GROUPNAME and PERMISSION
+        GROUP=`echo "$group_permission" | awk -F":" '{print $1}'`
+        PERMISSION=`echo "$group_permission" | awk -F":" '{print $2}'`
+        if [ "$?" -eq 0 ]; then
+          cat >> ${FILE} << EOF
+               <acl-entry><groupName>$GROUP</groupName><permissions>$PERMISSION</permissions></acl-entry>
+EOF
+        fi
+      done
+
+      cat >> ${FILE} << EOF
+        </default-acl>
+EOF
+    fi
+
+    if [ "${SA_FSTYPE}" == "gpfs" ] && [ "${SA_QUOTA}" == "true" ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} quota"
+      # Check SA_QUOTA_DEVICE
+      if [ -z ${SA_QUOTA_DEVICE} ]; then
+        yaimlog ERROR "${FUNCTION}: Missing quota device definition!"
+        yaimlog ERROR "Please set \$STORM_${SA_UPP}_QUOTA_DEVICE variable"
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      # Between SA_QUOTA_USER, SA_QUOTA_GROUP, SA_QUOTA_FILESET consider only the first one set in this order
+      if [ ! -z ${SA_QUOTA_USER} ]; then
+        SA_QUOTA_ELEMENT="<userName>${SA_QUOTA_USER}</userName>"
+      elif [ ! -z ${SA_QUOTA_GROUP} ]; then
+        SA_QUOTA_ELEMENT="<groupName>${SA_QUOTA_GROUP}</groupName>"
+      elif [ ! -z ${SA_QUOTA_FILESET} ]; then
+        SA_QUOTA_ELEMENT="<filesetName>${SA_QUOTA_FILESET}</filesetName>"
+      else
+        yaimlog ERROR "${FUNCTION}: Missing quota definition!"
+        yaimlog ERROR "Please set one between: \$STORM_${SA_UPP}_QUOTA_USER, \$STORM_${SA_UPP}_QUOTA_GROUP, \$STORM_${SA_UPP}_QUOTA_FILESET"
+        yestr ${YEX_CONFIG}
+        yaimlog ERROR "${YERRORSTR}"
+        exit ${YEX_CONFIG}
+      fi
+      cat >> ${FILE} << EOF
+        <quota enabled="true">
+          <device>${SA_QUOTA_DEVICE}</device>
+            <quotaElement>
+              ${SA_QUOTA_ELEMENT}
+            </quotaElement>
+        </quota> 
+EOF
+    fi
+
+    cat >> ${FILE} << EOF
+        <trans-prot>
+EOF
+
+    if [ "${SA_FILE_SUPPORT}" == "true" ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (file)"
+      cat >> ${FILE} << EOF
+          <prot name="file">
+            <schema>file</schema>
+          </prot>
+EOF
+    fi
+
+    if [ "${SA_GRIDFTP_SUPPORT}" == "true" ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (gsiftp)"
+      # gsiftp entry could be multiple
+      i=0
+      for SA_GRIDFTP_POOL in ${SA_GRIDFTP_POOL_LIST}; do
+        SA_GRIDFTP_POOL_HOST=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $1}'`
+        cat >> ${FILE} << EOF
+          <prot name="gsiftp">
+            <id>$i</id>
+            <schema>gsiftp</schema>
+            <host>${SA_GRIDFTP_POOL_HOST}</host>
+            <port>2811</port>
+          </prot>
+EOF
+        ((i++))
+      done
+    fi
+
+    if [ "${SA_RFIO_SUPPORT}" == "true" ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (rfio)"
+      cat >> ${FILE} << EOF
+          <prot name="rfio">
+            <schema>rfio</schema>
+            <host>${SA_RFIO_HOST}</host>
+            <port>5001</port>
+          </prot>
+EOF
+    fi
+
+    if [ "${SA_ROOT_SUPPORT}" == "true" ]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (root)"
+      cat >> ${FILE} << EOF
+          <prot name="root">
+            <schema>root</schema>
+            <host>${SA_ROOT_HOST}</host>
+            <!--port>1094</port-->
+          </prot>
+EOF
+    fi
+
+    cat >> ${FILE} << EOF
+        </trans-prot>
+EOF
+    # gsiftp entry could be use a load balancing strategy
+    SA_GRIDFTP_POOL_NUMBER=`echo ${SA_GRIDFTP_POOL_LIST} | awk '{print NF}'`
+    if [[ ${SA_GRIDFTP_POOL_NUMBER} > 1 ]]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} gsiftp pool"
+      cat >> ${FILE} << EOF
+        <pool>
+          <balance-strategy>${SA_GRIDFTP_POOL_STRATEGY}</balance-strategy>
+          <members>
+EOF
+      # 'weight' strategy case
+      if [ ${SA_GRIDFTP_POOL_STRATEGY} = 'weight' ]; then
+        i=0
+        for SA_GRIDFTP_POOL in ${SA_GRIDFTP_POOL_LIST}; do
+          SA_GRIDFTP_POOL_WEIGHT=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $2}'`
+          # set to 1 if weight is null
+          if [ -z ${SA_GRIDFTP_POOL_WEIGHT} ]; then
+            SA_GRIDFTP_POOL_WEIGHT=100
+          fi
+          cat >> ${FILE} << EOF
+            <member member-id="$i"><weight>${SA_GRIDFTP_POOL_WEIGHT}</weight></member>
+EOF
+          ((i++))
+        done
+      # other strategy cases
+      else
+        i=0
+        for SA_GRIDFTP_POOL in ${SA_GRIDFTP_POOL_LIST}; do
+          cat >> ${FILE} << EOF
+            <member member-id="$i"></member>
+EOF
+          ((i++))
+        done
+      fi
+      cat >> ${FILE} << EOF
+          </members>
+       </pool>
+EOF
+    fi
+    cat >> ${FILE} << EOF
+      </capabilities>
+    </filesystem>
+
+EOF
+
+  done
+
+  cat >> ${FILE} << EOF
+  </filesystems>
+  <mapping-rules>
+EOF
+
+  for SA in $STORM_STORAGEAREA_LIST; do
+
+    # Convert case
+    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+
+    # Remove DNS-like characters from SA_UPP names
+    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+
+    x=STORM_${SA_UPP}_ROOT;                    SA_ROOT=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
+    x=STORM_${SA_UPP}_ACCESSPOINT;             SA_ACCESSPOINT=${!x:-/${SA_LOW}}
+
+    yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} map-rule (${SA_LOW})"
+    cat >> ${FILE} << EOF
+    <map-rule name="${SA_LOW}-maprule">
+      <stfn-root>${SA_ACCESSPOINT}</stfn-root>
+      <mapped-fs>${SA_UPP}-FS</mapped-fs>
+    </map-rule>
+EOF
+
+  done
+
+  cat >> ${FILE} << EOF
+  </mapping-rules>
+  <approachable-rules>
+EOF
+
+  for SA in $STORM_STORAGEAREA_LIST; do
+   
+    # Convert case
+    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+
+    # Remove DNS-like characters from SA_UPP names
+    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+ 
+    x=STORM_${SA_UPP}_VONAME;                  SA_VONAME=${!x:-${SA_LOW}}
+
+    yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} app-rule (${SA_LOW})"
+    cat >> ${FILE} << EOF
+    <app-rule name="${SA_LOW}-rule">
+      <subjects>
+        <dn>*</dn>
+	<vo-name>${SA_VONAME}</vo-name>
+      </subjects>
+      <approachable-fs>${SA_UPP}-FS</approachable-fs>
+    </app-rule>
+EOF
+  done
+
+  cat >> ${FILE} << EOF
+  </approachable-rules>
+</namespace>
+EOF
+
+  #==========================================================
+
+  yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
+  #----------------------------------------------------------
+  # ${STORM_BE_DIR}/etc/namespace.xml - END
+  #----------------------------------------------------------
+
+  # Exit with success
+  return 0
+
+}
