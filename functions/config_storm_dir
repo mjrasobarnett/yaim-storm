@@ -26,13 +26,13 @@
 # NOTES :       Check existence and permission of the Storage Areas
 #               served by StoRM and of the installation directory.
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 ##############################################################################
 
 function config_storm_dir_check () {
 
-  requires $1 JAVA_LOCATION STORM_DEFAULT_ROOT
+  requires $1 STORM_DEFAULT_ROOT
   return $?
 
 }
@@ -66,7 +66,8 @@ function config_storm_dir () {
     dir=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
 
     [ -d ${dir} ] || (yaimlog INFO "${FUNCTION}: Creating storage area ${dir}"; mkdir -p ${dir};
-      yaimlog DEBUG "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for ${dir}"; chown -R ${STORM_USER}:${STORM_USER} ${dir};
+      yaimlog DEBUG "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for ${dir}"; 
+      chown -R ${STORM_USER}:${STORM_USER} ${dir};
       yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}"; chmod -R o-rwx ${dir})
 
     # TODO: Improve this check to evaluates both gpfs and posix cases
@@ -77,19 +78,6 @@ function config_storm_dir () {
     #fi
 
   done
-
-  #---------------------------------------------------------------------
-  # TO BE REVIEWED - BEGIN - Is it really needed?
-  #---------------------------------------------------------------------
-  # Set the JAVA environment
-  yaimlog INFO "${FUNCTION}: Setting up JAVA environment"
-  yaimgridenv_set JAVA_HOME ${JAVA_LOCATION}
-#  # The install is really needed?
-#  alternatives --install /usr/bin/java java $JAVA_LOCATION/bin/java 2
-#  alternatives --set java $JAVA_LOCATION/bin/java
-  #---------------------------------------------------------------------
-  # TO BE REVIEWED - END
-  #---------------------------------------------------------------------
 
   # Exit with success
   return 0

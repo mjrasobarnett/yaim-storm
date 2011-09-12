@@ -17,7 +17,7 @@
 # limitations under the License.
 ##############################################################################
 #
-# NAME :        config_gip_storm
+# NAME :        config_gip_glue2_storm
 #
 # DESCRIPTION : This function configures the published information on a StoRM SE.
 #
@@ -75,8 +75,8 @@ function get_size () {
     yaimlog DEBUG "${FUNCTION}: set a temporary value."
     total=$4
     used=0
-    reserved=$4
     free=$4
+    reserved=0
     available=$4
   else
       # convert in GB (base 10)
@@ -96,43 +96,45 @@ function get_size () {
 
 }
 
-function config_gip_storm_check () {
+function config_gip_glue2_storm_check () {
 
   requires $1 SITE_NAME STORM_BACKEND_HOST STORM_DEFAULT_ROOT STORM_FRONTEND_PATH \
               STORM_FRONTEND_PORT STORM_FRONTEND_PUBLIC_HOST \
-              STORM_BACKEND_REST_SERVICES_PORT VOS
-
+              STORM_BACKEND_REST_SERVICES_PORT VOS 
   return $?
 
 }
 
-function config_gip_storm_setenv () {
+function config_gip_glue2_storm_setenv () {
 
   yaimgridenv_set STORM_BACKEND_HOST ${STORM_BACKEND_HOST}
   yaimgridenv_set STORM_FRONTEND_PUBLIC_HOST ${STORM_FRONTEND_PUBLIC_HOST}
   yaimgridenv_set STORM_FRONTEND_PORT ${STORM_FRONTEND_PORT}
   yaimgridenv_set STORM_FRONTEND_PATH ${STORM_FRONTEND_PATH}
+  yaimgridenv_set STORM_ENDPOINT_QUALITY_LEVEL ${STORM_ENDPOINT_QUALITY_LEVEL}
+  yaimgridenv_set STORM_ENDPOINT_SERVING_STATE ${STORM_ENDPOINT_SERVING_STATE}
+  yaimgridenv_set STORM_ENDPOINT_CAPABILITY ${STORM_ENDPOINT_CAPABILITY}
 
 }
 
-function config_gip_storm () {
+function config_gip_glue2_storm () {
 
-  FUNCTION="config_gip_storm"
+  FUNCTION="config_gip_glue2_storm"
 
   INFO_SERVICE_CONFIG=/etc/glite/info/service
   INFO_SERVICE_SCRIPT=/usr/bin
   INFO_PROVIDER_PATH=/var/lib/bdii/gip/provider
   INFO_LDIF_PATH=/var/lib/bdii/gip/ldif
   INFO_PLUGIN_PATH=/var/lib/bdii/gip/plugin
-
+  
   # Manage variables
   STORM_FRONTEND_ENDPOINT="httpg://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}"
 
   yaimlog INFO "${FUNCTION}: Static service information"
-  #----------------------------------------------------------------
-  # ${INFO_PROVIDER_PATH}/service-srm-storm-v2 - BEGIN
-  #----------------------------------------------------------------
-  FILE="${INFO_PROVIDER_PATH}/service-srm-storm-v2"
+  #----------------------------------------------------------
+  # ${INFO_PROVIDER_PATH}/service-glue2-srm-storm-v2 - BEGIN
+  #----------------------------------------------------------
+  FILE="${INFO_PROVIDER_PATH}/service-glue2-srm-storm-v2"
   yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
   cat > ${FILE} << EOF
 #!/bin/sh
@@ -140,48 +142,54 @@ function config_gip_storm () {
 EOF
 
   cat >> ${FILE} << EOF
-${INFO_SERVICE_SCRIPT}/glite-info-service ${INFO_SERVICE_CONFIG}/glite-info-service-srm-storm-v2.conf ${SITE_NAME} ${STORM_FRONTEND_ENDPOINT}
+${INFO_SERVICE_SCRIPT}/glite-info-glue2-simple ${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf ${SITE_NAME} ${STORM_FRONTEND_ENDPOINT}
 EOF
 
   # Set execute permissions
   chmod +x ${FILE}
   yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
-  #--------------------------------------------------
-  # ${INFO_PROVIDER_PATH}/service-srm-storm-v2 - END
-  #--------------------------------------------------
+  #--------------------------------------------------------
+  # ${INFO_PROVIDER_PATH}/service-glue2-srm-storm-v2 - END
+  #--------------------------------------------------------
 
   yaimlog INFO "${FUNCTION}: Static service information"
   #---------------------------------------------------------------------
-  # ${INFO_SERVICE_CONFIG}/glite-info-service-srm-storm-v2.conf - BEGIN
+  # ${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf - BEGIN
   #---------------------------------------------------------------------
   # Configuration file for SRM v2.2 service reporter
-  FILE="${INFO_SERVICE_CONFIG}/glite-info-service-srm-storm-v2.conf"
+  FILE="${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf"
   yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
   cat > ${FILE} << EOF
 init = /usr/libexec/storm-dynamic-info-provider/glite-info-service-storm init
-service_type = SRM
+service_type = emi.storm
 get_version = echo \${GLITE_INFO_SERVICE_VERSION}
 get_endpoint = echo \${GLITE_INFO_SERVICE_ENDPOINT}
 get_status = ${INFO_SERVICE_SCRIPT}/glite-info-service-test SRM_V2 && /usr/libexec/storm-dynamic-info-provider/glite-info-service-storm status
 WSDL_URL = http://sdm.lbl.gov/srm-wg/srm.v2.2.wsdl
 semantics_URL = http://sdm.lbl.gov/srm-wg/doc/SRM.v2.2.html
 get_starttime = perl -e '@st=stat("/var/run/storm-backend-server.pid");print "@st[10]\n";'
+
+get_capabilities = echo -e 'information.model\ninformation.discovery\ninformation.monitoring'
+get_implementor = echo emi
+get_implementationname = echo StoRM
+get_implementationversion = rpm -qa | grep storm-backend-server | cut -d- -f4
+get_qualitylevel = echo \${STORM_ENDPOINT_QUALITY_LEVEL}
+get_servingstate = echo \${STORM_ENDPOINT_SERVING_STATE}
 get_data = echo
 get_services = echo
 EOF
 
   # Run function to complete file
   l_write_vo_info ${FILE}
-  yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
-  #-------------------------------------------------------------------
-  # ${INFO_SERVICE_CONFIG}/glite-info-service-srm-storm-v2.conf - END
-  #-------------------------------------------------------------------
+  #-------------------------------------------------------------------------
+  # ${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf - END
+  #-------------------------------------------------------------------------
 
   yaimlog INFO "${FUNCTION}: Static storage information"
   #----------------------------------------------------------------
-  # ${INFO_LDIF_PATH}/static-file-storm.ldif - BEGIN
+  # ${INFO_LDIF_PATH}/static-file-glue2-storm.ldif - BEGIN
   #----------------------------------------------------------------
-  FILE="${INFO_LDIF_PATH}/static-file-storm.ldif"   # Configuration filename
+  FILE="${INFO_LDIF_PATH}/static-file-glue2-storm.ldif"   # Configuration filename
   FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"                     # Backup configuration filename (if needed)
   FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"                 # New configuration filename (if needed)
 
@@ -206,7 +214,7 @@ EOF
 
   # Remove oldest backup file
   yaimlog DEBUG "${FUNCTION}: Removing old backup files"
-  find `dirname "${FILE}"` -ctime +2 -name 'static-file-storm.ldif.bkp*' -exec rm {} \;
+  find `dirname "${FILE}"` -ctime +2 -name 'static-file-glue2-storm.ldif.bkp*' -exec rm {} \;
 
   # Set permissions
   chmod 644 ${FILE}
@@ -357,45 +365,121 @@ EOF
   done
 
   #==========================================================
-  # Create GlueSE entries
+  # Create GLUE2ServiceId entries
 
-  yaimlog DEBUG "${FUNCTION}: Creating GlueSEUniqueID entries"
-
-  GLOBAL_TOTAL_SIZE_GB=$((GLOBAL_TOTAL_ONLINE_SIZE_GB+GLOBAL_TOTAL_NEARLINE_SIZE_GB))
-  GLOBAL_FREE_SIZE_GB=$((GLOBAL_FREE_ONLINE_SIZE_GB+GLOBAL_FREE_NEARLINE_SIZE_GB))
-
+  yaimlog DEBUG "${FUNCTION}: Creating GLUE2ServiceId entries"
   cat >> ${FILE} << EOF
 #
-# GlueSEUniqueID
+# GLUE2ServiceId
 #
-dn: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSE
-objectClass: GlueInformationService
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEUniqueID: ${STORM_FRONTEND_PUBLIC_HOST}
-GlueSEName: ${SITE_NAME}:srm_v2
-GlueSEArchitecture: multidisk
-GlueSEStatus: Production
-GlueSEImplementationName: StoRM
-GlueSEImplementationVersion: `rpm -q --queryformat='%{VERSION}' storm-backend-server`
-GlueSESizeTotal: $((GLOBAL_TOTAL_SIZE_GB))
-GlueSESizeFree: $((GLOBAL_FREE_SIZE_GB))
-GlueSETotalOnlineSize: $((GLOBAL_TOTAL_ONLINE_SIZE_GB))
-GlueSEUsedOnlineSize: $((GLOBAL_USED_ONLINE_SIZE_GB))
-GlueSETotalNearlineSize: $((GLOBAL_TOTAL_NEARLINE_SIZE_GB))
-GlueSEUsedNearlineSize: $((GLOBAL_USED_NEARLINE_SIZE_GB))
-GlueInformationServiceURL: ldap://${STORM_BACKEND_HOST}:2170/mds-vo-name=resource,o=grid
-GlueForeignKey: GlueSiteUniqueID=${SITE_NAME}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
+dn: GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupID=resource,o=glue
+objectClass: GLUE2Service
+GLUE2ServiceId: ${STORM_FRONTEND_PUBLIC_HOST}
+GLUE2ServiceCapability: ${STORM_ENDPOINT_CAPABILITY}
+GLUE2ServiceType: Storage
+GLUE2ServiceQualityLevel: ${STORM_ENDPOINT_QUALITY_LEVEL}
+GLUE2ServiceStatusInfo: http://${STORM_FRONTEND_PUBLIC_HOST}/get-status
+GLUE2ServiceAdminDomainForeignKey: ${MY_DOMAIN}
 
 EOF
   #==========================================================
 
   #==========================================================
-  # Create GlueSA entries
+  # Create GLUE2StorageServiceCapacityId entries
+
+  yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageServiceCapacityId entries"
+  
+  cat >> ${FILE} << EOF
+#
+# GLUE2StorageServiceCapacityId online
+#
+dn: GLUE2StorageServiceCapacityId=${STORM_FRONTEND_PUBLIC_HOST}/capacity/online,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2StorageServiceCapacity
+GLUE2StorageServiceCapacityId: ${STORM_FRONTEND_PUBLIC_HOST}/capacity/online
+GLUE2StorageServiceCapacityType: online
+GLUE2StorageServiceCapacityTotalSize: $((GLOBAL_TOTAL_ONLINE_SIZE_GB))
+GLUE2StorageServiceCapacityFreeSize: $((GLOBAL_FREE_ONLINE_SIZE_GB))
+GLUE2StorageServiceCapacityUsedSize: $((GLOBAL_USED_ONLINE_SIZE_GB))
+GLUE2StorageServiceCapacityReservedSize: $((GLOBAL_RESERVED_ONLINE_SIZE_GB))
+
+EOF
+
+#==========================================================
+  # Create GLUE2StorageServiceCapacityId entries
+
+  yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageServiceCapacityId entries"
+  cat >> ${FILE} << EOF
+#
+# GLUE2StorageServiceCapacityId nearline
+#
+dn: GLUE2StorageServiceCapacityId=${STORM_FRONTEND_PUBLIC_HOST}/capacity/nearline,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2StorageServiceCapacity
+GLUE2StorageServiceCapacityId: ${STORM_FRONTEND_PUBLIC_HOST}/capacity/nearline
+GLUE2StorageServiceCapacityType: nearline
+GLUE2StorageServiceCapacityTotalSize: $((GLOBAL_TOTAL_NEARLINE_SIZE_GB))
+GLUE2StorageServiceCapacityFreeSize: $((GLOBAL_FREE_NEARLINE_SIZE_GB))
+GLUE2StorageServiceCapacityUsedSize: $((GLOBAL_USED_NEARLINE_SIZE_GB))
+GLUE2StorageServiceCapacityReservedSize: $((GLOBAL_RESERVED_NEARLINE_SIZE_GB))
+
+EOF
+
+  #==========================================================
+  # Create GLUE2EndpointId entries
+
+  yaimlog DEBUG "${FUNCTION}: Creating GLUE2EndpointId entries"
+  cat >> ${FILE} << EOF
+#
+# GLUE2EndpointId
+#
+dn: GLUE2EndpointId=${STORM_FRONTEND_PUBLIC_HOST}/srm/2.2.0,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupID=resource,o=glue
+objectClass: GLUE2Endpoint
+objectClass: GLUE2StorageEndpoint
+GLUE2EndpointId: ${STORM_FRONTEND_PUBLIC_HOST}/srm/2.2.0
+GLUE2EndpointURL: ${STORM_FRONTEND_ENDPOINT}
+GLUE2EndpointCapability: Storage Management
+GLUE2EndpointTechnology: webservice
+GLUE2EndpointInterfaceName: SRM
+GLUE2EndpointInterfaceVersion: 2.2.0
+GLUE2EndpointInterfaceExtension:
+GLUE2EndpointWSDL: http://sdm.lbl.gov/srm-wg/srm.v2.2.wsdl
+GLUE2EndpointSupportedProfile:
+GLUE2EndpointSemantics: http://sdm.lbl.gov/srm-wg/doc/srm.v2.2.wsdl
+GLUE2EndpointImplementor: emi.storm
+GLUE2EndpointImplementationName: StoRM
+GLUE2EndpointImplementationVersion: `rpm -q --queryformat='%{VERSION}' storm-backend-server`
+GLUE2EndpointQualityLevel: Testing
+GLUE2EndpointHealthState: OK
+GLUE2EndpointHealthStateInfo: No Problems for storm-backend-server
+GLUE2EndpointServingState: emi.storm.backend
+GLUE2EndpointIssuerCA: to be defined
+GLUE2EndpointTrustedCA: to be defined
+GLUE2EndpointDowntimeAnnounce: No
+GLUE2EndpointServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}
+GLUE2StorageEndpointStorageServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}
+
+EOF
+
+  #==========================================================
+  # Create GLUE2ManagerId entries
+
+  yaimlog DEBUG "${FUNCTION}: Creating GLUE2ManagerId entries"
+  cat >> ${FILE} << EOF
+#
+# GLUE2ManagerId
+#
+dn: GLUE2ManagerID=${STORM_BACKEND_HOST}/manager,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupID=resource,o=glue
+objectClass: GLUE2Manager
+objectClass: GLUE2StorageManager
+GLUE2ManagerId: ${STORM_BACKEND_HOST}/manager 
+GLUE2ManagerProductName: storm-backend-server
+GLUE2ManagerProductVersion: `rpm -q --queryformat='%{VERSION}' storm-backend-server`
+GLUE2ManagerServiceForeignKey: ${STORM_BACKEND_HOST}
+GLUE2StorageManagerStorageServiceForeignKey: ${STORM_BACKEND_HOST}
+
+EOF
+
+  #==========================================================
+  # Create GLUE2Share entries
 
   for SA in ${STORM_STORAGEAREA_LIST}; do
 
@@ -410,6 +494,7 @@ EOF
     x=STORM_${SA_UPP}_TOKEN;           SA_TOKEN=${!x}
     x=STORM_${SA_UPP}_VONAME;          SA_VONAME=${!x:-${SA_LOW}}
     x=STORM_${SA_UPP}_STORAGECLASS;    SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
+    x=STORM_${SA_UPP}_SERVINGSTATE;    SA_SERVING_STATE=${!x:-/${STORM_ENDPOINT_SERVING_STATE}}
     # Convert in uppercase
     SA_STORAGECLASS=`echo ${SA_STORAGECLASS} | tr '[:lower:]' '[:upper:]'`
 
@@ -447,118 +532,79 @@ EOF
       esac
     fi
 
-    yaimlog DEBUG "${FUNCTION}: Creating GlueSALocalID entries for ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY} SA (${SA_VONAME} VO)"
+  #==========================================================
+  # Create GLUE2PolicyId entries
 
-    SA_AVAILABLE_SIZE_KB=$((`hash_find SA_AVAILABLE_ONLINE_SIZE_KB ${SA_UPP}`))+$((`hash_find SA_AVAILABLE_NEARLINE_SIZE_KB ${SA_UPP}`))
-    SA_USED_SIZE_KB=$((`hash_find SA_USED_ONLINE_SIZE_KB ${SA_UPP}`))+$((`hash_find SA_USED_NEARLINE_SIZE_KB ${SA_UPP}`))
-        
+  yaimlog DEBUG "${FUNCTION}: Creating GLUE2PolicyId entries"
+  cat >> ${FILE} << EOF
+
+#
+# GLUE2PolicyID
+#
+dn: GLUE2PolicyID=${STORM_FRONTEND_PUBLIC_HOST}/srm/2.2.0/ap,GLUE2EndpointId=${STORM_FRONTEND_PUBLIC_HOST}/srm/2.2.0,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2Policy
+objectClass: GLUE2AccessPolicy
+GLUE2PolicyID: ${STORM_FRONTEND_PUBLIC_HOST}/srm/2.2.0/ap
+GLUE2PolicyScheme: org.glite.standard
+GLUE2PolicyRule: VO:${SA_VONAME}
+GLUE2PolicyUserDomainForeignKey: ${SA_VONAME}
+GLUE2AccessPolicyEndpointForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}/srm/2.2.0/ap
+
+EOF
+
+
+    yaimlog DEBUG "${FUNCTION}: Creating GLUE2ShareID entries for ${SA_LOW} (${SA_VONAME} VO)"
     cat >> ${FILE} << EOF
+
 #
-# GlueSALocalID ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY} SA (${SA_VONAME} VO)
+# GLUE2ShareID ${SA_LOW} (${SA_VONAME} VO)
 #
-dn: GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY},GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSATop
-objectClass: GlueSA
-objectClass: GlueSAPolicy
-objectClass: GlueSAState
-objectClass: GlueSAAccessControlBase
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSALocalID: ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
-GlueSAName: Reserved space for ${SA_VONAME} VO
-GlueSATotalOnlineSize: $((`hash_find SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP}`))
-GlueSAUsedOnlineSize: $((`hash_find SA_USED_ONLINE_SIZE_GB ${SA_UPP}`))
-GlueSAFreeOnlineSize: $((`hash_find SA_FREE_ONLINE_SIZE_GB ${SA_UPP}`))
-GlueSAReservedOnlineSize: $((`hash_find SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP}`))
-GlueSACapability: InstalledOnlineCapacity=$((SA_INSTALLED_ONLINE_CAPACITY))
-GlueSACapability: InstalledNearlineCapacity=$((SA_INSTALLED_NEARLINE_CAPACITY))
-GlueSATotalNearlineSize: $((`hash_find SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP}`))
-GlueSAUsedNearlineSize: $((`hash_find SA_USED_NEARLINE_SIZE_GB ${SA_UPP}`))
-GlueSAFreeNearlineSize: $((`hash_find SA_FREE_NEARLINE_SIZE_GB ${SA_UPP}`))
-GlueSAReservedNearlineSize: $((`hash_find SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP}`))
-GlueSARetentionPolicy: ${SA_RETENTION_POLICY}
-GlueSAAccessLatency: online
-GlueSAExpirationMode: neverExpire
-GlueSAPolicyFileLifeTime: permanent
-GlueSAType: permanent
-GlueSAStateAvailableSpace: $((SA_AVAILABLE_SIZE_KB))
-GlueSAStateUsedSpace: $((SA_USED_SIZE_KB))
-GlueSAAccessControlBaseRule: VO:${SA_VONAME}
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
+dn: GLUE2ShareId=${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW},GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2Share
+objectClass: GLUE2StorageShare
+GLUE2ShareId: ${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW}
+GLUE2ShareDescription: Share for ${SA_VONAME}
+GLUE2StorageShareServingState: ${SA_SERVING_STATE}
+GLUE2StorageSharePath: ${SA_ACCESSPOINT}
+GLUE2StorageShareAccessMode: to be defined
+GLUE2StorageShareSharingID: ${SA_VONAME}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
+GLUE2StorageShareAccessLatency: ${SA_ACCESS_LATENCY}
+GLUE2StorageShareRetentionPolicy: ${SA_RETENTION_POLICY}
+GLUE2StorageShareExpirationMode: neverExpire
+GLUE2StorageShareDefaultLifeTime: -1
+GLUE2StorageShareMaximumLifeTime: -1
+GLUE2StorageShareTag: ${SA_LOW}
+GLUE2ShareServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}
+GLUE2StorageShareStorageServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW}
 
 EOF
 
-    if [ -z ${SA_TOKEN} ]; then
-      yaimlog DEBUG "${FUNCTION}: Creating GlueVOInfoLocalID entries for ${SA_VONAME} VO (no token)"
-      cat >> ${FILE} << EOF
+    yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageShareCapacityID entries for ${SA_LOW} (${SA_VONAME} VO)"
+
+    SA_TOTAL_SIZE_GB=$((`hash_find SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP}`))+$((`hash_find SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP}`))
+    SA_USED_SIZE_GB=$((`hash_find SA_USED_ONLINE_SIZE_GB ${SA_UPP}`))+$((`hash_find SA_USED_NEARLINE_SIZE_GB ${SA_UPP}`))
+    SA_FREE_SIZE_GB=$((`hash_find SA_FREE_ONLINE_SIZE_GB ${SA_UPP}`))+$((`hash_find SA_FREE_NEARLINE_SIZE_GB ${SA_UPP}`))
+    SA_RESERVED_SIZE_GB=$((`hash_find SA_RESERVED_ONLINE_SIZE_GB ${SA_UPP}`))+$((`hash_find SA_RESERVED_NEARLINE_SIZE_GB ${SA_UPP}`))
+
+    cat >> ${FILE} << EOF
+
 #
-# GlueVOInfoLocalID ${SA_VONAME}
+# GLUE2StorageShareCapacityID ${SA_LOW} (${SA_VONAME} VO)
 #
-dn: GlueVOInfoLocalID=${SA_VONAME},GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY},GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSATop
-objectClass: GlueVOInfo
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueVOInfoLocalID: ${SA_VONAME}
-GlueVOInfoPath: ${SA_ACCESSPOINT}
-GlueVOInfoAccessControlBaseRule: VO:${SA_VONAME}
-GlueChunkKey: GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
+dn: GLUE2StorageShareCapacityID=${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW}/capacity,GLUE2ShareId=${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW},GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2StorageShareCapacity
+GLUE2StorageShareCapacityID: ${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW}/capacity
+GLUE2StorageShareCapacityType: ${SA_ACCESS_LATENCY}
+GLUE2StorageShareCapacityTotalSize: $((SA_TOTAL_SIZE_GB)) 
+GLUE2StorageShareCapacityFreeSize: $((SA_FREE_SIZE_GB))
+GLUE2StorageShareCapacityUsedSize: $((SA_USED_SIZE_GB))
+GLUE2StorageShareCapacityReservedSize:  $((SA_RESERVED_SIZE_GB))
+GLUE2StorageShareCapacityStorageShareForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW}/capacity
 
 EOF
-    else
-      yaimlog DEBUG "${FUNCTION}: Creating GlueVOInfoLocalID entries for ${SA_VONAME} VO (${SA_TOKEN} token)"
-      cat >> ${FILE} << EOF
-#
-# GlueVOInfoLocalID ${SA_VONAME}:${SA_TOKEN}
-#
-dn: GlueVOInfoLocalID=${SA_VONAME}:${SA_TOKEN},GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY},GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSATop
-objectClass: GlueVOInfo
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueVOInfoLocalID: ${SA_VONAME}:${SA_TOKEN}
-GlueVOInfoPath: ${SA_ACCESSPOINT}
-GlueVOInfoTag: ${SA_TOKEN}
-GlueVOInfoAccessControlBaseRule: VO:${SA_VONAME}
-GlueChunkKey: GlueSALocalID=${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
-
-EOF
-    fi
 
   done
 
-  #==========================================================
-
-  #==========================================================
-  # Create GlueSEControlProtocol entries
-
-  yaimlog DEBUG "${FUNCTION}: Creating GlueSEControlProtocolLocalID entries for srm_v2.2 protocol"
-  cat >> ${FILE} << EOF
-#
-# GlueSEControlProtocolLocalID srm_v2.2
-#
-dn: GlueSEControlProtocolLocalID=srm_v2.2,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSEControlProtocol
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEControlProtocolType: SRM
-GlueSEControlProtocolLocalID: srm_v2.2
-GlueSEControlProtocolVersion: 2.2.0
-GlueSEControlProtocolEndpoint: ${STORM_FRONTEND_ENDPOINT}
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
-
-EOF
   #==========================================================
 
   #==========================================================
@@ -569,181 +615,106 @@ EOF
   STORM_INFO_RFIO_SUPPORT=`echo ${STORM_INFO_RFIO_SUPPORT} | tr '[:upper:]' '[:lower:]'`
   STORM_INFO_GRIDFTP_SUPPORT=`echo ${STORM_INFO_GRIDFTP_SUPPORT} | tr '[:upper:]' '[:lower:]'`
   STORM_INFO_ROOT_SUPPORT=`echo ${STORM_INFO_ROOT_SUPPORT} | tr '[:upper:]' '[:lower:]'`
-  STORM_INFO_HTTP_SUPPORT=`echo ${STORM_INFO_HTTP_SUPPORT} | tr '[:upper:]' '[:lower:]'`
-  STORM_INFO_HTTPS_SUPPORT=`echo ${STORM_INFO_HTTPS_SUPPORT} | tr '[:upper:]' '[:lower:]'`
 
   if [ ${STORM_INFO_FILE_SUPPORT} = "true" ]; then
-    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for file protocol"
+    yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageAccessProtocolID entries for file protocol"
     cat >> ${FILE} << EOF
 #
-# GlueSEAccessProtocolLocalID file
+# GLUE2StorageAccessProtocolID file
 #
-dn: GlueSEAccessProtocolLocalID=file,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSEAccessProtocol
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEAccessProtocolType: file
-GlueSEAccessProtocolLocalID: file
-GlueSEAccessProtocolVersion: 1.0.0
-GlueSEAccessProtocolSupportedSecurity: GSI
-GlueSEAccessProtocolMaxStreams: 1
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
+dn: GLUE2StorageAccessProtocolID=${STORM_FRONTEND_PUBLIC_HOST}/file,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2StorageAccessProtocol
+GLUE2StorageAccessProtocolID: ${STORM_FRONTEND_PUBLIC_HOST}/file
+GLUE2StorageAccessProtocolType: file
+GLUE2StorageAccessProtocolVersion: 1.0.0
+GLUE2StorageAccessProtocolMaxStreams: 1
 
 EOF
   fi
 
   if [ ${STORM_INFO_RFIO_SUPPORT} = "true" ]; then
-    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for rfio protocol"
+    yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageAccessProtocolID entries for rfio protocol"
     cat >> ${FILE} << EOF
 #
-# GlueSEAccessProtocolLocalID rfio
+# GLUE2StorageAccessProtocolID rfio
 #
-dn: GlueSEAccessProtocolLocalID=rfio,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSEAccessProtocol
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEAccessProtocolType: rfio
-GlueSEAccessProtocolLocalID: rfio
-GlueSEAccessProtocolVersion: 1.0.0
-GlueSEAccessProtocolSupportedSecurity: GSI
-GlueSEAccessProtocolMaxStreams: 1
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
+dn: GLUE2StorageAccessProtocolID=${STORM_FRONTEND_PUBLIC_HOST}/rfio,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2StorageAccessProtocol
+GLUE2StorageAccessProtocolID: ${STORM_FRONTEND_PUBLIC_HOST}/rfio
+GLUE2StorageAccessProtocolType: rfio
+GLUE2StorageAccessProtocolVersion: 1.0.0
+GLUE2StorageAccessProtocolMaxStreams: 1
 
 EOF
   fi
 
   if [ ${STORM_INFO_GRIDFTP_SUPPORT} = "true" ]; then
-    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for gsiftp protocol"
+    yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageAccessProtocolID entries for gsiftp protocol"
     cat >> ${FILE} << EOF
 #
-# GlueSEAccessProtocolLocalID gsiftp
+# GLUE2StorageAccessProtocolID gsiftp
 #
-dn: GlueSEAccessProtocolLocalID=gsiftp,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSEAccessProtocol
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEAccessProtocolType: gsiftp
-GlueSEAccessProtocolLocalID: gsiftp
-GlueSEAccessProtocolVersion: 1.0.0
-GlueSEAccessProtocolSupportedSecurity: GSI
-GlueSEAccessProtocolMaxStreams: 10
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
+dn: GLUE2StorageAccessProtocolID=${STORM_FRONTEND_PUBLIC_HOST}/gsiftp,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2StorageAccessProtocol
+GLUE2StorageAccessProtocolID: ${STORM_FRONTEND_PUBLIC_HOST}/gsiftp
+GLUE2StorageAccessProtocolType: gsiftp
+GLUE2StorageAccessProtocolVersion: 2.0.0
+GLUE2StorageAccessProtocolMaxStreams: 10
 
 EOF
   fi
 
   if [ ${STORM_INFO_ROOT_SUPPORT} = "true" ]; then
-    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for root protocol"
+    yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageAccessProtocolID entries for root protocol"
     cat >> ${FILE} << EOF
 #
-# GlueSEAccessProtocolLocalID root
+# GLUE2StorageAccessProtocolID root
 #
-dn: GlueSEAccessProtocolLocalID=root,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSEAccessProtocol
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEAccessProtocolType: root
-GlueSEAccessProtocolLocalID: root
-GlueSEAccessProtocolVersion: 1.0.0
-GlueSEAccessProtocolSupportedSecurity: GSI
-GlueSEAccessProtocolMaxStreams: 1
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
+dn: GLUE2StorageAccessProtocolID=${STORM_FRONTEND_PUBLIC_HOST}/root,GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupId=resource,o=glue
+objectClass: GLUE2StorageAccessProtocol
+GLUE2StorageAccessProtocolID: ${STORM_FRONTEND_PUBLIC_HOST}/root
+GLUE2StorageAccessProtocolType: root
+GLUE2StorageAccessProtocolVersion: 1.0.0
+GLUE2StorageAccessProtocolMaxStreams: 1
+
 EOF
   fi
-  
-    if [ ${STORM_INFO_HTTP_SUPPORT} = "true" ]; then
-    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for http protocol"
-    cat >> ${FILE} << EOF
-#
-# GlueSEAccessProtocolLocalID http
-#
-dn: GlueSEAccessProtocolLocalID=http,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSEAccessProtocol
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEAccessProtocolType: http
-GlueSEAccessProtocolLocalID: http
-GlueSEAccessProtocolVersion: 1.1.0
-GlueSEAccessProtocolSupportedSecurity: GSI
-GlueSEAccessProtocolMaxStreams: 1
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
-EOF
-  fi
-  
-    if [ ${STORM_INFO_HTTPS_SUPPORT} = "true" ]; then
-    yaimlog DEBUG "${FUNCTION}: Creating GlueSEAccessProtocolLocalID entries for https protocol"
-    cat >> ${FILE} << EOF
-#
-# GlueSEAccessProtocolLocalID https
-#
-dn: GlueSEAccessProtocolLocalID=https,GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST},mds-vo-name=resource,o=grid
-objectClass: GlueSETop
-objectClass: GlueSEAccessProtocol
-objectClass: GlueKey
-objectClass: GlueSchemaVersion
-GlueSEAccessProtocolType: https
-GlueSEAccessProtocolLocalID: https
-GlueSEAccessProtocolVersion: 1.1.0
-GlueSEAccessProtocolSupportedSecurity: GSI
-GlueSEAccessProtocolMaxStreams: 1
-GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
-GlueSchemaVersionMajor: 1
-GlueSchemaVersionMinor: 3
-EOF
-  fi
-  
   #==========================================================
 
   yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
   #----------------------------------------------------------------
-  # ${INFO_LDIF_PATH}/static-file-storm.ldif - END
-  #----------------------------------------------------------------
+  # ${INFO_LDIF_PATH}/static-file-glue2-storm.ldif - END
+  #---------------------------------------------------------------
 
   yaimlog INFO "${FUNCTION}: Dynamic storage information"
   #--------------------------------------------------------------------
-  # ${INFO_PLUGIN_PATH}/glite-info-dynamic-storm - BEGIN
+  # ${INFO_PLUGIN_PATH}/glite-info-glue2-dynamic-storm  - BEGIN
   #--------------------------------------------------------------------
   # Create configuration file for dynamic information provider
   FILE="/etc/storm/backend-server/storm-yaim-variables.conf"
   yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
   set | egrep '^STORM|^SITE_NAME' | sort > ${FILE}
-  chgrp ldap /etc/storm/backend-server/storm-yaim-variables.conf 
+  chgrp ldap /etc/storm/backend-server/storm-yaim-variables.conf
   chmod 450 ${FILE}
 
   # Install dynamic script pointing to gip plugin
-  WRAPPER="${INFO_PLUGIN_PATH}/glite-info-dynamic-storm"
+  WRAPPER="${INFO_PLUGIN_PATH}/glite-info-glue2-dynamic-storm"
   yaimlog INFO "${FUNCTION}: Creating ${WRAPPER} ..."
   cat > ${WRAPPER} << EOF
 #! /bin/sh
-/usr/libexec/storm-dynamic-info-provider/glite-info-dynamic-storm ${FILE}
+/usr/libexec/storm-dynamic-info-provider/glite-info-glue2-dynamic-storm ${FILE}
 EOF
 
   # Set permissions
   chmod 755 ${WRAPPER}
   #--------------------------------------------------------------------
-  # ${INFO_PLUGIN_PATH}/glite-info-dynamic-storm - END
+  # ${INFO_PLUGIN_PATH}/glite-info-glue2-dynamic-storm - END
   #--------------------------------------------------------------------
 
   # Remove old cron replaced by new dynamic information provider
-  rm -f /etc/cron.d/glite-info-dynamic-storm
+  rm -f /etc/cron.d/glite-info-glue2-dynamic-storm
 
   # Exit with success
   return 0
 
 }
-

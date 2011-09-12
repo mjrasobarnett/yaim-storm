@@ -1,9 +1,9 @@
-NAME := ig-yaim-storm
+NAME := yaim-storm
 prefix=$(PREFIX)
-PACKAGE=ig-yaim-storm
-VERSION=4.0.9
+PACKAGE=yaim-storm
+VERSION=4.1.1
 VERSION_=`echo $(VERSION) | tr '.' '_'`
-RELEASE=10
+RELEASE=1.sl5
 FULLNAME := $(NAME)-$(VERSION)
 
 REMOTE_USER=`whoami`
@@ -43,12 +43,14 @@ install:
 	@mkdir -p $(prefix)/yaim/examples/siteinfo/services
 	@mkdir -p $(prefix)/yaim/examples/siteinfo/vo.d
 	@mkdir -p $(prefix)/yaim/functions/local
+	@mkdir -p $(prefix)/yaim/functions/utils
 	@mkdir -p $(prefix)/yaim/node-info.d
 	@mkdir -p $(prefix)/yaim/libexec
 	@echo "$(PACKAGE) $(VERSION)-$(RELEASE)" > $(prefix)/yaim/etc/versions/$(PACKAGE)
 	@install -m 0644 defaults/*                           $(prefix)/yaim/defaults
 	@install -m 0644 examples/siteinfo/services/*         $(prefix)/yaim/examples/siteinfo/services
 	@install -m 0755 functions/config*                    $(prefix)/yaim/functions/local
+	@install -m 0755 functions/utils/*                    $(prefix)/yaim/functions/utils
 	@install -m 0644 node-info.d/*                        $(prefix)/yaim/node-info.d
 
 tar:

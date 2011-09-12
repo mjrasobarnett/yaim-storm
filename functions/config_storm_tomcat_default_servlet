@@ -1,0 +1,115 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_properties
+#
+# DESCRIPTION : This function configures tomcat web.xml file.
+#
+# AUTHORS :     michele.dibenedetto@cnaf.infn.it
+#
+# NOTES :
+#
+# YAIM MODULE:  yaim-storm
+#
+##############################################################################
+
+function config_storm_tomcat_default_servlet_check () {
+
+  requires $1 STORM_BACKEND_HOST STORM_BACKEND_REST_SERVICES_PORT TOMCAT_CONTEXT_DEPLOY_FOLDER
+  return $?
+
+}
+
+function config_storm_tomcat_default_servlet_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_tomcat_default_servlet () {
+
+  FUNCTION="config_storm_tomcat_default_servlet"
+
+  yaimlog INFO "${FUNCTION}: web.xml file"
+  #----------------------------------------------------------
+  # /etc/storm/gridhttps-server/web.xml - BEGIN
+  #----------------------------------------------------------
+  FILE_NAME="web.xml"
+  FILE="/etc/storm/gridhttps-server/${FILE_NAME}"     # Configuration filename
+  FILE_T="${FILE}.template"                       # Template configuration filename
+  FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"      # Backup configuration filename (if needed)
+  
+  # Configuration file management
+  # If not exists, create it from template
+  if [ ! -f ${FILE} ]; then
+    yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} from template ${FILE_T}"
+    cp ${FILE_T} ${FILE}
+  else
+      yaimlog DEBUG "${FUNCTION}: Backup old configuration file in ${FILE_B}"
+      mv ${FILE} ${FILE_B}
+      cp ${FILE_T} ${FILE}
+  fi
+
+  yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+
+  # Remove oldest backup file
+  yaimlog DEBUG "${FUNCTION}: Removing old backup files."
+  find `dirname "${FILE}"` -ctime +2 -name '${FILE_NAME}.bkp*' -exec rm {} \;
+
+  # Set permissions
+  chmod 644 ${FILE}
+
+  #set_template_value server.hostname ${STORM_BACKEND_HOST} 
+  sed --in-place "s/@server.hostname@/$STORM_BACKEND_HOST/g" ${FILE}
+  #set_template_value server.port ${STORM_BACKEND_REST_SERVICES_PORT} ${FILE}
+  sed --in-place "s/@server.port@/$STORM_BACKEND_REST_SERVICES_PORT/g" ${FILE}
+  #set_template_value contextDeployFolder ${TOMCAT_CONTEXT_DEPLOY_FOLDER} ${FILE}
+  sed --in-place "s/@contextDeployFolder@/`echo $TOMCAT_CONTEXT_DEPLOY_FOLDER | sed 's/\//\\\\\//g'`/g" ${FILE}
+  #==========================================================
+
+  yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
+  #----------------------------------------------------------
+  # /etc/storm/gridhttps-server/web.xml - END
+  #----------------------------------------------------------
+
+  # Save the original web.xml
+   
+  ORIGINAL_FILE="/usr/share/tomcat5/conf/${FILE_NAME}"     # Configuration filename
+  ORIGINAL_FILE_B="${ORIGINAL_FILE}.storm.saved"      # Backup configuration filename (if needed)
+  
+  if [ ! -L ${ORIGINAL_FILE} -a -f ${ORIGINAL_FILE} ]; then
+    yaimlog DEBUG "${FUNCTION}: First configuration, saving original ${ORIGINAL_FILE} to backup ${ORIGINAL_FILE_B}"
+    mv ${ORIGINAL_FILE} ${ORIGINAL_FILE_B} 
+  fi
+  
+  # eventually delete a previous link to web.xml in tomcat conf directory
+  
+  if [ -L ${ORIGINAL_FILE} ]; then
+    yaimlog DEBUG "${FUNCTION}: Removing an existent ${FILE_NAME} link"
+    unlink ${ORIGINAL_FILE} 
+  fi
+  
+  # create a link to the produced web.xml in tomcat conf directory
+  
+  ln -sf  ${FILE} ${ORIGINAL_FILE}
+
+  # Exit with success
+  return 0
+
+}

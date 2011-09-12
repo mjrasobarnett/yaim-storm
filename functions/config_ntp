@@ -1,0 +1,98 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders. 
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :   	config_ntp
+#        
+# DESCRIPTION : This function configures NTP server.
+#
+# AUTHORS :     Enrico Ferro
+#               grid-release@lists.infn.it
+#
+# NOTES :       - Configure NTP server
+#               - Requires in $NTP_HOSTS_IP a space separared lists of the IP address of one 
+#                 or more time servers
+#
+# YAIM MODULE:  yaim-storm
+#                
+############################################################################## 
+
+config_ntp_check () {
+
+  requires $1 NTP_HOSTS_IP
+
+}
+
+config_ntp_setenv () { 
+
+  yaimlog DEBUG "This function currently doesn't set any environment variables."
+
+}
+
+config_ntp () {
+
+  ntp_file=/etc/ntp.conf
+  tick_file=/etc/ntp/step-tickers
+
+  if [ ! -f "/usr/sbin/ntpdate" ] ; then
+    yaimlog ERROR "ntpd package not installed"
+    return 1
+  fi
+
+  # Stop the service
+  /sbin/service ntpd stop &> /dev/null
+
+  # Backup old settings
+  if [ -f ${ntp_file} ]; then
+    bkp_file=${ntp_file}.yaimold.`date +%Y%m%d_%H%M%S`
+    yaimlog INFO "Storing old ntp settings in ${bkp_file}"
+    cp ${ntp_file} ${bkp_file}
+  fi
+
+  # Rewrite NTP configuration files
+  > ${ntp_file}
+  > ${tick_file}
+  for k in $NTP_HOSTS_IP ; do
+    cat << EOF >> ${ntp_file}
+restrict $k mask 255.255.255.255 nomodify notrap noquery
+server $k
+EOF
+    echo "$k" >> ${tick_file}
+  done
+
+  COUNTER=0;
+  FAILED_COUNTER=0;
+  # Synchronize the clock (service has to be down)
+  for k in $NTP_HOSTS_IP ; do
+    COUNTER=$(($COUNTER + 1))
+  	/usr/sbin/ntpdate $k >/dev/null
+  	if [ ! $? -eq 0 ] ; then
+  		FAILED_COUNTER=$(($FAILED_COUNTER + 1))
+  		yaimlog WARNING "Unable to synchronize the clock with ntp server $k"
+  	fi
+  	if [ $COUNTER -eq $FAILED_COUNTER ] ; then
+  		yaimlog WARNING "Unable to synchronize the clock with any of the provided ntp servers"
+  	fi
+  done
+  
+  # Enable the service and start it
+  /sbin/chkconfig ntpd on
+  /sbin/service ntpd start >/dev/null
+
+  return 0
+
+}

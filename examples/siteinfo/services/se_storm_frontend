@@ -17,8 +17,11 @@
 # OPTIONAL - Default value: /etc/grid-security/${STORM_USER}
 #STORM_CERT_DIR=/etc/grid-security/${STORM_USER}
 # Directory used to exchange proxies.
-# OPTIONAL - Default value: ${STORM_BE_DIR}/tmp
-#STORM_PROXY_HOME=${STORM_BE_DIR}/tmp
+# OPTIONAL - Default value: /etc/storm/tmp
+#STORM_PROXY_HOME=/etc/storm/tmp
+# List of supported Virtual Organizations.
+#EXAMPLE: VOS="dteam infngrid" 
+VOS=
 
 # Database settings
 #---------------------------------------------------------
@@ -53,18 +56,21 @@ STORM_DB_PWD=
 
 # Log settings
 #---------------------------------------------------------
+# StoRM frontend log file
+# OPTIONAL - Default value: /var/log/storm/storm-frontend.log
+#STORM_FE_LOG_FILE = /var/log/storm/storm-frontend.log
 # StoRM Frontend log level.
 # OPTIONAL - Available values: [KNOWN|ERROR|WARNING|INFO|DEBUG|DEBUG2] - Default value: INFO
 #STORM_FE_LOG_LEVEL=INFO
 
 # Security settings
 #---------------------------------------------------------
-# Disable the check in gridmapfile for client DN.
+# Enable the check in gridmapfile for client DN.
 # OPTIONAL - Available values: [true|false] - Default value: false
-#STORM_FE_DISABLE_MAPPING=false
-# Disable the check in gridmapfile for client VOMS attributes.
+#STORM_FE_ENABLE_MAPPING=false
+# Enable the check in gridmapfile for client VOMS attributes.
 # OPTIONAL - Available values: [true|false] - Default value: false
-#STORM_FE_DISABLE_VOMSCHECK=false
+#STORM_FE_ENABLE_VOMSCHECK=false
 
 # Backend XMLRPC server settings
 #---------------------------------------------------------
@@ -78,8 +84,14 @@ STORM_DB_PWD=
 # OPTIONAL - Default value: /RPC2
 #STORM_FE_BE_XMLRPC_PATH=/RPC2
 
+# Backend REST server settings
+#---------------------------------------------------------
+# StoRM backend server rest port
+# OPTIONAL - Default value: 9998
+#STORM_BACKEND_REST_SERVICES_PORT=9998
+
 # WSDL settings
 #---------------------------------------------------------
 # WSDL to be returned to a GET request.
-# OPTIONAL - Default value: ${STORM_FE_DIR}/wsdl/srm.v2.2.wsdl
-#STORM_FE_WSDL=${STORM_FE_DIR}/wsdl/srm.v2.2.wsdl
+# OPTIONAL - Default value: /usr/share/wsdl/srm.v2.2.wsdl
+#STORM_FE_WSDL=/usr/share/wsdl/srm.v2.2.wsdl

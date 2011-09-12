@@ -25,13 +25,13 @@
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 ##############################################################################
 
 function config_storm_checksum_check () {
 
-  requires $1 MYSQL_PASSWORD STORM_CKSUM_SERVICE_PORT STORM_CKSUM_STATUS_PORT STORM_CKSUM_SHUTDOWN_PORT STORM_CKSUM_THREADS
+  requires $1 STORM_CKSUM_SERVICE_PORT STORM_CKSUM_STATUS_PORT STORM_CKSUM_SHUTDOWN_PORT STORM_CKSUM_THREADS
   return $?
 
 }
@@ -58,16 +58,17 @@ function config_storm_checksum () {
       || (yaimlog INFO "${FUNCTION}: Adding system user '$STORM_USER'"; adduser -r ${STORM_USER})
   fi
 
-  # Change ownership to storm-checksum directory
-  [ -d "${STORM_CKSUM_DIR}" ] || (yaimlog INFO "${FUNCTION}: Creating ${STORM_CKSUM_DIR} directory"; mkdir -p "${STORM_CKSUM_DIR}")
+  # Change ownership to storm-checksum-server directory
+  #No reason to try creating the directory, it comes from the rpm
+  #[ -d "${STORM_CKSUM_DIR}" ] || (yaimlog INFO "${FUNCTION}: Creating ${STORM_CKSUM_DIR} directory"; mkdir -p "${STORM_CKSUM_DIR}")
   yaimlog INFO "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for ${STORM_CKSUM_DIR}"
   chown -R ${STORM_USER}:${STORM_USER} ${STORM_CKSUM_DIR}
 
   yaimlog INFO "${FUNCTION}: Configuration file"
   #----------------------------------------------------------
-  # ${STORM_CKSUM_DIR}/etc/storm-checksum.ini - BEGIN
+  # /etc/storm/checksum-server/storm-checksum-server.ini - BEGIN
   #----------------------------------------------------------
-  FILE="${STORM_CKSUM_DIR}/etc/storm-checksum.ini"   # Configuration filename
+  FILE="/etc/storm/checksum-server/storm-checksum-server.ini"   # Configuration filename
   FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"      # Backup configuration filename (if needed)
   FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"  # New configuration filename (if needed)
   
@@ -95,27 +96,15 @@ function config_storm_checksum () {
 
   yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
   #----------------------------------------------------------
-  # ${STORM_CKSUM_DIR}/etc/storm-checksum.ini - END
-  #----------------------------------------------------------
-
-  #----------------------------------------------------------
-  # /etc/init.d/storm-checksum - BEGIN
-  #----------------------------------------------------------
-  FILE="/etc/init.d/storm-checksum"
-  # Create symbolic link
-  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
-  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_CKSUM_DIR}/etc/init.d/storm-backend"
-  ln -sf ${STORM_CKSUM_DIR}/etc/init.d/storm-checksum ${FILE}
-  #----------------------------------------------------------
-  # /etc/init.d/storm-checksum - END
+  # /etc/storm/checksum-server/storm-checksum-server.ini - END
   #----------------------------------------------------------
 
   # Activate and restart service
-  /sbin/chkconfig --add storm-checksum
-  /sbin/chkconfig storm-checksum on
+  /sbin/chkconfig --add storm-checksum-server
+  /sbin/chkconfig storm-checksum-server on
   yaimlog INFO "${FUNCTION}: Restart service."
-  /sbin/service storm-checksum stop
-  /sbin/service storm-checksum start
+  /sbin/service storm-checksum-server stop
+  /sbin/service storm-checksum-server start
 
   # Exit with success
   return 0    

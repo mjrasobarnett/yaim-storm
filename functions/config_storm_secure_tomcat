@@ -1,0 +1,262 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004. 
+# See http://www.eu-egee.org/partners/ for details on the copyright 
+# holders.  
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); 
+# you may not use this file except in compliance with the License. 
+# You may obtain a copy of the License at 
+#
+#    http://www.apache.org/licenses/LICENSE-2.0 
+#
+# Unless required by applicable law or agreed to in writing, software 
+# distributed under the License is distributed on an "AS IS" BASIS, 
+# WITHOUT WARRANTIES OR CONDITIONS 
+# OF ANY KIND, either express or implied. 
+# See the License for the specific language governing permissions and 
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_secure_tomcat
+#
+# DESCRIPTION : This function configures tomcat
+#
+# AUTHORS :     michele.dibenedetto@cnaf.infn.it
+#
+# NOTES :       This function is taken from the config_secure_tomcat function written
+#               by Akos Frohner (Akos.Frohner@cern.ch) and Maria Alandes Pradillo (Maria.Alandes.Pradillo@cern.ch).
+#
+# YAIM MODULE:  yaim-storm
+#                 
+##############################################################################
+
+config_storm_secure_tomcat_check () {
+
+ requires $1 TOMCAT_USER STORM_GRIDHTTPS_SERVER_PORT STORM_GRIDHTTPS_HTTPS_SERVER_PORT TOMCAT_HOSTCERT_LOCATION TOMCAT_HOSTKEY_LOCATION TRUSTMANAGER_CRL_UPDATE_INTERVAL X509_CERT_DIR X509_HOST_CERT X509_HOST_KEY
+ return $?
+
+}
+
+config_storm_secure_tomcat_setenv () {
+
+  if [ -f /etc/tomcat5/tomcat5.conf ]; then
+    source /etc/tomcat5/tomcat5.conf
+    yaimgridenv_set CATALINA_HOME ${CATALINA_HOME}
+  fi
+}
+
+config_storm_secure_tomcat () {
+
+
+####@ Check whether tomcat and java are installed
+
+yaimlog INFO "Check that java is installed"
+if [ ! -f /etc/java/java.conf ]; then
+  yestr ${YEX_NOSUCHFILE}
+  yaimlog ERROR "/etc/java/java.conf doesn't exist. Java is probably not installed !"
+  yaimlog ERROR "${YERRORSTR}"
+  exit ${YEX_NOSUCHFILE}
+fi
+
+yaimlog INFO "Check that tomcat is installed"
+if [ ! -f /etc/tomcat5/tomcat5.conf ]; then
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "/etc/tomcat5/tomcat5.conf doesn't exist. Tomcat is probably not installed !"
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+fi
+
+yaimlog INFO "Stop tomcat in case it's running"
+service tomcat5 stop 
+
+####@ Find Tomcat's webapps dir
+if [ ! -d "${CATALINA_BASE}/conf" ]; then
+    CATALINA_BASE=${CATALINA_HOME}
+fi
+if [ ! -d "${CATALINA_BASE}/conf" ]; then
+    CATALINA_BASE="/var/tomcat5"
+fi
+if [ ! -d "${CATALINA_BASE}/conf" ]; then
+    CATALINA_BASE="/var/lib/tomcat5"
+fi
+if [ ! -d "${CATALINA_BASE}/conf" ]; then
+    yaimlog ABORT "ERROR: Could not find CATALINA_BASE"
+    exit 1
+fi
+if [ ! -d "${CATALINA_BASE}/conf/Catalina/localhost" ]; then
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "Non default Tomcat installation,"
+    yaimlog ERROR "where the webapp configuration directory does not exist:"
+    yaimlog ERROR "${CATALINA_BASE}/conf/Catalina/localhost"
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+fi
+
+
+####@ Check tomcat user exists
+id -u $TOMCAT_USER > /dev/null 2>&1
+if [ $? -ne 0 ] ; then
+  yaimlog ERROR "User ${TOMCAT_USER} doesn't exist."
+  yestr ${YEX_NOUSER}
+  yaimlog ERROR "${YERRORSTR}"
+  exit ${YEX_NOUSER}
+fi
+      
+####@ Copy the host certificates in tomcat
+yaimlog INFO "Copying hostcert to ${TOMCAT_HOSTCERT_LOCATION} for $TOMCAT_USER:root......"
+cp -f ${X509_HOST_CERT} ${TOMCAT_HOSTCERT_LOCATION}
+yaimlog INFO "Copying hostkey to ${TOMCAT_HOSTKEY_LOCATION} for $TOMCAT_USER:root..."
+cp -f ${X509_HOST_KEY} ${TOMCAT_HOSTKEY_LOCATION}
+chown $TOMCAT_USER:root ${TOMCAT_HOSTCERT_LOCATION}
+chown $TOMCAT_USER:root ${TOMCAT_HOSTKEY_LOCATION}
+chmod 644 ${TOMCAT_HOSTCERT_LOCATION}
+chmod 400 ${TOMCAT_HOSTKEY_LOCATION}
+
+
+####@ Configure the tomcat server itself
+
+####@ Replace server.xml with the one defining the secure connector
+yaimlog INFO "Configuring /etc/tomcat5/server.xml..."
+if [ ! -f /etc/tomcat5/server.xml.storm.saved ] ; then
+	cp -f /etc/tomcat5/server.xml /etc/tomcat5/server.xml.storm.saved
+fi
+
+cat > /etc/tomcat5/server.xml << EOT
+<Server port="8005" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" />
+  <Listener className="org.apache.catalina.mbeans.ServerLifecycleListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.storeconfig.StoreConfigLifecycleListener"/>
+  <GlobalNamingResources>
+    <Environment name="simpleValue" type="java.lang.Integer" value="30"/>
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+              description="User database that can be updated and saved"
+              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+              pathname="conf/tomcat-users.xml" />
+  </GlobalNamingResources>
+  <Service name="Catalina">
+    <Connector port="${STORM_GRIDHTTPS_SERVER_PORT}" maxHttpHeaderSize="8192"
+               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
+               enableLookups="false" redirectPort="8443" acceptCount="100"
+               connectionTimeout="20000" disableUploadTimeout="true" />
+    <Connector port="${STORM_GRIDHTTPS_HTTPS_SERVER_PORT}"
+     crlUpdateInterval="${TRUSTMANAGER_CRL_UPDATE_INTERVAL}"
+     crlRequired="true"
+     crlEnabled="true"
+     trustStoreDir="${X509_CERT_DIR}"
+     SSLEnabled="true"
+     maxThreads="150"
+     minSpareThreads="25"
+     maxSpareThreads="75"
+     enableLookups="false"
+     disableUploadTimeout="true"
+     acceptCount="100"
+     debug="0"
+     scheme="https"
+     secure="true"
+     clientAuth="true"
+     sslProtocol="TLS"
+     log4jConfFile="/etc/tomcat5/log4j-trustmanager.properties"
+     sslCAFiles="/etc/grid-security/certificates/*.0"
+     crlFiles="/etc/grid-security/certificates/*.r0"
+     sslKey="${TOMCAT_HOSTKEY_LOCATION}"
+     sslCertFile="${TOMCAT_HOSTCERT_LOCATION}"
+     sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation" />
+    <Connector port="8009"
+               enableLookups="false" redirectPort="8443" protocol="AJP/1.3" />
+    <Engine name="Catalina" defaultHost="localhost">
+       <Host name="localhost" appBase="webapps"
+             unpackWARs="true" autoDeploy="true"
+             xmlValidation="false" xmlNamespaceAware="false" />
+    </Engine>
+  </Service>
+</Server>
+EOT
+
+chown $TOMCAT_USER:$TOMCAT_USER /etc/tomcat5/server.xml
+
+####@ Copy log4j-trustmanager.properties into place
+ln -sf /var/lib/trustmanager-tomcat/log4j-trustmanager.properties /usr/share/tomcat5/conf/
+chown $TOMCAT_USER:$TOMCAT_USER /usr/share/tomcat5/conf/log4j-trustmanager.properties
+
+yaimlog INFO "Copying trustmanager deps to tomcat server lib directory.." 
+# log4j
+build-jar-repository /var/lib/tomcat5/common/lib log4j
+# bouncy castle has changed packaging between 1.37 and 1.41:
+if [ -f /usr/share/java-ext/bouncycastle-jdk1.5/bcprov.jar ]; then
+  # location <= 1.37
+  ln -fs /usr/share/java-ext/bouncycastle-jdk1.5/bcprov.jar /var/lib/tomcat5/common/lib/bcprov.jar
+elif [ -f /usr/share/java/bcprov.jar ]; then
+  # location >= 1.41
+  build-jar-repository /var/lib/tomcat5/common/lib bcprov
+else
+  # something unknown has happened
+  yestr ${YEX_NOSUCHFILE}
+  yaimlog ERROR "Could not find 'bcprov.jar' of BouncyCastle !"
+  yaimlog ERROR "${YERRORSTR}"
+  exit ${YEX_NOSUCHFILE}
+fi
+
+ln -fs /usr/share/java/trustmanager.jar /var/lib/tomcat5/common/lib/
+ln -fs /usr/share/java/trustmanager-tomcat.jar /var/lib/tomcat5/server/lib/
+ln -fs /usr/share/java/vomsjapi.jar /var/lib/tomcat5/common/lib/
+
+####@ Defining JAVA_HOME in the Tomcat configuration file
+yaimlog INFO "Defining JAVA_HOME in the Tomcat configuration file"
+
+if [ -f /usr/sbin/update-alternatives ]; then
+  JAVA_HOME=`update-alternatives --display java | grep 'link currently points to'| awk '{print $5}' | sed 's/\/bin\/java//'`
+else
+  yaimlog INFO "Using /etc/java/java.conf to deduce the value of JAVA_HOME"
+  # In case JAVA_HOME is defined using another variable like JAVA_JVM we need to source the file
+  source /etc/java/java.conf  
+  temp=`mktemp /tmp/javaconf.XXXXXX`
+  # Check if JAVA_HOME is commented or not
+  cat /etc/java/java.conf | grep -v ^# > ${temp}
+  if [ `grep -c ^JAVA_HOME ${temp}` -gt 1 ]; then
+     rm -rf ${temp}
+     yestr ${YEX_CONFIG}
+     yaimlog ERROR "YAIM is not able to deduce JAVA_HOME from /etc/java/java.conf"
+     yaimlog ERROR "There's more than one JAVA_HOME defined in /etc/java/java.conf"
+     yaimlog ERROR "${YERRORSTR}"
+     exit ${YEX_CONFIG}
+  fi
+  JAVA_HOME=`awk -F= '$1 == "JAVA_HOME" {print $2}' ${temp}`  
+  if [ "${JAVA_HOME}" ]; then
+    JAVA_HOME=`eval echo ${JAVA_HOME}`
+  else
+    cat /etc/java/java.conf | grep ^#JAVA_HOME= > ${temp}
+    if [ `grep -c ^#JAVA_HOME= ${temp}` -gt 1 ]; then
+      rm -rf ${temp}
+      yestr ${YEX_CONFIG}
+      yaimlog ERROR "YAIM is not able to deduce JAVA_HOME from /etc/java/java.conf"
+      yaimlog ERROR "There's more than one JAVA_HOME definition commented out"
+      yaimlog ERROR "${YERRORSTR}"
+      exit ${YEX_CONFIG}
+    fi
+    JAVA_HOME=`awk -F= '$1 == "#JAVA_HOME" {print $2}' /etc/java/java.conf`
+    if [ "${JAVA_HOME}" ]; then
+      JAVA_HOME=`eval echo ${JAVA_HOME}`
+    else
+      yestr ${YEX_MISSINGVAR}
+      yaimlog ERROR "No JAVA_HOME defined in /etc/java/java.conf"
+      yaimlog ERROR "${YERRORSTR}"
+      exit ${YEX_MISSINGVAR}
+    fi
+  fi
+  rm -rf ${temp}
+fi
+
+# Add JAVA_HOME if not already defined with the right value
+if [ ! `grep -q ^JAVA_HOME=${JAVA_HOME} /etc/tomcat5/tomcat5.conf` ]; then
+  cp /etc/tomcat5/tomcat5.conf /etc/tomcat5/tomcat5.conf.old    
+  # Comment existing definitions
+  sed -i 's/^JAVA_HOME/# The following line was commented out by yaim\n# JAVA_HOME/g' /etc/tomcat5/tomcat5.conf 
+  echo "# JAVA_HOME defined by yaim in `date`" >> /etc/tomcat5/tomcat5.conf
+  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/tomcat5/tomcat5.conf
+fi
+
+return 0
+
+}

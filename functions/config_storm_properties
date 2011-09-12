@@ -25,14 +25,14 @@
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 ##############################################################################
 
 function config_storm_properties_check () {
 
   requires $1 MYSQL_PASSWORD STORM_DB_HOST STORM_DB_PWD STORM_DB_USER \
-              STORM_FRONTEND_HOST_LIST STORM_PROXY_HOME
+              STORM_FRONTEND_HOST_LIST STORM_PROXY_HOME STORM_BACKEND_REST_SERVICES_PORT
   return $?
 
 }
@@ -47,8 +47,8 @@ function config_storm_properties () {
 
   FUNCTION="config_storm_properties"
 
-JARDIR="${STORM_BE_DIR}/lib"
-if [ ! -f ${JABDIR}/mysql-connector-java-5.1.13-bin.jar ]; then
+JARDIR="/usr/share/java/storm-backend-server"
+if [ ! -f ${JARDIR}/mysql-connector-java-5.1.13-bin.jar ]; then
   # Download needed jar file
   URL="http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.13.tar.gz/from/http://mi.mirror.garr.it/mirrors/MySQL/"
   JAR="mysql-connector-java-5.1.13-bin.jar"
@@ -66,25 +66,25 @@ if [ ! -f ${JABDIR}/mysql-connector-java-5.1.13-bin.jar ]; then
 fi
 
   #----------------------------------------------------------
-  # /etc/sysconfig/storm-backend - BEGIN
+  # /etc/sysconfig/storm-backend-server - BEGIN
   #----------------------------------------------------------
-  FILE="/etc/sysconfig/storm-backend"
+  #FILE="/etc/sysconfig/storm-backend-server"
   # Create symbolic link
-  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
-  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/sysconfig/storm-backend"
-  ln -sf ${STORM_BE_DIR}/etc/sysconfig/storm-backend ${FILE}
+  #yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
+  #yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> /etc/sysconfig/storm-backend-server"
+  #ln -sf ${STORM_BE_DIR}/etc/sysconfig/storm-backend-server ${FILE}
   # Set STORM_BE_USER
-  yaimlog DEBUG "${FUNCTION}: Set \$STORM_BE_USER to ${STORM_USER}"
-  set_value "export STORM_BE_USER" "${STORM_USER}" ${FILE}
+  #yaimlog DEBUG "${FUNCTION}: Set \$STORM_BE_USER to ${STORM_USER}"
+  #set_value "export STORM_BE_USER" "${STORM_USER}" ${FILE}
   #----------------------------------------------------------
-  # /etc/sysconfig/storm-backend - END
+  # /etc/sysconfig/storm-backend-server - END
   #----------------------------------------------------------
 
   yaimlog INFO "${FUNCTION}: Configuration file"
   #----------------------------------------------------------
-  # ${STORM_BE_DIR}/etc/storm.properties - BEGIN
+  # /etc/storm/backend-server/storm.properties - BEGIN
   #----------------------------------------------------------
-  FILE="${STORM_BE_DIR}/etc/storm.properties"     # Configuration filename
+  FILE="/etc/storm/backend-server/storm.properties"     # Configuration filename
   FILE_T="${FILE}.template"                       # Template configuration filename
   FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"      # Backup configuration filename (if needed)
   FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"  # New configuration filename (if needed)
@@ -138,7 +138,8 @@ fi
   set_value "storm.service.request-db.passwd"   "${STORM_DB_PWD}"                        ${FILE}
   set_value "proxy.home"                        "${STORM_PROXY_HOME}"                    ${FILE}
   set_value "storm.service.SURL.default-ports"  "${STORM_SERVICE_SURL_DEF_PORTS:-8444}"  ${FILE}
-
+  set_value "storm.rest.services.port"		    "${STORM_BACKEND_REST_SERVICES_PORT}"    ${FILE}
+  
   if [ "x${STORM_CKSUM_SUPPORT}" == "xtrue" ]; then
     HOSTNAMES=`echo ${STORM_CKSUM_SERVICE_LIST}     | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $1}' | sed s/[[:space:]]*,$//`
     STATUS_PORTS=`echo ${STORM_CKSUM_SERVICE_LIST}  | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $2}' | sed s/[[:space:]]*,$//`
@@ -159,11 +160,26 @@ fi
   else
     set_value "checksum.enabled"                "false"        ${FILE}
   fi
+  
+  # Gridhttps stuff
+  
+  # Convert in lowercase
+  STORM_GRIDHTTPS_ENABLED=`echo ${STORM_GRIDHTTPS_ENABLED} | tr '[:upper:]' '[:lower:]'`
+  # Convert spaces to commas
+
+  if [ "x${STORM_GRIDHTTPS_ENABLED}" == "xtrue" ]; then
+  	set_value "gridhttps.enabled" "true"  ${FILE}
+    set_value "gridhttps.server.host"     "${STORM_GRIDHTTPS_SERVER_HOST}"        ${FILE}
+    set_value "gridhttps.server.port"     "${STORM_GRIDHTTPS_SERVER_PORT}"        ${FILE}    
+    set_value "gridhttps.plugin.classname" "${STORM_GRIDHTTPS_PLUGIN_CLASSNAME}"  ${FILE}
+  else
+    set_value "gridhttps.enabled" "false"  ${FILE}
+  fi
   #==========================================================
 
   yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
   #----------------------------------------------------------
-  # ${STORM_BE_DIR}/etc/storm.properties - END
+  # /etc/storm/backend-server/storm.properties - END
   #----------------------------------------------------------
 
   # Exit with success

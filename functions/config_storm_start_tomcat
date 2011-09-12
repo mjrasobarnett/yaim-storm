@@ -1,0 +1,76 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004. 
+# See http://www.eu-egee.org/partners/ for details on the copyright 
+# holders.  
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); 
+# you may not use this file except in compliance with the License. 
+# You may obtain a copy of the License at 
+#
+#    http://www.apache.org/licenses/LICENSE-2.0 
+#
+# Unless required by applicable law or agreed to in writing, software 
+# distributed under the License is distributed on an "AS IS" BASIS, 
+# WITHOUT WARRANTIES OR CONDITIONS 
+# OF ANY KIND, either express or implied. 
+# See the License for the specific language governing permissions and 
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_secure_tomcat
+#
+# DESCRIPTION : This function configures tomcat
+#
+# AUTHORS :     michele.dibenedetto@cnaf.infn.it
+#
+# NOTES :       This function is taken from the config_secure_tomcat function written
+#               by Akos Frohner (Akos.Frohner@cern.ch) and Maria Alandes Pradillo (Maria.Alandes.Pradillo@cern.ch).
+#
+# YAIM MODULE:  yaim-storm
+#                 
+##############################################################################
+
+config_storm_start_tomcat_check () {
+
+ yaimlog INFO "No required variables to set."
+
+}
+
+config_storm_start_tomcat_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+}
+
+config_storm_start_tomcat () {
+
+
+####@ Check whether tomcat and java are installed
+
+yaimlog INFO "Check that java is installed"
+if [ ! -f /etc/java/java.conf ]; then
+  yestr ${YEX_NOSUCHFILE}
+  yaimlog ERROR "/etc/java/java.conf doesn't exist. Java is probably not installed !"
+  yaimlog ERROR "${YERRORSTR}"
+  exit ${YEX_NOSUCHFILE}
+fi
+
+yaimlog INFO "Check that tomcat is installed"
+if [ ! -f /etc/tomcat5/tomcat5.conf ]; then
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "/etc/tomcat5/tomcat5.conf doesn't exist. Tomcat is probably not installed !"
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+fi
+
+####@ chkconfig Tomcat
+yaimlog DEBUG "Doing chkconfig for tomcat5..."
+/sbin/chkconfig --add tomcat5
+/sbin/chkconfig tomcat5 on
+
+####@ Restart Tomcat
+yaimlog INFO "Starting Tomcat"
+service tomcat5 start
+
+return 0
+
+}

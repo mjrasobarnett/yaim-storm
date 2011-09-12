@@ -5,10 +5,8 @@
 #   - instead, edit the <confdir>/services/<nodetype> file.
 #     Note: the <confdir> directory corresponds to the directory where your site-info.def file resides.
 #
- 
-INSTALL_ROOT=${INSTALL_ROOT:-/opt}
-STORM_DIR=${INSTALL_ROOT}/storm
-STORM_CKSUM_DIR=${STORM_DIR}/checksum
+
+STORM_CKSUM_DIR=/usr/share/java/storm-checksum-server
 
 # General settings
 #---------------------------------------------------------

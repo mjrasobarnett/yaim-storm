@@ -17,35 +17,45 @@
 # limitations under the License.
 ##############################################################################
 #
-# NAME :        config_storm_checksum
+# NAME :        se_storm_backend
 #
-# DESCRIPTION : This function configures storm-gridftp service
+# DESCRIPTION : This files contain the function list that configures
+#               the SE StoRM backend 3.1 (SL4).
 #
-# AUTHORS :     grid-release@ists.nfn.it
+# AUTHORS :     grid-release@infn.it
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
-##############################################################################
+#############################################################################
 
-function config_storm_gridftp_check () {
-
-#  requires $1 GRIDFTP_WITH_DSI
-#  return $?
-   return 0
-}
-
-function config_storm_gridftp_setenv () {
-  yaimgridenv_set GRIDFTP_WITH_DSI "${GRIDFTP_WITH_DSI}"
-
-}
-
-function config_storm_gridftp () {
-
-  FUNCTION="config_storm_gridftp"
-  yaimlog INFO "${FUNCTION}: for now empty function"
-  
-  # Exit with success
-  return 0    
-}
+se_storm_backend_FUNCTIONS="
+config_ntp
+config_ldconf
+config_add_pool_env
+config_sysconfig_edg
+config_sysconfig_globus
+config_sysconfig_lcg
+config_crl
+config_host_certs
+config_vomsdir
+config_users
+config_edgusers
+config_mkgridmap
+config_vomsmap
+config_storm_generic
+config_storm_dir
+config_storm_mysql
+config_rfio
+config_lcas_lcmaps_gt4
+config_lcgenv
+config_storm_rfio
+config_storm_properties
+config_storm_namespace
+config_storm_gridhttps_plugin_properties
+config_storm_backend
+config_bdii_5.2
+config_gip_storm
+config_gip_glue2_storm
+config_gip_service_release"

@@ -17,24 +17,40 @@
 # limitations under the License.
 ##############################################################################
 #
-# NAME :        ig-se_storm_checksum
+# NAME :        se_storm_gridftp
 #
 # DESCRIPTION : This files contain the function list that configures
-#               the SE StoRM checksum 3.1 (SL4).
+#               the StoRM gridftp_dsi server 3.2 (SL5).
 #
-# AUTHORS :     grid-release@infn.it
+# AUTHORS :     grid-release@lists.infn.it
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 #############################################################################
 
-SE_storm_checksum_FUNCTIONS="
+# INFN-GRID: start from ig-ce list
+#            commented out unwanted functions
+se_storm_gridftp_FUNCTIONS="
 config_ntp
-config_ldconf
 config_add_pool_env
-config_sysconfig_lcg
-config_lcgenv
-config_storm_checksum
+config_ldconf
+config_sysconfig_edg
+config_crl
+config_host_certs
+config_edgusers
+config_users
+config_mkgridmap
+config_vomsdir
+config_vomsmap
+config_lcas_lcmaps_gt4
+config_storm_globus_gridftp
 "
+
+#config_sysconfig_globus
+#config_sysconfig_lcg
+#config_nfs_sw_dir_server
+#config_lcgenv
+
+

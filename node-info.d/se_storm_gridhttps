@@ -17,36 +17,25 @@
 # limitations under the License.
 ##############################################################################
 #
-# NAME :        ig-se_storm_frontend
+# NAME :        se-storm-gridhttps
 #
 # DESCRIPTION : This files contain the function list that configures
-#               the SE StoRM frontend 3.1 (SL4).
+#               the StoRM gridhttps server 1.0 (SL5).
 #
-# AUTHORS :     grid-release@infn.it
+# AUTHORS :     michele.dibenedetto@cnaf.infn.it
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 #############################################################################
 
-SE_storm_frontend_FUNCTIONS="
-config_ntp
-config_ldconf
-config_sysconfig_edg
-config_sysconfig_globus
-config_sysconfig_lcg
+se_storm_gridhttps_FUNCTIONS="
 config_crl
-config_rfio
 config_host_certs
-config_vomsdir
-config_users
-config_edgusers
-config_mkgridmap
-config_vomsmap
-config_gip_only
-config_gip_service_release
-config_lcgenv
-config_storm_generic
-config_storm_frontend
-config_lcas_lcmaps_gt4"
+config_storm_stop_tomcat
+config_storm_secure_tomcat
+config_storm_tomcat_default_servlet
+config_storm_gridhttps_server_logging
+config_storm_start_tomcat
+"

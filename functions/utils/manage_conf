@@ -1,0 +1,164 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        manage_conf functions
+#
+# DESCRIPTION : These functions allow to manage configuration settings for
+#               INFN-GRID profiles
+#
+# MAINTAINER :  grid-release@lists.infn.it
+#
+# NOTES :
+#
+# YAIM MODULE:  ig-yaim-storm
+#
+##############################################################################
+
+######################################################
+# get_value $key $file
+#       Get $value of $key in $file
+######################################################
+
+function get_value () {   # $key, $file
+
+  key=$1
+  file=$2
+  regex="^[[:space:]]*${key}[[:space:]]*="
+
+  egrep -E "${regex}" ${file} >& /dev/null
+  match=$?
+
+  # Match key => get value
+  if [ ${match} -eq 0 ]; then
+    value=`egrep -E "${regex}" ${file} | awk -F'=' '{print $2}'`
+    yaimlog DEBUG "Found key  : ${key}"
+    yaimlog DEBUG "with value : ${value}"
+    yaimlog DEBUG "   in file : ${file}"
+  # Don't match key return null value
+  else
+    yaimlog DEBUG "Not found key : ${key}"
+    yaimlog DEBUG "      in file : ${file}"
+    value="NULL"
+  fi
+
+  echo ${value} > /dev/null
+  return 0
+
+}
+
+######################################################
+# set_value $key $value $file
+#       Set $key=$value in $file
+######################################################
+
+function set_value () {   # $key, $value, $file
+
+  key=$1
+  value=$2
+  value_tr=`echo "$2" | sed -e 's/\//\\\\\//g' -e 's/\*/\\\\*/'`   # escape '/' and '*' (to be used in sed)
+  file=$3
+  regex="^#*${key}[[:space:]]*="
+
+  egrep -E "${regex}" ${file} >& /dev/null
+  match=$?
+
+  # Match key => modify value
+  if [ ${match} -eq 0 ]; then
+    yaimlog DEBUG "Modifying key : ${key}"
+    yaimlog DEBUG "   with value : ${value}"
+    yaimlog DEBUG "      in file : ${file}"
+    if ( echo " ${NODE_TYPE_LIST} " | egrep -q "storm" ); then
+      # without quotes
+      sed -i -e "s/${regex}.*/${key}=${value_tr}/" ${file}
+    else
+      # with quotes
+      sed -i -e "s/${regex}.*/${key}=\"${value_tr}\"/" ${file}
+    fi
+  # Don't match key => add key=value
+  else
+    yaimlog DEBUG "Adding key : ${key}"
+    yaimlog DEBUG "with value : ${value}"
+    yaimlog DEBUG "   in file : ${file}"
+    if ( echo " ${NODE_TYPE_LIST} " | egrep -q "storm" ); then
+      # without quotes
+      echo "${key}=${value}" >> ${file}
+    else
+      # with quotes
+      echo "${key}=\"${value}\"" >> ${file}
+    fi
+  fi
+
+  return 0
+
+}
+
+######################################################
+# comment_key $key $file
+#       Comment out $key in $file
+######################################################
+
+function comment_key () {   # $key, $file
+
+  key=$1
+  file=$2
+  regex="^[[:space:]]*${key}"
+
+  egrep -E "${regex}" ${file} >& /dev/null
+  match=$?
+
+  # Match key => comment it
+  if [ ${match} -eq 0 ]; then
+    yaimlog DEBUG "Commenting key : ${key}"
+    yaimlog DEBUG "       in file : ${file}"
+    sed -i -e "s/\(${regex}.*\)/#\1/" ${file}
+  # Don't match key => do nothing
+  fi
+
+  return 0
+
+}
+
+######################################################
+# hash_insert $name $key $value
+#       Insert $key and $value in hash $name
+######################################################
+
+function hash_insert () {   # $name, $key, $value
+
+  local name=$1 key=$2 value=$3
+  eval __hash_${name}_${key}=$value
+
+  return 0
+
+}
+
+######################################################
+# hash_find $name $key
+#       Find $key in hash $name and print $value
+######################################################
+
+function hash_find () {
+
+  local name=$1 key=$2
+  local value=__hash_${name}_${key}
+  echo ${!value}
+
+  return 0
+
+}

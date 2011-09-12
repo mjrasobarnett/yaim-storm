@@ -25,7 +25,7 @@
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 ##############################################################################
 
@@ -89,7 +89,22 @@ function config_storm_generic () {
     exit ${YEX_CONFIG}
   fi
 
+  #Adding JAVA_HOME variable to service environment
+  if [ ! -z ${JAVA_HOME} ] ; then
+    yaimlog DEBUG "${FUNCTION}: JAVA_HOME variable available"
+  elif [ ! -z ${JAVA_LOCATION} ] ; then
+    yaimlog DEBUG "${FUNCTION}: found java in JAVA_LOCATION"
+  	JAVA_HOME=${JAVA_LOCATION}
+  elif [ -L /usr/java/latest ] ; then
+    yaimlog DEBUG "${FUNCTION}: found java in filesystem"
+  	JAVA_HOME="/usr/java/latest"
+  fi
+  if [ ! -z ${JAVA_HOME} ] ; then
+  	yaimlog INFO "${FUNCTION}: Setting up JAVA environment"
+  	yaimgridenv_set JAVA_HOME ${JAVA_HOME}
+  fi
+  
   # Exit with success
-  return 0    
+  return ${YEX_OK}    
 
 }

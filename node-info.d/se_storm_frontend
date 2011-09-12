@@ -17,49 +17,35 @@
 # limitations under the License.
 ##############################################################################
 #
-# NAME :        ig-se_storm_backend
+# NAME :        se_storm_frontend
 #
 # DESCRIPTION : This files contain the function list that configures
-#               the SE StoRM backend 3.1 (SL4).
+#               the SE StoRM frontend 3.1 (SL4).
 #
 # AUTHORS :     grid-release@infn.it
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 #############################################################################
 
-SE_storm_backend_FUNCTIONS="
+se_storm_frontend_FUNCTIONS="
 config_ntp
 config_ldconf
-config_add_pool_env
 config_sysconfig_edg
 config_sysconfig_globus
 config_sysconfig_lcg
 config_crl
+config_rfio
 config_host_certs
 config_vomsdir
 config_users
 config_edgusers
 config_mkgridmap
 config_vomsmap
-config_storm_generic
-config_storm_dir
-config_bdii_only
-config_gip_only
-config_gip_storm
 config_gip_service_release
-config_rfio
-config_lcas_lcmaps_gt4
-config_globus_clients
-config_globus_gridftp
 config_lcgenv
-config_nfs_sw_dir_server
-config_storm_rfio
-config_storm_mysql
-config_storm_properties
-config_storm_namespace
-config_storm_backend"
-
-#config_add_pool_env
+config_storm_generic
+config_storm_frontend
+config_lcas_lcmaps_gt4"

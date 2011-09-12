@@ -17,56 +17,24 @@
 # limitations under the License.
 ##############################################################################
 #
-# NAME :        ig-se-storm-gridftp
+# NAME :        se_storm_checksum
 #
 # DESCRIPTION : This files contain the function list that configures
-#               the StoRM gridftp_dsi server 3.2 (SL5).
+#               the SE StoRM checksum 3.1 (SL4).
 #
-# AUTHORS :     grid-release@lists.infn.it
+# AUTHORS :     grid-release@infn.it
 #
 # NOTES :
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 #############################################################################
 
-# INFN-GRID: start from ig-ce list
-#            commented out unwanted functions
-SE_storm_gridftp_FUNCTIONS="
+se_storm_checksum_FUNCTIONS="
 config_ntp
-config_add_pool_env
 config_ldconf
-config_sysconfig_globus
-config_sysconfig_edg
+config_add_pool_env
 config_sysconfig_lcg
-config_crl
-config_host_certs
-config_edgusers
-config_users
-config_storm_gridftp
-config_mkgridmap
-config_vomsdir
-config_vomsmap
-config_lcas_lcmaps_gt4
-config_globus_clients
-config_globus_gridftp
 config_lcgenv
-config_nfs_sw_dir_server
+config_storm_checksum
 "
-
-#config_root_email
-#config_rgma_client
-#config_gip_only
-#config_gip_ce
-#config_fmon_client
-#config_lcgce_dgas
-#config_globus_gatekeeper
-#config_jobmanager
-#config_dgas_ce
-#config_gip_scheduler_plugin
-#config_gip_software_plugin
-#config_gip_vo_tag
-#config_glite_locallogger
-#config_bdii_only
-#config_mpi
-#config_glite_initdi

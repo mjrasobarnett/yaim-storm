@@ -26,7 +26,7 @@
 # NOTES :       - Change ownership to storm-backend directory
 #               - Activate and restart service
 #
-# YAIM MODULE:  ig-yaim-storm
+# YAIM MODULE:  yaim-storm
 #
 ##############################################################################
 
@@ -48,11 +48,32 @@ function config_storm_backend () {
 
   FUNCTION="config_storm_backend"
 
-  # Change ownership to storm-backend directory
-  if [ -d ${STORM_BE_DIR} ]; then
-    chown -R ${STORM_USER}:${STORM_USER} ${STORM_BE_DIR}
+  if [ -z ${JAVA_HOME} ] ; then
+	yaimlog ERROR "${FUNCTION}: JAVA_HOME variable not set."
+    yestr ${YEX_MISSINGVAR}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_MISSINGVAR}
+  fi
+
+  config_dir_prefix="/etc/storm"
+  config_dir="${config_dir_prefix}/backend-server"
+  
+  # Change ownership to storm-backend-server configuration directory
+  if [ -d ${config_dir_prefix} ]; then
+   #NOTE: this is not recursive
+    chown ${STORM_USER}:${STORM_USER} ${config_dir_prefix}
   else
-    yaimlog ERROR "${FUNCTION}: StoRM backend directory ${STORM_BE_DIR} doesn't exist."
+    yaimlog ERROR "${FUNCTION}: StoRM backend configuration directory prefix ${config_dir_prefix} doesn't exist"
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+  fi
+  
+  if [ -d ${config_dir} ]; then
+    yaimlog INFO "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for configuration directory ${config_dir}"
+    chown -R ${STORM_USER}:${STORM_USER} ${config_dir}
+  else
+    yaimlog ERROR "${FUNCTION}: StoRM backend server configuration directory ${config_dir} doesn't exist."
     yestr ${YEX_NOSUCHFILE}
     yaimlog ERROR "${YERRORSTR}"
     exit ${YEX_NOSUCHFILE}
@@ -61,53 +82,17 @@ function config_storm_backend () {
   # temporary fix for version  1.5.1-2 -> 1.5.1-3
   BACKEND_VERSION=`rpm -q --queryformat '%{VERSION}-%{RELEASE}' storm-backend-server`
 
-  #----------------------------------------------------------
-  # /etc/init.d/storm-backend - BEGIN
-  #----------------------------------------------------------
-  FILE="/etc/init.d/storm-backend"
-  # Create symbolic link
-  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
-  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/init.d/storm-backend"
-  ln -sf ${STORM_BE_DIR}/etc/init.d/storm-backend ${FILE}
-  #----------------------------------------------------------
-  # /etc/init.d/storm-backend - END
-  #----------------------------------------------------------
-  
-  #----------------------------------------------------------
-  # /etc/cron.d/storm-backend.cron - BEGIN
-  #----------------------------------------------------------
-  FILE="/etc/cron.d/storm-backend.cron"
-  # Create symbolic link
-  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
-  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/cron.d/storm-backend.cron"
-  ln -sf ${STORM_BE_DIR}/etc/cron.d/storm-backend.cron ${FILE}
-  #----------------------------------------------------------
-  # /etc/cron.d/storm-backend.cron - END
-  #---------------------------------------------------------- 
-
-  #----------------------------------------------------------
-  # /etc/logrotate.d/storm-backend.logrotate - BEGIN
-  #----------------------------------------------------------
-  FILE="/etc/logrotate.d/storm-backend.logrotate"
-  # Create symbolic link
-  yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
-  yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> ${STORM_BE_DIR}/etc/logrotate.d/storm-backend.logrotate"
-  ln -sf ${STORM_BE_DIR}/etc/logrotate.d/storm-backend.logrotate ${FILE}
-  #----------------------------------------------------------
-  # /etc/cron.d/storm-backend.cron - END
-  #---------------------------------------------------------- 
-
   # end temporary fix
+  #Note:the following instruction is necessary to enable /sbin/service to see the JAVA_LOCATION variable. It already called by setted
+  #     config_storm_dir. This note can be usefull in case of the edit/remotion of that function 
+  #yaimgridenv_set JAVA_HOME ${JAVA_LOCATION}
 
   # Activate and restart service
-  /sbin/chkconfig --add storm-backend
-  /sbin/chkconfig storm-backend on
+  /sbin/chkconfig --add storm-backend-server
+  /sbin/chkconfig storm-backend-server on
   yaimlog INFO "${FUNCTION}: Restart service."
-  /sbin/service storm-backend stop
-  /sbin/service storm-backend start
-
-  # Remove old backup
-  rm -f /etc/init.d/storm-backend\.*
+  /sbin/service storm-backend-server stop
+  /sbin/service storm-backend-server start
 
   # Exit with success
   return 0

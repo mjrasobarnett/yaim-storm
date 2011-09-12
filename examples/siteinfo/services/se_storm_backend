@@ -22,8 +22,8 @@ STORM_DEFAULT_ROOT=/storage
 # OPTIONAL - Default value: /etc/grid-security/${STORM_USER}
 #STORM_CERT_DIR=/etc/grid-security/${STORM_USER}
 # Directory used to exchange proxies.
-# OPTIONAL - Default value: ${STORM_BE_DIR}/tmp
-#STORM_PROXY_HOME=${STORM_BE_DIR}/tmp
+# OPTIONAL - Default value: /etc/storm/tmp
+#STORM_PROXY_HOME=/etc/storm/tmp
 # StoRM Frontend service public host.
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST}
 STORM_FRONTEND_PUBLIC_HOST=${STORM_BACKEND_HOST}
@@ -40,6 +40,12 @@ STORM_FRONTEND_HOST_LIST=${STORM_FRONTEND_PUBLIC_HOST}
 # StoRM SURL endpoint list.
 # OPTIONAL - Default value: srm://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}
 #STORM_SURL_ENDPOINT_LIST="srm://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}"
+# StoRM backend server rest port
+# OPTIONAL - Default value: 9998
+#STORM_BACKEND_REST_SERVICES_PORT=9998
+# List of supported Virtual Organizations.
+#EXAMPLE: VOS="dteam infngrid"
+VOS=
 
 # Database settings
 #---------------------------------------------------------
@@ -85,6 +91,36 @@ STORM_DB_PWD=
 # Protocol: root
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_INFO_ROOT_SUPPORT=false
+# Protocol: http
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_INFO_HTTP_SUPPORT=false
+# Protocol: https
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_INFO_HTTPS_SUPPORT=false
+
+# Gridhttps support
+#---------------------------------------------------------
+# Enable the support of http(s) protocols.
+# OPTIONAL - Default value: false
+#STORM_GRIDHTTPS_ENABLED=false
+# Gridhttps pluigin implementation class.
+# OPTIONAL - Default value: it.grid.storm.https.HTTPSPluginInterfaceStub
+#STORM_GRIDHTTPS_PLUGIN_CLASSNAME=it.grid.storm.https.HTTPSPluginInterfaceStub
+
+# Gridhttps plugin parameter
+#---------------------------------------------------------
+# StoRM Gridhttps server service host.
+# OPTIONAL - Default value: localhost
+#STORM_GRIDHTTPS_SERVER_HOST=localhost
+# StoRM Gridhttps server mapping service port.
+# OPTIONAL - Default value: 8088
+#STORM_GRIDHTTPS_SERVER_PORT=8088
+# StoRM Gridhttps server service user UID.
+# OPTIONAL - Default value: 0
+#STORM_GRIDHTTPS_SERVER_USER_UID=0
+# StoRM Gridhttps server service user GID.
+# OPTIONAL - Default value: 0
+#STORM_GRIDHTTPS_SERVER_GROUP_UID=0
 
 # Checksum support
 #---------------------------------------------------------

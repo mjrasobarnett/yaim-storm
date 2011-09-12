@@ -1,0 +1,83 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004. 
+# See http://www.eu-egee.org/partners/ for details on the copyright 
+# holders.  
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); 
+# you may not use this file except in compliance with the License. 
+# You may obtain a copy of the License at 
+#
+#    http://www.apache.org/licenses/LICENSE-2.0 
+#
+# Unless required by applicable law or agreed to in writing, software 
+# distributed under the License is distributed on an "AS IS" BASIS, 
+# WITHOUT WARRANTIES OR CONDITIONS 
+# OF ANY KIND, either express or implied. 
+# See the License for the specific language governing permissions and 
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_gridhttps_server
+#
+# DESCRIPTION : This function configures tomcat logging folder permissions and storm user
+#
+# AUTHORS :     michele.dibenedetto@cnaf.infn.it
+#
+# NOTES :      
+#
+# YAIM MODULE:  yaim-storm
+#                 
+##############################################################################
+
+config_storm_gridhttps_server_logging_check () {
+
+  requires $1 STORM_USER TOMCAT_USER
+  return $?
+
+}
+
+config_storm_gridhttps_server_logging_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+}
+
+config_storm_gridhttps_server_logging () {
+
+
+  FUNCTION="config_storm_gridhttps_server_logging"
+
+
+  if [ "${STORM_USER}" = "root" ]; then
+    yaimlog ERROR "${FUNCTION}: \$STORM_USER can't be root!"
+    yestr ${YEX_CONFIG}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_CONFIG}
+  else
+    id ${STORM_USER} >& /dev/null \
+      || (yaimlog INFO "${FUNCTION}: Adding system user '$STORM_USER'"; adduser -r ${STORM_USER})
+  fi
+
+  # Add TOMCAT_USER to primary-group of STORM_USER,
+  # for rights on log folder
+  yaimlog INFO "${FUNCTION}: Adding user '${TOMCAT_USER}' to '${STORM_USER}' group"
+  storm_group=`groups ${STORM_USER} |cut -d " " -f 3`
+  yaimlog DEBUG "storm_group = $storm_group"
+   
+   if ( getent group "${storm_group}" >/dev/null ); then
+   		getent group "${storm_group}" | grep ${TOMCAT_USER} >/dev/null
+  		if [ $? -eq 1 ]; then
+		    usermod -a -G $storm_group ${TOMCAT_USER}
+		fi
+  else
+    yaimlog ERROR "${FUNCTION}: Group 'storm_group' doesn't exit"
+    yestr ${YEX_CONFIG}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_CONFIG}
+  fi
+  
+  chgrp $storm_group /var/log/storm
+  chmod g+rwx /var/log/storm
+  # Exit with success
+  return 0
+
+}

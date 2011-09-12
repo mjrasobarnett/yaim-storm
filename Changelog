@@ -1,3 +1,32 @@
+05/08/2011 Eli
+
+* changed glite-info-service script in glite-info-glue2-simple script
+* optimized query to REST interfaces
+* introduced TOTAL, USED, FREE, AVAILABLE, RESERVED SIZE variables for each <SA>
+
+02/05/2011 MicheleD
+
+* renamed se_storm_gridhttps variable STORM_BACKEND_SERVER to STORM_BACKEND_HOST
+* renamed configuration file of gridhttps-plugin component in function config_storm_gridhttps_plugin_properties to /etc/storm/gridhttps-plugin/storm.gridhttps.plugin.properties
+* removed usage of variable STORM_ROOT from se_storm_frontend profile
+* removed requires of variable STORM_ROOT from config_storm_globus_gridftp function
+* removed creation of checksum jars folder
+* removed variables STORM_ROOT, STORM_DIR, STORM_BE_DIR and STORM_FE_DIR from se_storm_frontend and se_storm_frontend profiles 
+* changed default STORM_PROXY_HOME variable value to /etc/storm/tmp
+* changed default STORM_FE_WSDL variable value to /usr/share/wsdl/srm.v2.2.wsdl
+* removed change of ownership of STORM_BE_DIR
+* added change of ownership of /etc/storm and /etc/storm/backend-server
+* added variables STORM_GRIDHTTPS_SERVER_PORT and STORM_GRIDHTTPS_HTTPS_SERVER_PORT 
+ 
+10/02/2011 Eli
+
+* node-info.d/ig-se_storm_backend - changed order of config_storm_mysql, before config_gip_storm
+
+14/01/2011 Eli
+
+* added interaction with Info Service Interface to get sa space information
+* added two new def variables, STORM_INFO_SERVICE_HOST and STORM_INFO_SERVICE_PORT
+
 01/12/2010 Cris
 
 * functions/config_storm_properties - added check on java MySQL connector (Eli)
