@@ -59,7 +59,7 @@ function config_storm_frontend () {
     if [ "${STORM_DB_HOST}" = "`hostname -f`" ] || [ "${STORM_DB_HOST}" = "localhost" ]; then
       yaimlog INFO "${FUNCTION}: You are configuring both StoRM frontend and backend on this host"
       yaimlog INFO "${FUNCTION}: Please ensure that yaim script '-n' arguments are in the right order:"
-      yaimlog INFO "${FUNCTION}: [...] -n SE_storm_backend -n SE_storm_frontend [...]"
+      yaimlog INFO "${FUNCTION}: [...] -n se_storm_backend -n se_storm_frontend [...]"
       yestr ${YEX_CONFTARGET}
       yaimlog ERROR "${YERRORSTR}"
       exit ${YEX_CONFTARGET}

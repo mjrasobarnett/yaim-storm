@@ -20,6 +20,13 @@ STORM_CERT_DIR=/etc/grid-security/${STORM_USER}
 # Directory used to exchange proxies.
 # OPTIONAL - Default value: /etc/storm/tmp
 STORM_PROXY_HOME=/etc/storm/tmp
+# StoRM Frontend service public host.
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
+STORM_FRONTEND_PUBLIC_HOST=${STORM_BACKEND_HOST}
+# StoRM Frontend service host list: SRM endpoints can be more than one virtual host, also different than STORM_FRONTEND_PUBLIC_HOSTi
+# (e.g. dynamic DNS for multiple StoRM Frontend).
+# OPTIONAL - Default value: ${STORM_FRONTEND_PUBLIC_HOST}
+STORM_FRONTEND_HOST_LIST=${STORM_FRONTEND_PUBLIC_HOST}
 # StoRM Frontend service port.
 # OPTIONAL - Default value: 8444
 STORM_FRONTEND_PORT=8444
@@ -66,12 +73,21 @@ STORM_INFO_FILE_SUPPORT=true
 # Protocol: gridftp
 # OPTIONAL - Available values: [true|false] - Default value: true
 STORM_INFO_GRIDFTP_SUPPORT=true
+# GRIDFTP servers pool list. A comma separated list of hosts
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
+STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
 # Protocol: rfio
 # OPTIONAL - Available values: [true|false] - Default value: false
 STORM_INFO_RFIO_SUPPORT=false
+# Rfio server.
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
+STORM_RFIO_HOST=${STORM_BACKEND_HOST}
 # Protocol: root
 # OPTIONAL - Available values: [true|false] - Default value: false
 STORM_INFO_ROOT_SUPPORT=false
+# Root server.
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
+STORM_ROOT_HOST=${STORM_BACKEND_HOST}
 # Protocol: http
 # OPTIONAL - Available values: [true|false] - Default value: false
 STORM_INFO_HTTP_SUPPORT=false
@@ -106,11 +122,12 @@ STORM_GRIDHTTPS_SERVER_HOST=localhost
 # OPTIONAL - Default value: 8088
 STORM_GRIDHTTPS_SERVER_PORT=8088
 # StoRM Gridhttps server service user UID.
-# OPTIONAL - Default value: 0
-STORM_GRIDHTTPS_SERVER_USER_UID=0
+# COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
+#STORM_GRIDHTTPS_SERVER_USER_UID=
 # StoRM Gridhttps server service user GID.
 # OPTIONAL - Default value: 0
-STORM_GRIDHTTPS_SERVER_GROUP_UID=0
+# COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
+#STORM_GRIDHTTPS_SERVER_GROUP_UID=
 
 # Checksum support
 #---------------------------------------------------------
@@ -125,6 +142,13 @@ STORM_CKSUM_ALGORITHM="Adler32"
 # STORM_CKSUM_SERVICE_LIST="host1,status_port1,service_port1 host2,status_port2,service_port2"
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST},9995,9996
 # NOTE: default value will be set in functions because use variables set in site-info.def file.
+
+# Storage Areas settings
+#---------------------------------------------------------
+# List of supported Storage Areas.
+# Usually at least one Storage Area for each VO specified in VOS should be created. (e.g. STORM_STORAGEAREA_LIST="SA1 SA2 SA3").
+# OPTIONAL - Default value: ${VOS}
+STORM_STORAGEAREA_LIST=${VOS}
 
 # Default Storage Areas settings
 #---------------------------------------------------------

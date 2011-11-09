@@ -6,6 +6,12 @@
 #     Note: the <confdir> directory corresponds to the directory where your site-info.def file resides.
 #
 
+# General settings
+#---------------------------------------------------------
+# Enable or not the use of StoRM gridftp_dsi plugin  
+# OPTIONAL - Default value: no
+GRIDFTP_WITH_DSI="no"
+
 X509_VOMS_DIR="/etc/grid-security/vomsdir/"
 X509_CERT_DIR="/etc/grid-security/certificates/"
 X509_HOST_CERT="/etc/grid-security/hostcert.pem"

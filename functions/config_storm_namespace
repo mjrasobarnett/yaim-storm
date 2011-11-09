@@ -32,7 +32,7 @@
 
 function config_storm_namespace_check () {
 
-  requires $1 STORM_BACKEND_HOST STORM_DEFAULT_ROOT VOS
+  requires $1 STORM_BACKEND_HOST STORM_DEFAULT_ROOT VOS STORM_STORAGEAREA_LIST
   return $?
 
 }
@@ -147,6 +147,7 @@ EOF
         yaimlog ERROR "${FUNCTION}: Please check $x variable in your site-info.def"
         return 1
     esac
+
     # NOTE: Temporary re-enable default token on namespace
     x=STORM_${SA_UPP}_TOKEN;                   SA_TOKEN=${!x:-${SA_UPP}_TOKEN}
     x=STORM_${SA_UPP}_STORAGECLASS;            SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
@@ -175,27 +176,9 @@ EOF
     SA_SIZE_LIMIT=`echo ${SA_SIZE_LIMIT} | tr '[:upper:]' '[:lower:]'`
     # Convert in uppercase
     SA_STORAGECLASS=`echo ${SA_STORAGECLASS} | tr '[:lower:]' '[:upper:]'`
-
-    TOTAL_ONLINE_SIZE=0
-    TOTAL_NEARLINE_SIZE=0
-
-##################################################################################
-# Start: added by M. David (david@lip.pt)
-
-    x=STORM_${SA_UPP}_ONLINE_SIZE;           SA_ONLINE_SIZE=${!x:-${TOTAL_ONLINE_SIZE}}
-    x=STORM_${SA_UPP}_NEARLINE_SIZE;         SA_NEARLINE_SIZE=${!x:-${TOTAL_NEARLINE_SIZE}}
-
-    if [ ! -z ${SA_ONLINE_SIZE} ]; then
-      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} total online size (${SA_ONLINE_SIZE})"
-      TOTAL_ONLINE_SIZE=$((${SA_ONLINE_SIZE}*1024/(1000*1000*1000)))
-    fi
-    if [ ! -z ${SA_NEARLINE_SIZE} ]; then
-      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} total online size (${SA_NEARLINE_SIZE})"
-      TOTAL_NEARLINE_SIZE=$((${SA_NEARLINE_SIZE}*1024/(1000*1000*1000)))
-    fi
-
-# End
-##################################################################################
+     
+    x=STORM_${SA_UPP}_ONLINE_SIZE;           SA_ONLINE_SIZE=${!x}
+    x=STORM_${SA_UPP}_NEARLINE_SIZE;         SA_NEARLINE_SIZE=${!x}
 
     yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} filesystem"
     cat >> ${FILE} << EOF
@@ -208,6 +191,46 @@ EOF
       <space-token-description>${SA_TOKEN}</space-token-description>
 EOF
     fi
+
+    if [ "${SA_STORAGECLASS}" == "T1D0" ]; then
+      if [ -z "${SA_NEARLINE_SIZE}" ] ; then
+         yaimlog ERROR "${FUNCTION}: Missing nearline size!"
+         yaimlog ERROR "Please set: STORM_${SA_UPP}_NEARLINE_SIZE in GB"
+         yestr ${YEX_CONFIG}
+         yaimlog ERROR "${YERRORSTR}"
+         exit ${YEX_CONFIG}
+      fi
+      if [ "${SA_NEARLINE_SIZE}" == "0" ] || [ "${SA_NEARLINE_SIZE}" == "0.0" ]; then
+         yaimlog ERROR "${FUNCTION}: Wrong nearline size!"
+         yaimlog ERROR "Please set: STORM_${SA_UPP}_NEARLINE_SIZE > 0 GB"
+         yestr ${YEX_CONFIG}
+         yaimlog ERROR "${YERRORSTR}"
+         exit ${YEX_CONFIG}
+      fi
+      SA_NEARLINE_SIZE=$((${SA_NEARLINE_SIZE}*(1024*1024*1024)))
+    else
+      if [ ! -z "${SA_NEARLINE_SIZE}" ] && [ "${SA_NEARLINE_SIZE}" -ne "0" ]; then
+         yaimlog DEBUG "${FUNCTION}: Wrong Nearline Size setting!"
+         yaimlog DEBUG "Set: STORM_${SA_UPP}_NEARLINE_SIZE to 0 GB"
+      fi
+      SA_NEARLINE_SIZE=0
+    fi
+
+    if [ -z "${SA_ONLINE_SIZE}" ]; then
+       yaimlog ERROR "${FUNCTION}: Missing online size!"
+       yaimlog ERROR "Please set: STORM_${SA_UPP}_ONLINE_SIZE in GB"
+       yestr ${YEX_CONFIG}
+       yaimlog ERROR "${YERRORSTR}"
+       exit ${YEX_CONFIG}
+    fi
+    if [ "${SA_ONLINE_SIZE}" == "0" ] || [ "${SA_ONLINE_SIZE}" == "0.0" ]; then
+       yaimlog ERROR "${FUNCTION}: Wrong online size!"
+       yaimlog ERROR "Please set: STORM_${SA_UPP}_ONLINE_SIZE > 0 GB"
+       yestr ${YEX_CONFIG}
+       yaimlog ERROR "${YERRORSTR}"
+       exit ${YEX_CONFIG}
+    fi
+    SA_ONLINE_SIZE=$((${SA_ONLINE_SIZE}*(1024*1024*1024)))
 
     # Check the STORAGECLASS
     SA_RETENTION_POLICY="replica"   # default
@@ -231,6 +254,7 @@ EOF
           SA_ACCESS_LATENCY="online"
           ;;
       esac
+
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} storage-class (${SA_STORAGECLASS}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY})"
       cat >> ${FILE} << EOF
       <storage-class>${SA_STORAGECLASS}</storage-class>
@@ -252,14 +276,16 @@ EOF
          <authz-db>${SA_AUTH}</authz-db>
 EOF
     fi
+    yaimlog DEBUG "${FUNCTION}: Set Online Size $SA_ONLINE_SIZE for ${SA_UPP}"
+    yaimlog DEBUG "${FUNCTION}: Set Nearline Size $SA_NEARLINE_SIZE for ${SA_UPP}"
     cat >> ${FILE} << EOF
       </storage-area-authz>
       <properties>
           <RetentionPolicy>${SA_RETENTION_POLICY}</RetentionPolicy>
           <AccessLatency>${SA_ACCESS_LATENCY}</AccessLatency>
           <ExpirationMode>neverExpire</ExpirationMode>
-          <TotalOnlineSize unit="GB" limited-size="${SA_SIZE_LIMIT}">$TOTAL_ONLINE_SIZE</TotalOnlineSize>
-          <TotalNearlineSize unit="GB">$TOTAL_NEARLINE_SIZE</TotalNearlineSize>
+          <TotalOnlineSize unit="Byte" limited-size="${SA_SIZE_LIMIT}">$SA_ONLINE_SIZE</TotalOnlineSize>
+          <TotalNearlineSize unit="Byte">$SA_NEARLINE_SIZE</TotalNearlineSize>
       </properties>
       <capabilities>
         <aclMode>${SA_ACLMODE}</aclMode>

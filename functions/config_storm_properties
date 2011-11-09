@@ -31,8 +31,8 @@
 
 function config_storm_properties_check () {
 
-  requires $1 MYSQL_PASSWORD STORM_DB_HOST STORM_DB_PWD STORM_DB_USER \
-              STORM_FRONTEND_HOST_LIST STORM_PROXY_HOME STORM_BACKEND_REST_SERVICES_PORT
+  requires $1 STORM_DB_HOST STORM_DB_PWD STORM_DB_USER \
+              STORM_FRONTEND_HOST_LIST STORM_PROXY_HOME STORM_BACKEND_REST_SERVICES_PORT STORM_GRIDHTTPS_ENABLED
   return $?
 
 }
@@ -48,37 +48,10 @@ function config_storm_properties () {
   FUNCTION="config_storm_properties"
 
 JARDIR="/usr/share/java/storm-backend-server"
-if [ ! -f ${JARDIR}/mysql-connector-java-5.1.13-bin.jar ]; then
+if [ -f ${JARDIR}/mysql-connector-java-5.1.13-bin.jar ]; then
   # Download needed jar file
-  URL="http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.13.tar.gz/from/http://mi.mirror.garr.it/mirrors/MySQL/"
-  JAR="mysql-connector-java-5.1.13-bin.jar"
-  TMPFILE=`mktemp`
-  yaimlog DEBUG "${FUNCTION}: Download mysql-connector-java tar.gz"
-  wget --quiet -O ${TMPFILE} ${URL}
-  JARFILE="`tar -tzf ${TMPFILE} | fgrep ${JAR}`"
-  yaimlog DEBUG "${FUNCTION}: Untar ${JARFILE}"
-  tar -xzf ${TMPFILE} ${JARFILE}
-  yaimlog DEBUG "${FUNCTION}: Move to ${JARDIR}/${JAR}"
-  mv -f ${JARFILE} ${JARDIR}/${JAR}
-  chown ${STORM_USER}:${STORM_USER} ${JARDIR}/${JAR}
-  chmod 644 ${JARDIR}/${JAR}
-  rm -f ${TMPFILE}
+  rm -f ${JARDIR}/mysql-connector-java-5.1.13-bin.jar
 fi
-
-  #----------------------------------------------------------
-  # /etc/sysconfig/storm-backend-server - BEGIN
-  #----------------------------------------------------------
-  #FILE="/etc/sysconfig/storm-backend-server"
-  # Create symbolic link
-  #yaimlog INFO "${FUNCTION}: Processing ${FILE} ..."
-  #yaimlog DEBUG "${FUNCTION}: Creating symbolic link ${FILE} -> /etc/sysconfig/storm-backend-server"
-  #ln -sf ${STORM_BE_DIR}/etc/sysconfig/storm-backend-server ${FILE}
-  # Set STORM_BE_USER
-  #yaimlog DEBUG "${FUNCTION}: Set \$STORM_BE_USER to ${STORM_USER}"
-  #set_value "export STORM_BE_USER" "${STORM_USER}" ${FILE}
-  #----------------------------------------------------------
-  # /etc/sysconfig/storm-backend-server - END
-  #----------------------------------------------------------
 
   yaimlog INFO "${FUNCTION}: Configuration file"
   #----------------------------------------------------------

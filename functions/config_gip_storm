@@ -67,25 +67,56 @@ function l_write_vo_info () {
 #
 function get_size () {
 
-  FUNCTION="get_size"
+  FUNC="get_size"
 
-  size=`/usr/bin/curl -s http://$2:$3/info/status/$1`
-  if [ -z ${size} ]; then
-    yaimlog INFO "${FUNCTION}: the command /usr/bin/curl -s http://$2:$3/info/status/$1 return no value; check storm backend service status."
-    yaimlog DEBUG "${FUNCTION}: set a temporary value."
-    total=$4
-    used=0
-    reserved=$4
-    free=$4
-    available=$4
-  else
-      # convert in GB (base 10)
-      used=`echo $size | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^used-space/ {print $2}'`
-      free=`echo $size | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^free-space/ {print $2}'`
-      reserved=`echo $size | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^reserved-space/ {print $2}'`
-      total=`echo $size | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^total-space/ {print $2}'`
-      available=`echo $size | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^available-space/ {print $2}'`
+  if [ "$#" -ne "9" ]; then
+    yaimlog ERROR "${FUNC}: Internal Error!"
+    yaimlog ERROR "Please set: Verify the number of parameters passed to the ${FUNCTION} function"
+    yestr ${YEX_SOFTWARE}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_SOFTWARE}
   fi
+
+  SIZE=`/usr/bin/curl -s http://$2:$3/info/status/$1`
+  if [ -z "${SIZE}" ]; then
+    # convert in byte (base 10)
+    yaimlog DEBUG "${FUNC}: the command /usr/bin/curl -s http://$2:$3/info/status/$1 return no value; check StoRM Backend service status."
+    yaimlog DEBUG "${FUNC}: set a temporary value."
+    total=$(($4*(1000*1000*1000)))
+    used=0
+    reserved=$(($4*(1000*1000*1000)))
+    free=$(($4*(1000*1000*1000)))
+    available=$(($4*(1000*1000*1000)))
+  elif [ "${SIZE}" == "<html><body><h1>Internal Error</h1></body></html>" ]; then
+    # convert in byte (base 10)
+    yaimlog DEBUG "${FUNC}: the command /usr/bin/curl -s http://$2:$3/info/status/$1 return Internal Error; check StoRM Backend info service status."
+    yaimlog DEBUG "${FUNC}: set a temporary value."
+    total=$(($4*(1000*1000*1000)))
+    used=0
+    reserved=$(($4*(1000*1000*1000)))
+    free=$(($4*(1000*1000*1000)))
+    available=$(($4*(1000*1000*1000)))
+  else
+    # # convert in byte (base 10)
+    used=`echo $SIZE | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^used-space/ {print $2}'`
+    free=`echo $SIZE | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^free-space/ {print $2}'`
+    reserved=`echo $SIZE | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^reserved-space/ {print $2}'`
+    total=`echo $SIZE | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^total-space/ {print $2}'`
+    available=`echo $SIZE | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^available-space/ {print $2}'`
+    busy=`echo $SIZE | sed -e 's/[{}]/''/g' | awk -v RS=',"' -F: '/^busy-space/ {print $2}'`
+    if [ "${available}" -eq "0" ]; then
+      available=$((${total} - ${busy}))
+    fi
+    yaimlog DEBUG "${FUNC}: TOTAL: ${total}; AVAILABLE: ${available}; USED: ${used}; FREE: ${free}; RESERVED: ${reserved}; BUSY: $busy"
+    NSIZE=`/usr/libexec/storm-dynamic-info-provider/storm-base-ten-converter -u $used -f $free -r $reserved -t $total -a $available`
+    used=`echo $NSIZE | sed -e 's/[{}]/''/g' | awk -v RS=',' -F': ' '/used-space/ {print $2}'`
+    free=`echo $NSIZE | sed -e 's/[{}]/''/g' | awk -v RS=',' -F': ' '/free-space/ {print $2}'`
+    reserved=`echo $NSIZE | sed -e 's/[{}]/''/g' | awk -v RS=',' -F': ' '/reserved-space/ {print $2}'`
+    total=`echo $NSIZE | sed -e 's/[{}]/''/g' | awk -v RS=',' -F': ' '/total-space/ {print $2}'`
+    available=`echo $NSIZE | sed -e 's/[{}]/''/g' | awk -v RS=',' -F': ' '/available-space/ {print $2}'`
+    yaimlog DEBUG "${FUNC}: TOTAL: ${total}; AVAILABLE: ${available}; USED: ${used}; FREE: ${free}; RESERVED: ${reserved}"
+  fi
+  yaimlog DEBUG "${FUNC}: TOTAL: ${total}; AVAILABLE: ${available}; USED: ${used}; FREE: ${free}; RESERVED: ${reserved}"
   export $5=${total}
   export $6=${available}
   export $7=${used}
@@ -227,26 +258,22 @@ EOF
     x=STORM_${SA_UPP}_VONAME;          SA_VONAME=${!x:-${SA_LOW}}
     x=STORM_${SA_UPP}_STORAGECLASS;    SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
 
-    hash_insert SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP} 0          # default
-    hash_insert SA_FREE_ONLINE_SIZE_GB  ${SA_UPP} 0           # default
-    hash_insert SA_USED_ONLINE_SIZE_GB  ${SA_UPP} 0           # default
+    hash_insert SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP} 0         # default
+    hash_insert SA_FREE_ONLINE_SIZE_GB  ${SA_UPP} 0         # default
+    hash_insert SA_USED_ONLINE_SIZE_GB  ${SA_UPP} 0         # default
     hash_insert SA_RESERVED_ONLINE_SIZE_GB ${SA_UPP} 0      # default
-    hash_insert SA_USED_ONLINE_SIZE_KB ${SA_UPP} 0           # default
-    hash_insert SA_AVAILABLE_ONLINE_SIZE_KB ${SA_UPP} 0      # default
+    hash_insert SA_USED_ONLINE_SIZE_KB ${SA_UPP} 0          # default
+    hash_insert SA_AVAILABLE_ONLINE_SIZE_KB ${SA_UPP} 0     # default
 
-    hash_insert SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP} 0        # default
-    hash_insert SA_FREE_NEARLINE_SIZE_GB ${SA_UPP} 0         # default
-    hash_insert SA_USED_NEARLINE_SIZE_GB ${SA_UPP} 0        # default
-    hash_insert SA_RESERVED_NEARLINE_SIZE_GB ${SA_UPP} 0    # default
-    hash_insert SA_USED_NEARLINE_SIZE_KB ${SA_UPP} 0        # default
-    hash_insert SA_AVAILABLE_NEARLINE_SIZE_KB ${SA_UPP} 0   # default
+    hash_insert SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP} 0       # default
 
-    SA_SIZE=1                          #default
+    x=STORM_${SA_UPP}_ONLINE_SIZE;   SA_SIZE=${!x}
 
     if ! [ -z "${SA_STORAGECLASS}" ]; then
       case ${SA_STORAGECLASS} in
         "T1D0")
-          x=STORM_${SA_UPP}_NEARLINE_SIZE;   SA_SIZE=${!x}
+          x=STORM_${SA_UPP}_NEARLINE_SIZE; SA_NL_SIZE=${!x}
+          x=STORM_${SA_UPP}_ONLINE_SIZE;   SA_SIZE=${!x}
           ;;
         "T1D1")
           x=STORM_${SA_UPP}_ONLINE_SIZE;   SA_SIZE=${!x}
@@ -260,30 +287,24 @@ EOF
       esac
     fi
 
-    get_size  ${SA_TOKEN} ${STORM_BACKEND_HOST} ${STORM_BACKEND_REST_SERVICES_PORT} ${SA_SIZE} TOTAL AVAILABLE USED FREE RESERVED
+    get_size ${SA_TOKEN} ${STORM_BACKEND_HOST} ${STORM_BACKEND_REST_SERVICES_PORT} ${SA_SIZE} TOTAL AVAILABLE USED FREE RESERVED
 
     if ! [ -z "${SA_STORAGECLASS}" ]; then
       if [ "${SA_STORAGECLASS}" == "T1D0" ] ; then
           # Get size values on SA_TOKEN (in GB)
-          hash_insert SA_USED_NEARLINE_SIZE_GB  ${SA_UPP} $((${USED}*1024/(1000*1000*1000)))
-          hash_insert SA_FREE_NEARLINE_SIZE_GB  ${SA_UPP} $((${FREE}*1024/(1000*1000*1000)))
-          hash_insert SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP} $((${TOTAL}*1024/(1000*1000*1000)))
-          hash_insert SA_RESERVED_NEARLINE_SIZE_GB ${SA_UPP} $((${RESERVED}*1024/(1000*1000*1000)))
-
-          # Get size values on SA_TOKEN (in KB)
-          hash_insert SA_USED_NEARLINE_SIZE_KB  ${SA_UPP} $((${USED}*1024/1000))
-          hash_insert SA_AVAILABLE_NEARLINE_SIZE_KB  ${SA_UPP} $((${AVAILABLE}*1024/1000))
+          hash_insert SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP} ${SA_NL_SIZE}
       fi
     fi
+
     # Get size values on SA_TOKEN (in GB)
-    hash_insert SA_USED_ONLINE_SIZE_GB  ${SA_UPP} $((${USED}*1024/(1000*1000*1000)))
-    hash_insert SA_FREE_ONLINE_SIZE_GB  ${SA_UPP} $((${FREE}*1024/(1000*1000*1000)))
-    hash_insert SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP} $((${TOTAL}*1024/(1000*1000*1000)))
-    hash_insert SA_RESERVED_ONLINE_SIZE_GB ${SA_UPP} $((${RESERVED}*1024/(1000*1000*1000)))
+    hash_insert SA_USED_ONLINE_SIZE_GB  ${SA_UPP} $((${USED}/(1000*1000*1000)))
+    hash_insert SA_FREE_ONLINE_SIZE_GB  ${SA_UPP} $((${FREE}/(1000*1000*1000)))
+    hash_insert SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP} $((${TOTAL}/(1000*1000*1000)))
+    hash_insert SA_RESERVED_ONLINE_SIZE_GB ${SA_UPP} $((${RESERVED}/(1000*1000*1000)))
 
     # Get size values on SA_TOKEN (in KB)
-    hash_insert SA_USED_ONLINE_SIZE_KB  ${SA_UPP} $((${USED}*1024/1000))
-    hash_insert SA_AVAILABLE_ONLINE_SIZE_KB  ${SA_UPP} $((${AVAILABLE}*1024/1000))
+    hash_insert SA_USED_ONLINE_SIZE_KB  ${SA_UPP} $((${USED}/1000))
+    hash_insert SA_AVAILABLE_ONLINE_SIZE_KB  ${SA_UPP} $((${AVAILABLE}/1000))
 
     # Prepare per-VO and global values
     PERVO_VONAME_INDEX=`echo ${SA_VONAME} | sed -e 's/-//g' -e 's/\.//g'`
@@ -313,21 +334,6 @@ EOF
     hash_insert PERVO_TOTAL_ONLINE_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
     let GLOBAL_TOTAL_ONLINE_SIZE_GB+=$y
 
-    x=`hash_find PERVO_USED_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX}`
-    y=`hash_find SA_USED_NEARLINE_SIZE_GB ${SA_UPP}`
-    hash_insert PERVO_USED_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
-    let GLOBAL_USED_NEARLINE_SIZE_GB+=$y
-
-    x=`hash_find PERVO_RESERVED_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX}`
-    y=`hash_find SA_RESERVED_NEARLINE_SIZE_GB ${SA_UPP}`
-    hash_insert PERVO_RESERVED_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
-    let GLOBAL_RESERVED_NEARLINE_SIZE_GB+=$y
-
-    x=`hash_find PERVO_FREE_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX}`
-    y=`hash_find SA_FREE_NEARLINE_SIZE_GB ${SA_UPP}`
-    hash_insert PERVO_FREE_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
-    let GLOBAL_FREE_NEARLINE_SIZE_GB+=$y
-
     x=`hash_find PERVO_TOTAL_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX}`
     y=`hash_find SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP}`
     hash_insert PERVO_TOTAL_NEARLINE_SIZE_GB ${PERVO_VONAME_INDEX} $((x+y))
@@ -344,16 +350,6 @@ EOF
     hash_insert PERVO_AVAILABLE_ONLINE_SIZE_KB ${PERVO_VONAME_INDEX} $((x+y))
     let GLOBAL_AVAILABLE_ONLINE_SIZE_KB+=$y
 
-    x=`hash_find PERVO_USED_NEARLINE_SIZE_KB ${PERVO_VONAME_INDEX}`
-    y=`hash_find SA_USED_NEARLINE_SIZE_KB ${SA_UPP}`
-    hash_insert PERVO_USED_NEARLINE_SIZE_KB ${PERVO_VONAME_INDEX} $((x+y))
-    let GLOBAL_USED_NEARLINE_SIZE_KB+=$y
-
-    x=`hash_find PERVO_AVAILABLE_NEARLINE_SIZE_KB ${PERVO_VONAME_INDEX}`
-    y=`hash_find SA_AVAILABLE_NEARLINE_SIZE_KB ${SA_UPP}`
-    hash_insert PERVO_AVAILABLE_NEARLINE_SIZE_KB ${PERVO_VONAME_INDEX} $((x+y))
-    let GLOBAL_AVAILABLE_NEARLINE_SIZE_KB+=$y
-
   done
 
   #==========================================================
@@ -361,8 +357,7 @@ EOF
 
   yaimlog DEBUG "${FUNCTION}: Creating GlueSEUniqueID entries"
 
-  GLOBAL_TOTAL_SIZE_GB=$((GLOBAL_TOTAL_ONLINE_SIZE_GB+GLOBAL_TOTAL_NEARLINE_SIZE_GB))
-  GLOBAL_FREE_SIZE_GB=$((GLOBAL_FREE_ONLINE_SIZE_GB+GLOBAL_FREE_NEARLINE_SIZE_GB))
+  GLOBAL_TOTAL_SIZE_GB=$(($((GLOBAL_TOTAL_ONLINE_SIZE_GB)) + $((GLOBAL_TOTAL_NEARLINE_SIZE_GB))))
 
   cat >> ${FILE} << EOF
 #
@@ -381,11 +376,11 @@ GlueSEStatus: Production
 GlueSEImplementationName: StoRM
 GlueSEImplementationVersion: `rpm -q --queryformat='%{VERSION}' storm-backend-server`
 GlueSESizeTotal: $((GLOBAL_TOTAL_SIZE_GB))
-GlueSESizeFree: $((GLOBAL_FREE_SIZE_GB))
+GlueSESizeFree: $((GLOBAL_FREE_ONLINE_SIZE_GB))
 GlueSETotalOnlineSize: $((GLOBAL_TOTAL_ONLINE_SIZE_GB))
 GlueSEUsedOnlineSize: $((GLOBAL_USED_ONLINE_SIZE_GB))
 GlueSETotalNearlineSize: $((GLOBAL_TOTAL_NEARLINE_SIZE_GB))
-GlueSEUsedNearlineSize: $((GLOBAL_USED_NEARLINE_SIZE_GB))
+GlueSEUsedNearlineSize: 0
 GlueInformationServiceURL: ldap://${STORM_BACKEND_HOST}:2170/mds-vo-name=resource,o=grid
 GlueForeignKey: GlueSiteUniqueID=${SITE_NAME}
 GlueSchemaVersionMajor: 1
@@ -423,7 +418,7 @@ EOF
         "T1D0")
           SA_RETENTION_POLICY="custodial"
           SA_ACCESS_LATENCY="nearline"
-          SA_INSTALLED_ONLINE_CAPACITY=0
+          SA_INSTALLED_ONLINE_CAPACITY=`hash_find SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP}`
           SA_INSTALLED_NEARLINE_CAPACITY=`hash_find SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP}`
           ;;
         "T1D1")
@@ -449,9 +444,6 @@ EOF
 
     yaimlog DEBUG "${FUNCTION}: Creating GlueSALocalID entries for ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY} SA (${SA_VONAME} VO)"
 
-    SA_AVAILABLE_SIZE_KB=$((`hash_find SA_AVAILABLE_ONLINE_SIZE_KB ${SA_UPP}`))+$((`hash_find SA_AVAILABLE_NEARLINE_SIZE_KB ${SA_UPP}`))
-    SA_USED_SIZE_KB=$((`hash_find SA_USED_ONLINE_SIZE_KB ${SA_UPP}`))+$((`hash_find SA_USED_NEARLINE_SIZE_KB ${SA_UPP}`))
-        
     cat >> ${FILE} << EOF
 #
 # GlueSALocalID ${SA_LOW}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY} SA (${SA_VONAME} VO)
@@ -473,16 +465,16 @@ GlueSAReservedOnlineSize: $((`hash_find SA_TOTAL_ONLINE_SIZE_GB ${SA_UPP}`))
 GlueSACapability: InstalledOnlineCapacity=$((SA_INSTALLED_ONLINE_CAPACITY))
 GlueSACapability: InstalledNearlineCapacity=$((SA_INSTALLED_NEARLINE_CAPACITY))
 GlueSATotalNearlineSize: $((`hash_find SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP}`))
-GlueSAUsedNearlineSize: $((`hash_find SA_USED_NEARLINE_SIZE_GB ${SA_UPP}`))
-GlueSAFreeNearlineSize: $((`hash_find SA_FREE_NEARLINE_SIZE_GB ${SA_UPP}`))
-GlueSAReservedNearlineSize: $((`hash_find SA_TOTAL_NEARLINE_SIZE_GB ${SA_UPP}`))
+GlueSAUsedNearlineSize: 0
+GlueSAFreeNearlineSize: 0
+GlueSAReservedNearlineSize: 0
 GlueSARetentionPolicy: ${SA_RETENTION_POLICY}
 GlueSAAccessLatency: online
 GlueSAExpirationMode: neverExpire
 GlueSAPolicyFileLifeTime: permanent
 GlueSAType: permanent
-GlueSAStateAvailableSpace: $((SA_AVAILABLE_SIZE_KB))
-GlueSAStateUsedSpace: $((SA_USED_SIZE_KB))
+GlueSAStateAvailableSpace: $((`hash_find SA_AVAILABLE_ONLINE_SIZE_KB ${SA_UPP}`))
+GlueSAStateUsedSpace: $((`hash_find SA_USED_ONLINE_SIZE_KB ${SA_UPP}`))
 GlueSAAccessControlBaseRule: VO:${SA_VONAME}
 GlueChunkKey: GlueSEUniqueID=${STORM_FRONTEND_PUBLIC_HOST}
 GlueSchemaVersionMajor: 1
@@ -708,7 +700,7 @@ EOF
   fi
   
   #==========================================================
-
+  chown ldap:ldap ${INFO_LDIF_PATH}/static-file-storm.ldif
   yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
   #----------------------------------------------------------------
   # ${INFO_LDIF_PATH}/static-file-storm.ldif - END
@@ -732,7 +724,7 @@ EOF
 #! /bin/sh
 /usr/libexec/storm-dynamic-info-provider/glite-info-dynamic-storm ${FILE}
 EOF
-
+  chown ldap:ldap ${WRAPPER}
   # Set permissions
   chmod 755 ${WRAPPER}
   #--------------------------------------------------------------------

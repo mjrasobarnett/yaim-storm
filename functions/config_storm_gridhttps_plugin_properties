@@ -31,7 +31,10 @@
 
 function config_storm_gridhttps_plugin_properties_check () {
 
-  requires $1 STORM_GRIDHTTPS_ENABLED STORM_GRIDHTTPS_SERVER_USER_UID STORM_GRIDHTTPS_SERVER_GROUP_UID
+  requires $1 STORM_GRIDHTTPS_ENABLED
+  if [ "x${STORM_GRIDHTTPS_ENABLED}" == "xtrue" ]; then
+  	requires $1 STORM_GRIDHTTPS_SERVER_USER_UID STORM_GRIDHTTPS_SERVER_GROUP_UID
+  fi
   return $?
 
 }

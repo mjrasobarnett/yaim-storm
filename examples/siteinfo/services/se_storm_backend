@@ -26,11 +26,11 @@ STORM_DEFAULT_ROOT=/storage
 #STORM_PROXY_HOME=/etc/storm/tmp
 # StoRM Frontend service public host.
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST}
-STORM_FRONTEND_PUBLIC_HOST=${STORM_BACKEND_HOST}
+#STORM_FRONTEND_PUBLIC_HOST=${STORM_BACKEND_HOST}
 # StoRM Frontend service host list: SRM endpoints can be more than one virtual host, also different than STORM_FRONTEND_PUBLIC_HOSTi
 # (e.g. dynamic DNS for multiple StoRM Frontend).
 # OPTIONAL - Default value: ${STORM_FRONTEND_PUBLIC_HOST}
-STORM_FRONTEND_HOST_LIST=${STORM_FRONTEND_PUBLIC_HOST}
+#STORM_FRONTEND_HOST_LIST=${STORM_FRONTEND_PUBLIC_HOST}
 # StoRM Frontend service port.
 # OPTIONAL - Default value: 8444
 #STORM_FRONTEND_PORT=8444
@@ -116,11 +116,12 @@ STORM_DB_PWD=
 # OPTIONAL - Default value: 8088
 #STORM_GRIDHTTPS_SERVER_PORT=8088
 # StoRM Gridhttps server service user UID.
-# OPTIONAL - Default value: 0
-#STORM_GRIDHTTPS_SERVER_USER_UID=0
+# COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
+#STORM_GRIDHTTPS_SERVER_USER_UID=
 # StoRM Gridhttps server service user GID.
 # OPTIONAL - Default value: 0
-#STORM_GRIDHTTPS_SERVER_GROUP_UID=0
+# COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
+#STORM_GRIDHTTPS_SERVER_GROUP_UID=
 
 # Checksum support
 #---------------------------------------------------------
@@ -141,7 +142,7 @@ STORM_DB_PWD=
 # List of supported Storage Areas.
 # Usually at least one Storage Area for each VO specified in VOS should be created. (e.g. STORM_STORAGEAREA_LIST="SA1 SA2 SA3").
 # OPTIONAL - Default value: ${VOS}
-STORM_STORAGEAREA_LIST=${VOS}
+#STORM_STORAGEAREA_LIST=${VOS}
 
 # Default Storage Areas settings
 #---------------------------------------------------------
@@ -161,17 +162,15 @@ STORM_STORAGEAREA_LIST=${VOS}
 # Load balancing strategy for GRIDFTP servers pool.
 # OPTIONAL - Available values: [round-robin|random|weight|metric-1|metric-2] - Default value: round-robin
 #STORM_GRIDFTP_POOL_STRATEGY=round-robin
-# GRIDFTP servers pool list. ATTENTION: this variable define a list of pair values comma-separated: hostname,weight, e.g.:
-# STORM_GRIDFTP_POOL_LIST="host1,weight1 host2,weight2 host3,weight3"
-# Weight has 0-100 range; if not specified, weight will be 100.
-# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
-STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
+# GRIDFTP servers pool list. A comma separated list of hosts
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
+#STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
 # Rfio server.
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST}
-STORM_RFIO_HOST=${STORM_BACKEND_HOST}
+#STORM_RFIO_HOST=${STORM_BACKEND_HOST}
 # Root server.
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST}
-STORM_ROOT_HOST=${STORM_BACKEND_HOST}
+#STORM_ROOT_HOST=${STORM_BACKEND_HOST}
 # Storage Class type.
 # OPTIONAL - Available values: [T0D1|T1D0|T1D1|<null>] - No default value.
 #STORM_STORAGECLASS=
@@ -225,7 +224,7 @@ STORM_ROOT_HOST=${STORM_BACKEND_HOST}
 # Example for a Storage Area "INFNGRID":
 #STORM_STORAGEAREA_LIST="infngrid"
 # **COMPULSORY** variables
-STORM_INFNGRID_VONAME=infngrid
+#STORM_INFNGRID_VONAME=infngrid
 # **OPTIONAL** variables
 #STORM_INFNGRID_ROOT=$STORM_DEFAULT_ROOT/infngrid
 #STORM_INFNGRID_ACCESSPOINT=/infngrid

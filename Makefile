@@ -1,9 +1,11 @@
+include Makefile.inc
+
 NAME := yaim-storm
 prefix=$(PREFIX)
 PACKAGE=yaim-storm
-VERSION=4.1.1
+VERSION=$(version)
 VERSION_=`echo $(VERSION) | tr '.' '_'`
-RELEASE=1.sl5
+RELEASE=$(release)
 FULLNAME := $(NAME)-$(VERSION)
 
 REMOTE_USER=`whoami`
@@ -12,11 +14,9 @@ LOG=${HOME}/build_$(PACKAGE).log
 
 SL4_PUB_PATH_32=/rep/repo/ig_sl4-i386/3_1_0/
 SL4_PUB_PATH_64=/rep/repo/ig_sl4-x86_64/3_1_0/
-#SL5_PUB_PATH_32=/rep/repo/ig_sl5-i386/3_2_0/
 SL5_PUB_PATH_64=/rep/repo/ig_sl5-x86_64/3_2_0/
 SL4_TEST_PATH_32=/rep/repo/ig-cert_sl4-i386/3_1_0/
 SL4_TEST_PATH_64=/rep/repo/ig-cert_sl4-x86_64/3_1_0/
-#SL5_TEST_PATH_32=/rep/repo/ig-cert_sl5-i386/3_2_0/
 SL5_TEST_PATH_64=/rep/repo/ig-cert_sl5-x86_64/3_2_0/
 SVN_URL=https://svn.forge.cnaf.infn.it/svn/igrelease
 SVN_TAG=$(NAME)-$(VERSION_)-$(RELEASE)
