@@ -14,7 +14,7 @@
 
 SUBDIR = utils
 
-functionlocaldir = $(prefix)/functions/local
+functionlocaldir = $(prefix)/yaim/functions/local
 dist_functionlocal_SCRIPTS = config_gip_glue2_storm \
     config_gip_storm \
     config_ntp \

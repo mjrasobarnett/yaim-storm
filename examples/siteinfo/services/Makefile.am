@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-examplesconfdir = $(prefix)/examples/siteinfo/services/
+examplesconfdir = $(prefix)/yaim/examples/siteinfo/services/
 dist_examplesconf_DATA = se_storm_backend \
    se_storm_checksum \
    se_storm_frontend \

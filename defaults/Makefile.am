@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-defaultconfdir = $(prefix)/defaults
+defaultconfdir = $(prefix)/yaim/defaults
 dist_defaultconf_DATA = se_storm_backend.pre \
    se_storm_checksum.pre \
    se_storm_frontend.pre \

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-functionutilsdir = $(prefix)/functions/utils
+functionutilsdir = $(prefix)/yaim/functions/utils
 dist_functionutils_SCRIPTS = manage_conf
 
 MAINTAINERCLEANFILES = Makefile.in
