@@ -34,12 +34,10 @@ BuildArch:      noarch
 BuildRoot:      %{_builddir}/var/tmp/%{name}-%{version}
 Summary:        Provides the utility files. 
 
-%define _sysconfdir    /etc
-%define _generalprefix storm
-
 BuildRequires: libtool
 BuildRequires: automake
 BuildRequires: autoconf
+Requires: glite-yaim-core
 
 %define debug_package %{nil}
 
@@ -69,10 +67,24 @@ rm -rf $RPM_BUILD_ROOT
 %files 
 %defattr(-,%{default_user},%{default_user},-)
 
+%dir %{prefix}/yaim/
+%dir %{prefix}/yaim/defaults
 %{prefix}/yaim/defaults
+
+%dir %{prefix}/yaim/etc
+%dir %{prefix}/yaim/etc/versions
 %{prefix}/yaim/etc/versions/%{name}
+
+%dir %{prefix}/yaim/examples
+%dir %{prefix}/yaim/examples/siteinfo
+%dir %{prefix}/yaim/examples/siteinfo/services
 %{prefix}/yaim/examples/siteinfo/services
+
+%dir %{prefix}/yaim/functions
+%dir %{prefix}/yaim/functions/local
 %{prefix}/yaim/functions/local
+
+%dir %{prefix}/yaim/node-info.d
 %{prefix}/yaim/node-info.d
 
 %changelog

@@ -35,7 +35,7 @@ doc_DATA = AUTHORS \
     README
 
 ## Subdirectories list
-SUBDIRS = defaults examples functions node-info.d
+SUBDIRS = defaults etc examples functions node-info.d
 
 ## Default flags to run aclocal
 ACLOCAL_AMFLAGS = -I m4

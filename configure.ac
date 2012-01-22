@@ -57,6 +57,7 @@ AM_CONFIG_HEADER([etc/autogen/config.h])
 AC_CONFIG_FILES([Makefile])
 
 AC_CONFIG_FILES([defaults/Makefile])
+AC_CONFIG_FILES([etc/Makefile])
 AC_CONFIG_FILES([examples/Makefile])
 AC_CONFIG_FILES([examples/siteinfo/Makefile])
 AC_CONFIG_FILES([examples/siteinfo/services/Makefile])
