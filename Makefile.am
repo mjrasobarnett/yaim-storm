@@ -27,12 +27,12 @@ EXTRA_DIST = \
     project \
     m4
 
-docdir = $(datadir)/doc/@PACKAGE@-@VERSION@
-doc_DATA = AUTHORS \
-    LICENSE \
-    CREDITS \
-    ChangeLog \
-    README
+#docdir = $(datadir)/doc/@PACKAGE@-@VERSION@
+#doc_DATA = AUTHORS \
+#    LICENSE \
+#    CREDITS \
+#    ChangeLog \
+#    README
 
 ## Subdirectories list
 SUBDIRS = defaults etc examples functions node-info.d
