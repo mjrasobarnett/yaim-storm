@@ -13,7 +13,7 @@
 # limitations under the License.
 
 EXTRA_DIST = \
-    yaim-storm.in \
+    yaim-storm.in 
 
 etcconfdir = $(prefix)/etc/versions
 dist_etcconf_DATA = yaim-storm
