@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-nodeconfdir = $(prefix)/yaim/node-conf.d
+nodeconfdir = $(prefix)/yaim/node-info.d
 dist_nodeconf_DATA = se_storm_backend \
    se_storm_checksum \
    se_storm_frontend \

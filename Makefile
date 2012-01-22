@@ -58,7 +58,7 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(top_srcdir)/etc/autogen/config.h.in \
 	./project/config.guess ./project/config.sub \
 	./project/install-sh ./project/ltmain.sh ./project/missing \
-	AUTHORS
+	AUTHORS ChangeLog
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/storm.m4 \
@@ -150,8 +150,8 @@ SHELL = /bin/sh
 STRIP = strip
 VERSION = 4.1.7
 WORKDIR = /home/joda/storm-yaim/yaim-storm_4.2
-YAIM_STORM = sl5
 YAIM_STORM_AGE_NUMBER = 1
+YAIM_STORM_SO = sl5
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -700,12 +700,12 @@ stage:
 
 distsrc:
 	mkdir -p /home/joda/storm-yaim/yaim-storm_4.2/../dist
-	cp $(distdir).tar.gz /home/joda/storm-yaim/yaim-storm_4.2/../dist/$(distdir)-1.@YAIM_STORM_SO@.src.tar.gz
+	cp $(distdir).tar.gz /home/joda/storm-yaim/yaim-storm_4.2/../dist/$(distdir)-1.sl5.src.tar.gz
 	cp $(RPM_SRPM)/*.rpm /home/joda/storm-yaim/yaim-storm_4.2/../dist
 
 distbin: stage  
 	mkdir -p /home/joda/storm-yaim/yaim-storm_4.2/../dist; \
-	cd etics-tmp; tar -zcf $(distdir).noarch.tar.gz etc usr; cp $(distdir).noarch.tar.gz /home/joda/storm-yaim/yaim-storm_4.2/../dist/$(distdir)-1.@YAIM_STORM_SO@.noarch.tar.gz; cd ..; \
+	cd etics-tmp; tar -zcf $(distdir).noarch.tar.gz etc usr; cp $(distdir).noarch.tar.gz /home/joda/storm-yaim/yaim-storm_4.2/../dist/$(distdir)-1.sl5.noarch.tar.gz; cd ..; \
 	cp $(RPM_RPM)/*/*.rpm /home/joda/storm-yaim/yaim-storm_4.2/../dist
 
 clean-local:

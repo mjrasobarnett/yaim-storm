@@ -15,7 +15,7 @@
 EXTRA_DIST = \
     yaim-storm.in 
 
-etcconfdir = $(prefix)/etc/versions
+etcconfdir = $(prefix)/yaim/etc/versions
 dist_etcconf_DATA = yaim-storm
 
 CLEANFILES = \

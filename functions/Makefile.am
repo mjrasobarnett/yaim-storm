@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SUBDIR = utils
+SUBDIRS = utils
 
 functionlocaldir = $(prefix)/yaim/functions/local
 dist_functionlocal_SCRIPTS = config_gip_glue2_storm \
