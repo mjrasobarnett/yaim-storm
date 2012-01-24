@@ -27,13 +27,6 @@ EXTRA_DIST = \
     project \
     m4
 
-#docdir = $(datadir)/doc/@PACKAGE@-@VERSION@
-#doc_DATA = AUTHORS \
-#    LICENSE \
-#    CREDITS \
-#    ChangeLog \
-#    README
-
 ## Subdirectories list
 SUBDIRS = defaults etc examples functions node-info.d
 
@@ -92,7 +85,7 @@ distsrc:
 
 distbin: stage  
 	mkdir -p @DISTBIN@; \
-	cd etics-tmp; tar -zcf $(distdir).noarch.tar.gz etc usr; cp $(distdir).noarch.tar.gz @DISTBIN@/$(distdir)-@YAIM_STORM_AGE_NUMBER@.@YAIM_STORM_SO@.noarch.tar.gz; cd ..; \
+	cd etics-tmp; tar -zcf $(distdir).noarch.tar.gz opt; cp $(distdir).noarch.tar.gz @DISTBIN@/$(distdir)-@YAIM_STORM_AGE_NUMBER@.@YAIM_STORM_SO@.noarch.tar.gz; cd ..; \
 	cp $(RPM_RPM)/*/*.rpm @DISTBIN@
 
 clean-local:

@@ -92,14 +92,14 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home/joda/storm-yaim/yaim-storm_4.2/project/missing --run aclocal-1.9
+ACLOCAL = ${SHELL} /home/joda/storm-2.0/emi.storm.yaim-storm/project/missing --run aclocal-1.9
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/joda/storm-yaim/yaim-storm_4.2/project/missing --run tar
+AMTAR = ${SHELL} /home/joda/storm-2.0/emi.storm.yaim-storm/project/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/joda/storm-yaim/yaim-storm_4.2/project/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/joda/storm-yaim/yaim-storm_4.2/project/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/joda/storm-yaim/yaim-storm_4.2/project/missing --run automake-1.9
+AUTOCONF = ${SHELL} /home/joda/storm-2.0/emi.storm.yaim-storm/project/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/joda/storm-2.0/emi.storm.yaim-storm/project/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/joda/storm-2.0/emi.storm.yaim-storm/project/missing --run automake-1.9
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=none
@@ -113,8 +113,8 @@ CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
-DISTBIN = /home/joda/storm-yaim/yaim-storm_4.2/../dist
-DISTSOURCE = /home/joda/storm-yaim/yaim-storm_4.2/../dist
+DISTBIN = /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/sl5_x86_64_gcc412
+DISTSOURCE = /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/src
 ECHO = echo
 ECHO_C = 
 ECHO_N = -n
@@ -134,7 +134,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIBTYPE = lib64
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/joda/storm-yaim/yaim-storm_4.2/project/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/joda/storm-2.0/emi.storm.yaim-storm/project/missing --run makeinfo
 OBJEXT = o
 PACKAGE = yaim-storm
 PACKAGE_BUGREPORT = 
@@ -149,7 +149,7 @@ SET_MAKE =
 SHELL = /bin/sh
 STRIP = strip
 VERSION = 4.1.7
-WORKDIR = /home/joda/storm-yaim/yaim-storm_4.2
+WORKDIR = /home/joda/storm-2.0/emi.storm.yaim-storm
 YAIM_STORM_AGE_NUMBER = 1
 YAIM_STORM_SO = sl5
 ac_ct_AR = ar
@@ -182,14 +182,14 @@ host_os = linux-gnu
 host_vendor = redhat
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /home/joda/storm-yaim/yaim-storm_4.2/project/install-sh
+install_sh = /home/joda/storm-2.0/emi.storm.yaim-storm/project/install-sh
 libdir = ${exec_prefix}/lib64
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
 mandir = ${prefix}/share/man
 mkdir_p = mkdir -p --
 oldincludedir = /usr/include
-prefix = /home/joda/storm-yaim/yaim-storm_4.2/etics-tmp/opt/glite
+prefix = /home/joda/storm-2.0/emi.storm.yaim-storm/etics-tmp/opt/glite
 program_transform_name = s,x,x,
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
@@ -206,13 +206,6 @@ EXTRA_DIST = \
     project \
     m4
 
-
-#docdir = $(datadir)/doc/yaim-storm-4.1.7
-#doc_DATA = AUTHORS \
-#    LICENSE \
-#    CREDITS \
-#    ChangeLog \
-#    README
 SUBDIRS = defaults etc examples functions node-info.d
 ACLOCAL_AMFLAGS = -I m4
 CLEANFILES = \
@@ -676,13 +669,13 @@ rpm: dist
 	/bin/cp $(SPEC_FILE) $(RPM_SPEC)
 	cd $(RPM_SPEC); \
         /usr/bin/rpmbuild  --define "_topdir $(RPM_MAIN_DIR)" --nodeps -ba $(RPM_SPEC)/$(SPEC_FILE)
-	mkdir -p /home/joda/storm-yaim/yaim-storm_4.2/../dist /home/joda/storm-yaim/yaim-storm_4.2/../dist
+	mkdir -p /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/src /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/sl5_x86_64_gcc412
 
 stage:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
         dot_seen=no; \
         target="install"; \
-        prefix_arg="/home/joda/storm-yaim/yaim-storm_4.2/etics-tmp/opt/glite"; \
+        prefix_arg="/home/joda/storm-2.0/emi.storm.yaim-storm/etics-tmp/opt/glite"; \
         list='$(SUBDIRS)'; for subdir in $$list; do \
           echo "Making $$target $$prefix_arg in $$subdir"; \
           if test "$$subdir" = "."; then \
@@ -699,14 +692,14 @@ stage:
         fi; test -z "$$fail"
 
 distsrc:
-	mkdir -p /home/joda/storm-yaim/yaim-storm_4.2/../dist
-	cp $(distdir).tar.gz /home/joda/storm-yaim/yaim-storm_4.2/../dist/$(distdir)-1.sl5.src.tar.gz
-	cp $(RPM_SRPM)/*.rpm /home/joda/storm-yaim/yaim-storm_4.2/../dist
+	mkdir -p /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/src
+	cp $(distdir).tar.gz /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/src/$(distdir)-1.sl5.src.tar.gz
+	cp $(RPM_SRPM)/*.rpm /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/src
 
 distbin: stage  
-	mkdir -p /home/joda/storm-yaim/yaim-storm_4.2/../dist; \
-	cd etics-tmp; tar -zcf $(distdir).noarch.tar.gz etc usr; cp $(distdir).noarch.tar.gz /home/joda/storm-yaim/yaim-storm_4.2/../dist/$(distdir)-1.sl5.noarch.tar.gz; cd ..; \
-	cp $(RPM_RPM)/*/*.rpm /home/joda/storm-yaim/yaim-storm_4.2/../dist
+	mkdir -p /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/sl5_x86_64_gcc412; \
+	cd etics-tmp; tar -zcf $(distdir).noarch.tar.gz etc usr; cp $(distdir).noarch.tar.gz /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/sl5_x86_64_gcc412/$(distdir)-1.sl5.noarch.tar.gz; cd ..; \
+	cp $(RPM_RPM)/*/*.rpm /home/joda/storm-2.0/dist/emi/emi.storm.yaim-storm/4.2.0/sl5_x86_64_gcc412
 
 clean-local:
 	rm -f yaim-storm-4.1.7.*.tar.gz 
