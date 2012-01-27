@@ -119,7 +119,6 @@ STORM_DB_PWD=
 # COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
 #STORM_GRIDHTTPS_SERVER_USER_UID=
 # StoRM Gridhttps server service user GID.
-# OPTIONAL - Default value: 0
 # COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
 #STORM_GRIDHTTPS_SERVER_GROUP_UID=
 
