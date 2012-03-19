@@ -74,6 +74,15 @@ function config_storm_frontend () {
     yaimlog INFO "${FUNCTION}: Ok!"
   fi
 
+	if [ "x${STORM_FE_USER_BLACKLISTING}" == x"true" ]; then
+		if [ "x${STORM_FE_ARGUS_PEP_HOSTNAME}" == "x" ]; then
+		      yaimlog ERROR "${FUNCTION}: To enable user blacklisting you have to provide the ARGUS PEP hostname in STORM_FE_ARGUS_PEP_HOSTNAME"
+			  yestr ${YEX_CONFTARGET}
+			  yaimlog ERROR "${YERRORSTR}"
+			  exit ${YEX_CONFTARGET}
+		fi
+	fi 
+
   yaimlog INFO "${FUNCTION}: Configuration file"
   #----------------------------------------------------------
   # /etc/storm/frontend-server/storm-frontend-server.conf - BEGIN
@@ -112,23 +121,31 @@ function config_storm_frontend () {
   chmod 644 ${FILE}
 
   #==========================================================
-  set_value "db.host"                      "${STORM_DB_HOST}"                           ${FILE}
-  set_value "db.user"                      "${STORM_DB_USER}"                           ${FILE}
-  set_value "db.passwd"                    "${STORM_DB_PWD}"                            ${FILE}
-  set_value "fe.port"                      "${STORM_FRONTEND_PORT}"                     ${FILE}
-  set_value "fe.threadpool.threads.number" "${STORM_FE_THREADS_NUMBER}"                 ${FILE}
-  set_value "fe.gsoap.maxpending"          "${STORM_FE_GSOAP_MAXPENDING}"               ${FILE}
-  #set_value "log.filename"                 "${STORM_FE_LOG_FILE}"                       ${FILE}
-  set_value "log.debuglevel"               "${STORM_FE_LOG_LEVEL}"                      ${FILE}
-  #set_value "security.enable.mapping"      "${STORM_FE_ENABLE_MAPPING}"                 ${FILE}
-  #set_value "security.enable.vomscheck"    "${STORM_FE_ENABLE_VOMSCHECK}"               ${FILE}
-  set_value "be.recalltable.port"          "${STORM_BACKEND_REST_SERVICES_PORT}"		${FILE}
-  set_value "be.xmlrpc.host"               "${STORM_FE_BE_XMLRPC_HOST}"                 ${FILE}
-  set_value "be.xmlrpc.port"               "${STORM_FE_BE_XMLRPC_PORT}"                 ${FILE}
-  set_value "be.xmlrpc.path"               "${STORM_FE_BE_XMLRPC_PATH}"                 ${FILE}
-  set_value "proxy.dir"                    "${STORM_PROXY_HOME}"                        ${FILE}
-  set_value "proxy.user"                   "${STORM_USER}"                              ${FILE}
-  #set_value "wsdl.file"                    "${STORM_FE_WSDL}"                           ${FILE}
+  set_value "db.host"                       "${STORM_DB_HOST}"                           ${FILE}
+  set_value "db.user"                       "${STORM_DB_USER}"                           ${FILE}
+  set_value "db.passwd"                     "${STORM_DB_PWD}"                            ${FILE}
+  set_value "fe.port"                       "${STORM_FRONTEND_PORT}"                     ${FILE}
+  set_value "fe.threadpool.threads.number"  "${STORM_FE_THREADS_NUMBER}"                 ${FILE}
+  set_value "fe.gsoap.maxpending"           "${STORM_FE_GSOAP_MAXPENDING}"               ${FILE}
+  #set_value "log.filename"                  "${STORM_FE_LOG_FILE}"                       ${FILE}
+  set_value "log.debuglevel"                "${STORM_FE_LOG_LEVEL}"                      ${FILE}
+  #set_value "security.enable.mapping"       "${STORM_FE_ENABLE_MAPPING}"                 ${FILE}
+  #set_value "security.enable.vomscheck"     "${STORM_FE_ENABLE_VOMSCHECK}"               ${FILE}
+  set_value "be.recalltable.port"           "${STORM_BACKEND_REST_SERVICES_PORT}"		 ${FILE}
+  set_value "be.xmlrpc.host"                "${STORM_FE_BE_XMLRPC_HOST}"                 ${FILE}
+  set_value "be.xmlrpc.port"                "${STORM_FE_BE_XMLRPC_PORT}"                 ${FILE}
+  set_value "be.xmlrpc.path"                "${STORM_FE_BE_XMLRPC_PATH}"                 ${FILE}
+  set_value "check.user.blacklisting"		"${STORM_FE_USER_BLACKLISTING}"              ${FILE}
+  set_value "argus-pep.protocol"			"${STORM_FE_ARGUS_PEP_PROTOCOL}"             ${FILE}
+  set_value "argus-pep.hostname"			"${STORM_FE_ARGUS_PEP_HOSTNAME}"             ${FILE}
+  set_value "argus-pep.port"				"${STORM_FE_ARGUS_PEP_PORT}"                 ${FILE}
+  set_value "argus-pep.service"				"${STORM_FE_ARGUS_PEP_SERVICE}"              ${FILE}
+  set_value "monitoring.enabled"			"${STORM_FE_MONITORING_ENABLED}"             ${FILE}
+  set_value "monitoring.timeInterval"		"${STORM_FE_MONITORING_TIME_INTERVAL}"       ${FILE}
+  set_value "monitoring.detailed"			"${STORM_FE_MONITORING_DETAILED}"            ${FILE}
+  set_value "proxy.dir"                     "${STORM_PROXY_HOME}"                        ${FILE}
+  set_value "proxy.user"                    "${STORM_USER}"                              ${FILE}
+  #set_value "wsdl.file"                     "${STORM_FE_WSDL}"                           ${FILE}
   #==========================================================
 
   yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"

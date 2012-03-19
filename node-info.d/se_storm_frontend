@@ -47,5 +47,4 @@ config_vomsmap
 config_gip_service_release
 config_lcgenv
 config_storm_generic
-config_storm_frontend
-config_lcas_lcmaps_gt4"
+config_storm_frontend"
