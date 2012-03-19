@@ -56,13 +56,13 @@ STORM_FE_LOG_FILE=/var/log/storm/storm-frontend.log
 #---------------------------------------------------------
 # StoRM frontend monitoring flag
 # OPTIONAL - Available values: [true|false] - Default value: true
-STORM_FE_MONITORING_ENABLED = true
+STORM_FE_MONITORING_ENABLED=true
 # StoRM frontend monitoring time interval. Determines the duration of each monitoring round
 # OPTIONAL -Default value: 60 (seconds)
-STORM_FE_MONITORING_TIME_INTERVAL = 60
+STORM_FE_MONITORING_TIME_INTERVAL=60
 # StoRM frontend monitoring detailed flag. Determines the printing of detailed information for each kind of srm call  
 # OPTIONAL - Available values: [true|false] - Default value: false
-STORM_FE_MONITORING_DETAILED = false
+STORM_FE_MONITORING_DETAILED=false
 
 # StoRM Frontend log level.
 # OPTIONAL - Available values: [KNOWN|ERROR|WARNING|INFO|DEBUG|DEBUG2] - Default value: INFO
@@ -99,19 +99,19 @@ STORM_BACKEND_REST_SERVICES_PORT=9998
 #---------------------------------------------------------
 # Enable the user blacklisting via Argus
 # OPTIONAL - Available values: [true|false] - Default value: false
-STORM_FE_USER_BLACKLISTING = false
+STORM_FE_USER_BLACKLISTING=false
 # Argus PEP full hostname
 # OPTIONAL - Mandatory if STORM_FE_USER_BLACKLISTING is true 
-#STORM_FE_ARGUS_PEP_HOSTNAME = 
+#STORM_FE_ARGUS_PEP_HOSTNAME=
 # Argus PEP service URL protocol
 # OPTIONAL - Available values: [https] - Default value: https
-STORM_FE_ARGUS_PEP_PROTOCOL = https
+STORM_FE_ARGUS_PEP_PROTOCOL=https
 # Argus PEP service port
 # OPTIONAL - Default value: 8154
-STORM_FE_ARGUS_PEP_PORT = 8154
+STORM_FE_ARGUS_PEP_PORT=8154
 # Argus PEP service name
 # OPTIONAL - Default value: authz
-STORM_FE_ARGUS_PEP_SERVICE = authz
+STORM_FE_ARGUS_PEP_SERVICE=authz
 
 # WSDL settings
 #---------------------------------------------------------
