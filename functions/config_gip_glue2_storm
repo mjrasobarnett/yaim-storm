@@ -363,6 +363,7 @@ EOF
 #
 dn: GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupID=resource,o=glue
 objectClass: GLUE2Service
+objectClass: GLUE2StorageService
 GLUE2ServiceId: ${STORM_FRONTEND_PUBLIC_HOST}
 GLUE2ServiceCapability: ${STORM_ENDPOINT_CAPABILITY}
 GLUE2ServiceType: Storage
