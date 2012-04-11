@@ -68,7 +68,7 @@ function config_storm_dir () {
     [ -d ${dir} ] || (yaimlog INFO "${FUNCTION}: Creating storage area ${dir}"; mkdir -p ${dir};
       yaimlog DEBUG "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for ${dir}"; 
       chown -R ${STORM_USER}:${STORM_USER} ${dir};
-      yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}"; chmod -R o-rwx ${dir})
+      yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}"; chmod -R o-rwx,g+r ${dir})
 
     # TODO: Improve this check to evaluates both gpfs and posix cases
     #if [ $? != 0 ]; then
