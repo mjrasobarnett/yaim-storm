@@ -137,7 +137,7 @@ function config_storm_frontend () {
   set_value "be.xmlrpc.path"                "${STORM_FE_BE_XMLRPC_PATH}"                 ${FILE}
   set_value "check.user.blacklisting"		"${STORM_FE_USER_BLACKLISTING}"              ${FILE}
   #Storm currently manages a single argus pepd endpoint
-  STORM_ARGUS_PEPD_ENDPOINT=$(echo ARGUS_PEPD_ENDPOINTS | awk '{print $1}')
+  STORM_ARGUS_PEPD_ENDPOINT=$(echo ${ARGUS_PEPD_ENDPOINTS} | awk '{print $1}')
   set_value "argus-pepd-endpoint"			"${STORM_ARGUS_PEPD_ENDPOINT}"               ${FILE}
   set_value "monitoring.enabled"			"${STORM_FE_MONITORING_ENABLED}"             ${FILE}
   set_value "monitoring.timeInterval"		"${STORM_FE_MONITORING_TIME_INTERVAL}"       ${FILE}
