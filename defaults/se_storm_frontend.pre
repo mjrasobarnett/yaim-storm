@@ -100,18 +100,9 @@ STORM_BACKEND_REST_SERVICES_PORT=9998
 # Enable the user blacklisting via Argus
 # OPTIONAL - Available values: [true|false] - Default value: false
 STORM_FE_USER_BLACKLISTING=false
-# Argus PEP full hostname
+# Argus PEP endpoints list
 # OPTIONAL - Mandatory if STORM_FE_USER_BLACKLISTING is true 
-#STORM_FE_ARGUS_PEP_HOSTNAME=
-# Argus PEP service URL protocol
-# OPTIONAL - Available values: [https] - Default value: https
-STORM_FE_ARGUS_PEP_PROTOCOL=https
-# Argus PEP service port
-# OPTIONAL - Default value: 8154
-STORM_FE_ARGUS_PEP_PORT=8154
-# Argus PEP service name
-# OPTIONAL - Default value: authz
-STORM_FE_ARGUS_PEP_SERVICE=authz
+#ARGUS_PEPD_ENDPOINTS=
 
 # WSDL settings
 #---------------------------------------------------------

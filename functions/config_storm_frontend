@@ -75,8 +75,8 @@ function config_storm_frontend () {
   fi
 
 	if [ "x${STORM_FE_USER_BLACKLISTING}" == x"true" ]; then
-		if [ "x${STORM_FE_ARGUS_PEP_HOSTNAME}" == "x" ]; then
-		      yaimlog ERROR "${FUNCTION}: To enable user blacklisting you have to provide the ARGUS PEP hostname in STORM_FE_ARGUS_PEP_HOSTNAME"
+		if [ "x${ARGUS_PEPD_ENDPOINTS}" == "x" ]; then
+		      yaimlog ERROR "${FUNCTION}: To enable user blacklisting you have to provide the ARGUS PEP endpoint in ARGUS_PEPD_ENDPOINTS"
 			  yestr ${YEX_CONFTARGET}
 			  yaimlog ERROR "${YERRORSTR}"
 			  exit ${YEX_CONFTARGET}
@@ -136,10 +136,9 @@ function config_storm_frontend () {
   set_value "be.xmlrpc.port"                "${STORM_FE_BE_XMLRPC_PORT}"                 ${FILE}
   set_value "be.xmlrpc.path"                "${STORM_FE_BE_XMLRPC_PATH}"                 ${FILE}
   set_value "check.user.blacklisting"		"${STORM_FE_USER_BLACKLISTING}"              ${FILE}
-  set_value "argus-pep.protocol"			"${STORM_FE_ARGUS_PEP_PROTOCOL}"             ${FILE}
-  set_value "argus-pep.hostname"			"${STORM_FE_ARGUS_PEP_HOSTNAME}"             ${FILE}
-  set_value "argus-pep.port"				"${STORM_FE_ARGUS_PEP_PORT}"                 ${FILE}
-  set_value "argus-pep.service"				"${STORM_FE_ARGUS_PEP_SERVICE}"              ${FILE}
+  #Storm currently manages a single argus pepd endpoint
+  STORM_ARGUS_PEPD_ENDPOINT=$(echo ARGUS_PEPD_ENDPOINTS | awk '{print $1}')
+  set_value "argus-pepd-endpoint"			"${STORM_ARGUS_PEPD_ENDPOINT}"               ${FILE}
   set_value "monitoring.enabled"			"${STORM_FE_MONITORING_ENABLED}"             ${FILE}
   set_value "monitoring.timeInterval"		"${STORM_FE_MONITORING_TIME_INTERVAL}"       ${FILE}
   set_value "monitoring.detailed"			"${STORM_FE_MONITORING_DETAILED}"            ${FILE}
