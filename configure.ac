@@ -26,7 +26,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # Release number
 osdist=`cat /etc/redhat-release | awk 'BEGIN {FS="release "} {print $2}'| awk 'BEGIN {FS="."} {print $1}'`
 AC_SUBST([YAIM_STORM_SO], [sl$osdist])
-AC_SUBST([YAIM_STORM_AGE_NUMBER], [1])
+AC_SUBST([YAIM_STORM_AGE_NUMBER], [2])
 
 # Notices.
 AC_COPYRIGHT([See LICENCE file for details])
