@@ -78,7 +78,7 @@ function config_storm_generic () {
   # Add edguser to primary-group of STORM_USER,
   # for rights on storm-yaim-variables.conf used by the dynamic info-provider
   yaimlog INFO "${FUNCTION}: Adding user edguser to '${STORM_USER}' group"
-  storm_group=`groups storm |cut -d " " -f 3`
+  storm_group=`groups ${STORM_USER} |cut -d " " -f 3`
   yaimlog DEBUG "storm_group = $storm_group"
   if ( getent group "${storm_group}" >/dev/null ); then
     usermod -a -G $storm_group edguser
