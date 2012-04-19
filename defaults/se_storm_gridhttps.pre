@@ -18,11 +18,11 @@ STORM_GRIDHTTPS_SERVER_PORT=8088
 # OPTIONAL - Default value: 8443
 STORM_GRIDHTTPS_HTTPS_SERVER_PORT=8443
 # Host certificate for Trustmanager connector.
-# OPTIONAL - Default value: /usr/share/tomcat5/conf/hostcert.pem
-TOMCAT_HOSTCERT_LOCATION=/usr/share/tomcat5/conf/hostcert.pem
+# OPTIONAL - Default value: /etc/grid-security/tomcat-cert.pem
+TOMCAT_HOSTCERT_LOCATION=/etc/grid-security/tomcat-cert.pem
 # Host key for Trustmanager connector.
-# OPTIONAL - Default value: /usr/share/tomcat5/conf/hostkey.pem
-TOMCAT_HOSTKEY_LOCATION=/usr/share/tomcat5/conf/hostkey.pem
+# OPTIONAL - Default value: /etc/grid-security/tomcat-key.pem
+TOMCAT_HOSTKEY_LOCATION=/etc/grid-security/tomcat-key.pem
 # Trustmanager connector crl update time interval.
 # OPTIONAL - Default value: 2h
 TRUSTMANAGER_CRL_UPDATE_INTERVAL=2h

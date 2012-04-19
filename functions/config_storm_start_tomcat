@@ -32,7 +32,14 @@
 
 config_storm_start_tomcat_check () {
 
- yaimlog INFO "No required variables to set."
+  ret=0
+  detect_tomcat
+  if [ -z ${TOMCAT_VERSION} ]; then
+    yaimlog ERROR "Tomcat is probably not installed !"
+    yaimlog ERROR "${YERRORSTR}"
+    let "ret |= 1"
+  fi
+  return $ret
 
 }
 
@@ -54,22 +61,9 @@ if [ ! -f /etc/java/java.conf ]; then
   exit ${YEX_NOSUCHFILE}
 fi
 
-yaimlog INFO "Check that tomcat is installed"
-if [ ! -f /etc/tomcat5/tomcat5.conf ]; then
-    yestr ${YEX_NOSUCHFILE}
-    yaimlog ERROR "/etc/tomcat5/tomcat5.conf doesn't exist. Tomcat is probably not installed !"
-    yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_NOSUCHFILE}
-fi
-
-####@ chkconfig Tomcat
-yaimlog DEBUG "Doing chkconfig for tomcat5..."
-/sbin/chkconfig --add tomcat5
-/sbin/chkconfig tomcat5 on
-
 ####@ Restart Tomcat
 yaimlog INFO "Starting Tomcat"
-service tomcat5 start
+service ${TOMCAT_VERSION} start
 
 return 0
 

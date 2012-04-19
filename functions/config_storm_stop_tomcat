@@ -32,8 +32,14 @@
 
 config_storm_stop_tomcat_check () {
 
- yaimlog INFO "No required variables to set."
-
+  ret=0
+  detect_tomcat
+  if [ -z ${TOMCAT_VERSION} ]; then
+    yaimlog ERROR "Tomcat is probably not installed !"
+    yaimlog ERROR "${YERRORSTR}"
+    let "ret |= 1"
+  fi
+  return $ret
 }
 
 config_storm_stop_tomcat_setenv () {
@@ -54,16 +60,8 @@ if [ ! -f /etc/java/java.conf ]; then
   exit ${YEX_NOSUCHFILE}
 fi
 
-yaimlog INFO "Check that tomcat is installed"
-if [ ! -f /etc/tomcat5/tomcat5.conf ]; then
-    yestr ${YEX_NOSUCHFILE}
-    yaimlog ERROR "/etc/tomcat5/tomcat5.conf doesn't exist. Tomcat is probably not installed !"
-    yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_NOSUCHFILE}
-fi
-
 yaimlog INFO "Stop tomcat in case it's running"
-service tomcat5 stop 
+service ${TOMCAT_VERSION} stop 
 
 return 0
 
