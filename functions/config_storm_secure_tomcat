@@ -187,6 +187,7 @@ if [ "${TOMCAT_VERSION}" == "tomcat5" ]; then
 	build-jar-repository /var/lib/tomcat5/common/lib log4j
 elif [ "${TOMCAT_VERSION}" == "tomcat6" ]; then
 	build-jar-repository /usr/share/tomcat6/lib log4j
+	build-jar-repository /usr/share/tomcat6/lib commons-logging.jar
 fi
 
 # bouncy castle has changed packaging between 1.37 and 1.41:
