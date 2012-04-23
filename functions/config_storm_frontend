@@ -138,7 +138,9 @@ function config_storm_frontend () {
   set_value "check.user.blacklisting"		"${STORM_FE_USER_BLACKLISTING}"              ${FILE}
   #Storm currently manages a single argus pepd endpoint
   STORM_ARGUS_PEPD_ENDPOINT=$(echo ${ARGUS_PEPD_ENDPOINTS} | awk '{print $1}')
-  set_value "argus-pepd-endpoint"			"${STORM_ARGUS_PEPD_ENDPOINT}"               ${FILE}
+  if ! test -z $STORM_ARGUS_PEPD_ENDPOINT ; then
+    set_value "argus-pepd-endpoint"			"${STORM_ARGUS_PEPD_ENDPOINT}"               ${FILE}
+  fi
   set_value "monitoring.enabled"			"${STORM_FE_MONITORING_ENABLED}"             ${FILE}
   set_value "monitoring.timeInterval"		"${STORM_FE_MONITORING_TIME_INTERVAL}"       ${FILE}
   set_value "monitoring.detailed"			"${STORM_FE_MONITORING_DETAILED}"            ${FILE}
