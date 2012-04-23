@@ -197,7 +197,7 @@ if [ -f /usr/share/java-ext/bouncycastle-jdk1.5/bcprov.jar ]; then
 elif [ -f /usr/share/java/bcprov.jar ]; then
   # location >= 1.41
   if [ "${TOMCAT_VERSION}" == "tomcat5" ]; then
-	build-jar-repository /var/lib/tomcat5/common/lib lbcprov
+	build-jar-repository /var/lib/tomcat5/common/lib bcprov
   elif [ "${TOMCAT_VERSION}" == "tomcat6" ]; then
 	build-jar-repository /usr/share/tomcat6/lib bcprov
   fi
