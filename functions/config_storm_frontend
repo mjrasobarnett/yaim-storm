@@ -118,7 +118,7 @@ function config_storm_frontend () {
   find `dirname "${FILE}"` -ctime +2 -name 'storm-frontend.bkp*' -exec rm {} \;
 
   # Set permissions
-  chmod 644 ${FILE}
+  chmod 640 ${FILE}
 
   #==========================================================
   set_value "db.host"                       "${STORM_DB_HOST}"                           ${FILE}

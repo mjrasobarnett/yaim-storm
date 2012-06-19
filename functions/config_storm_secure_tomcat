@@ -96,6 +96,21 @@ if [ $? -ne 0 ] ; then
   yaimlog ERROR "${YERRORSTR}"
   exit ${YEX_NOUSER}
 fi
+
+
+  config_dir_prefix="/etc/storm"
+  config_dir="${config_dir_prefix}/gridhttps-server"
+  
+  # Change ownership to storm-gridhttps-server configuration directory
+  if [ -d ${config_dir} ]; then
+   #NOTE: this is not recursive
+    chown ${TOMCAT_USER}:${TOMCAT_USER} ${config_dir}
+  else
+    yaimlog ERROR "${FUNCTION}: StoRM gridhttps server configuration directory ${config_dir} doesn't exist"
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+  fi
       
 ####@ Copy the host certificates in tomcat
 yaimlog INFO "Copying hostcert to ${TOMCAT_HOSTCERT_LOCATION} for $TOMCAT_USER:root......"

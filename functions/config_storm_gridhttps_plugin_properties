@@ -53,6 +53,20 @@ function config_storm_gridhttps_plugin_properties () {
   # /etc/storm/gridhttps-plugin/storm.gridhttps.plugin.properties - BEGIN
   #----------------------------------------------------------
   
+  config_dir_prefix="/etc/storm"
+  config_dir="${config_dir_prefix}/gridhttps-plugin"
+  
+  # Change ownership to storm-gridhttps-plugin configuration directory
+  if [ -d ${config_dir} ]; then
+   #NOTE: this is not recursive
+    chown ${STORM_USER}:${STORM_USER} ${config_dir}
+  else
+    yaimlog ERROR "${FUNCTION}: StoRM gridhttps plugin configuration directory ${config_dir} doesn't exist"
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "${YERRORSTR}"
+    exit ${YEX_NOSUCHFILE}
+  fi
+  
   FILE="/etc/storm/gridhttps-plugin/storm.gridhttps.plugin.properties"     # Configuration filename
   FILE_T="${FILE}.template"                         # Template configuration filename
   FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"        # Backup configuration filename (if needed)
@@ -80,7 +94,7 @@ function config_storm_gridhttps_plugin_properties () {
     find `dirname "${FILE}"` -ctime +2 -name 'storm.gridhttps.plugin.properties.bkp*' -exec rm {} \;
 
     # Set permissions
-    chmod 644 ${FILE}
+    chmod 640 ${FILE}
     
     set_value "gridhttps.server.user.uid" "${STORM_GRIDHTTPS_SERVER_USER_UID}"    ${FILE}
     set_value "gridhttps.server.user.gid" "${STORM_GRIDHTTPS_SERVER_GROUP_UID}"   ${FILE}
