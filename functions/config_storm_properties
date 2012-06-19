@@ -93,7 +93,7 @@ fi
   find `dirname "${FILE}"` -ctime +2 -name 'storm.properties.bkp*' -exec rm {} \;
 
   # Set permissions
-  chmod 644 ${FILE}
+  chmod 640 ${FILE}
 
   #==========================================================
   # Set default (not in defaults/ because use variables set in services/ file)

@@ -58,10 +58,10 @@ function config_storm_namespace () {
   
   # Configuration file management
   STORM_NAMESPACE_OVERWRITE=`echo ${STORM_NAMESPACE_OVERWRITE} | tr '[:upper:]' '[:lower:]'`   # convert in lowercase
-  # If not exists, create it from template (can it be possible?)
+  # If not exists, create it empty
   if [ ! -f ${FILE} ]; then
-    yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} from template ${FILE_T}"
-    cp ${FILE_T} ${FILE}
+    yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} "
+    touch ${FILE}
   # Else if overwrite is enabled, create backup
   elif [ "${STORM_NAMESPACE_OVERWRITE}" = "true" ]; then
     yaimlog DEBUG "${FUNCTION}: Overwrite old configuration file ${FILE}"
@@ -82,7 +82,7 @@ function config_storm_namespace () {
   find `dirname "${FILE}"` -ctime +2 -name 'namespace.xml.bkp*' -exec rm {} \;
 
   # Set permissions
-  chmod 644 ${FILE}
+  chmod 640 ${FILE}
 
   #==========================================================
   # Configuration file creation
