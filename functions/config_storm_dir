@@ -65,18 +65,22 @@ function config_storm_dir () {
     x=STORM_${SA_UPP}_ROOT
     dir=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
 
-    [ -d ${dir} ] || (yaimlog INFO "${FUNCTION}: Creating storage area ${dir}"; mkdir -p ${dir};
+    if [ ! -d ${dir} ]; then
+      yaimlog INFO "${FUNCTION}: Creating storage area folder ${dir}"; 
+      mkdir -p ${dir};
+    fi
+
+    if [ -d ${dir} ]; then
       yaimlog DEBUG "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for ${dir}"; 
       chown -R ${STORM_USER}:${STORM_USER} ${dir};
-      yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}"; chmod -R o-rwx,g+r ${dir})
-
-    # TODO: Improve this check to evaluates both gpfs and posix cases
-    #if [ $? != 0 ]; then
-    #  if ! mmgetacl ${dir} >&/dev/null; then
-    #    yaimlog WARNING "${FUNCTION}: No ACL support in ${dir}! StoRM will not start!"
-    #  fi
-    #fi
-
+      yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}, adding group read permission"; 
+      chmod -R o-rwx,g+r ${dir}
+    else
+      yaimlog ERROR "${FUNC}: Unable to use ${dir} as Storage Area root!"
+      yestr ${YEX_NOSUCHFILE}
+      yaimlog ERROR "${YERRORSTR}"
+      exit ${YEX_NOSUCHFILE}
+    fi
   done
 
   # Exit with success
