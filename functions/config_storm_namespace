@@ -118,11 +118,6 @@ EOF
         SA_FSDRIVER=posixfs
         SA_FSSPACESYSTEM=MockSpaceSystem
         ;;
-      xfs)
-        SA_FSTYPE=xfs
-        SA_FSDRIVER=xfs
-        SA_FSSPACESYSTEM=XFSSpaceSystem
-        ;;
       gpfs)
         SA_FSTYPE=gpfs
         SA_FSDRIVER=gpfs

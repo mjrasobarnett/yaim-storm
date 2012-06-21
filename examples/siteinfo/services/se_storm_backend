@@ -147,7 +147,7 @@ STORM_DB_PWD=
 #---------------------------------------------------------
 # NOTE: you may change the settings for each SA acting on STORM_<SA>_* variables.
 # File system type.
-# OPTIONAL - Available values: [posixfs|xfs|gpfs] - Default value: posixfs
+# OPTIONAL - Available values: [posixfs|gpfs] - Default value: posixfs
 #STORM_FSTYPE=posixfs
 # ACL enforcing mechanism mode.
 # OPTIONAL - Available values: [aot|jit] (use aot for WLCG experiments) - Default value: aot
