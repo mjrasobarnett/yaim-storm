@@ -58,8 +58,7 @@ function config_storm_gridhttps_plugin_properties () {
   
   # Change ownership to storm-gridhttps-plugin configuration directory
   if [ -d ${config_dir} ]; then
-   #NOTE: this is not recursive
-    chown ${STORM_USER}:${STORM_USER} ${config_dir}
+    chown -R ${STORM_USER}:${STORM_USER} ${config_dir}
   else
     yaimlog ERROR "${FUNCTION}: StoRM gridhttps plugin configuration directory ${config_dir} doesn't exist"
     yestr ${YEX_NOSUCHFILE}
@@ -95,6 +94,7 @@ function config_storm_gridhttps_plugin_properties () {
 
     # Set permissions
     chmod 640 ${FILE}
+    chown ${STORM_USER}:${STORM_USER} ${FILE}
     
     set_value "gridhttps.server.user.uid" "${STORM_GRIDHTTPS_SERVER_USER_UID}"    ${FILE}
     set_value "gridhttps.server.user.gid" "${STORM_GRIDHTTPS_SERVER_GROUP_UID}"   ${FILE}
