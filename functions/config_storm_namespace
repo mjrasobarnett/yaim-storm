@@ -359,9 +359,10 @@ EOF
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (gsiftp)"
       # gsiftp entry could be multiple
       i=0
-      for SA_GRIDFTP_POOL in ${SA_GRIDFTP_POOL_LIST}; do
-        SA_GRIDFTP_POOL_HOST=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $1}'`
-        cat >> ${FILE} << EOF
+      for SA_GRIDFTP_POOL in $(echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
+        if [ ! -z ${SA_GRIDFTP_POOL} ]; then
+          SA_GRIDFTP_POOL_HOST=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $1}'`
+          cat >> ${FILE} << EOF
           <prot name="gsiftp">
             <id>$i</id>
             <schema>gsiftp</schema>
@@ -369,7 +370,8 @@ EOF
             <port>2811</port>
           </prot>
 EOF
-        ((i++))
+          ((i++))
+        fi
       done
     fi
 
@@ -422,7 +424,7 @@ EOF
         </trans-prot>
 EOF
     # gsiftp entry could be use a load balancing strategy
-    SA_GRIDFTP_POOL_NUMBER=`echo ${SA_GRIDFTP_POOL_LIST} | awk '{print NF}'`
+    SA_GRIDFTP_POOL_NUMBER=`echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{print NF}'`
     if [[ ${SA_GRIDFTP_POOL_NUMBER} > 1 ]]; then
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} gsiftp pool"
       cat >> ${FILE} << EOF
@@ -433,25 +435,29 @@ EOF
       # 'weight' strategy case
       if [ ${SA_GRIDFTP_POOL_STRATEGY} = 'weight' ]; then
         i=0
-        for SA_GRIDFTP_POOL in ${SA_GRIDFTP_POOL_LIST}; do
-          SA_GRIDFTP_POOL_WEIGHT=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $2}'`
-          # set to 1 if weight is null
-          if [ -z ${SA_GRIDFTP_POOL_WEIGHT} ]; then
-            SA_GRIDFTP_POOL_WEIGHT=100
-          fi
-          cat >> ${FILE} << EOF
+        for SA_GRIDFTP_POOL in $(echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
+          if [ ! -z ${SA_GRIDFTP_POOL} ]; then
+            SA_GRIDFTP_POOL_WEIGHT=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $2}'`
+            # set to 1 if weight is null
+            if [ -z ${SA_GRIDFTP_POOL_WEIGHT} ]; then
+              SA_GRIDFTP_POOL_WEIGHT=100
+            fi
+            cat >> ${FILE} << EOF
             <member member-id="$i"><weight>${SA_GRIDFTP_POOL_WEIGHT}</weight></member>
 EOF
-          ((i++))
+            ((i++))
+          fi
         done
       # other strategy cases
       else
         i=0
-        for SA_GRIDFTP_POOL in ${SA_GRIDFTP_POOL_LIST}; do
-          cat >> ${FILE} << EOF
+        for SA_GRIDFTP_POOL in $(echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
+          if [ ! -z ${SA_GRIDFTP_POOL} ]; then
+            cat >> ${FILE} << EOF
             <member member-id="$i"></member>
 EOF
-          ((i++))
+            ((i++))
+          fi
         done
       fi
       cat >> ${FILE} << EOF
