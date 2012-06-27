@@ -165,7 +165,7 @@ STORM_AUTH=permit-all
 # OPTIONAL - Available values: [true|false] - Default value: true
 STORM_SIZE_LIMIT=true
 # Load balancing strategy for GRIDFTP servers pool.
-# OPTIONAL - Available values: [round-robin|smart-rr|random|weight|metric-1|metric-2] - Default value: round-robin
+# OPTIONAL - Available values: [round-robin|smart-rr|random|weight] - Default value: round-robin
 STORM_GRIDFTP_POOL_STRATEGY=round-robin
 
 # Default resource bdii settings
