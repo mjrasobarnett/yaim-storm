@@ -72,7 +72,7 @@ function config_storm_dir () {
 
     if [ -d ${dir} ]; then
       yaimlog DEBUG "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for ${dir}"; 
-      chown -R ${STORM_USER}:${STORM_USER} ${dir};
+      chown -RL ${STORM_USER}:${STORM_USER} ${dir};
       yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}, adding group read permission"; 
       chmod -R o-rwx,g+r ${dir}
     else
