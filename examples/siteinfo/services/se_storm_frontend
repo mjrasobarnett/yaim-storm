@@ -10,6 +10,9 @@
 
 # General settings
 #---------------------------------------------------------
+# StoRM Frontend service port.
+# OPTIONAL - Default value: 8444
+#STORM_FRONTEND_PORT=8444
 # StoRM Frontend service user.
 # OPTIONAL - Default value: storm
 #STORM_USER=storm
@@ -41,6 +44,7 @@ STORM_DB_PWD=
 # (storm-frontend.conf) at every reconfiguration.
 # OPTIONAL - Available values: [true|false] - Default value: true
 #STORM_FRONTEND_OVERWRITE=true
+
 
 # Frontend general settings
 #---------------------------------------------------------

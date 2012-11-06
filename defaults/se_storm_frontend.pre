@@ -8,6 +8,9 @@
 
 # General settings
 #---------------------------------------------------------
+# StoRM Frontend service port.
+# OPTIONAL - Default value: 8444
+STORM_FRONTEND_PORT=8444
 # StoRM Frontend service user.
 # OPTIONAL - Default value: storm
 STORM_USER=storm
