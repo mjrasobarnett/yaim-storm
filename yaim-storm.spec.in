@@ -14,7 +14,7 @@
 
 %define name         @PACKAGE@
 %define version      @VERSION@
-%define release      @YAIM_STORM_AGE_NUMBER@.@YAIM_STORM_SO@
+%define release      @YAIM_STORM_AGE_NUMBER@
 
 %define builddir     @RPM_BUILD_DIR@/build-%{name}-%{version}
 
@@ -23,7 +23,7 @@
 
 Name:           %{name}
 Version:        %{version}
-Release:        %{release}
+Release:        %{release}%{?dist}
 Vendor:         EMI
 License:        Apache License
 URL:            http://grid-it.cnaf.infn.it
