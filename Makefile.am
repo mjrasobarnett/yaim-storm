@@ -41,15 +41,6 @@ MAINTAINERCLEANFILES = Makefile.in
 SPEC_FILE = \
     yaim-storm.spec
 
-#RPM_MAIN_DIR = $(PWD)/rpm
-#RPM_TMP_DIR = $(RPM_MAIN_DIR)/tmp
-#RPM_SOURCE = $(RPM_MAIN_DIR)/SOURCES
-#RPM_SPEC = $(RPM_MAIN_DIR)/SPECS
-#RPM_BUILD = $(RPM_MAIN_DIR)/BUILD
-#RPM_RPM = $(RPM_MAIN_DIR)/RPMS
-#RPM_SRPM = $(RPM_MAIN_DIR)/SRPMS
-#RPM_DIRS = $(RPM_MAIN_DIR) $(RPM_SOURCE) $(RPM_SPEC) $(RPM_BUILD) $(RPM_RPM) $(RPM_SRPM)
-
 RPM_MAIN_DIR = @MODULELOCATION@/rpm-build-test
 RPM_TMP_DIR = $(RPM_MAIN_DIR)/tmp
 RPM_SOURCE = $(RPM_MAIN_DIR)/SOURCES
@@ -58,6 +49,15 @@ RPM_BUILD = $(RPM_MAIN_DIR)/BUILD
 RPM_RPM = $(RPM_MAIN_DIR)/RPMS
 RPM_SRPM = $(RPM_MAIN_DIR)/SRPMS
 RPM_DIRS = $(RPM_MAIN_DIR) $(RPM_SOURCE) $(RPM_SPEC) $(RPM_BUILD) $(RPM_RPM) $(RPM_SRPM)
+
+rpm: dist
+        /bin/mkdir -p $(RPM_DIRS)
+        /bin/cp -u @PACKAGE@-@VERSION@.tar.gz $(RPM_SOURCE)
+        /bin/cp $(SPEC_FILE) $(RPM_SPEC)
+        /usr/bin/rpmbuild  --define "_topdir $(RPM_MAIN_DIR)" --nodeps -bs $(RPM_SPEC)/$(SPEC_FILE)
+
+rpm: srpm
+        /usr/bin/rpmbuild  --rebuild --define "_topdir $(RPM_MAIN_DIR)" --define "dist .@YAIM_STORM_SO@"  $(RPM_SRPM)/@PACKAGE@-@VERSION@-@YAIM_STORM_AGE_NUMBER@.src.rpm
 
 packaging: dist
 	/bin/mkdir -p $(RPM_DIRS)
@@ -68,14 +68,6 @@ packaging: dist
 	/bin/mkdir -p @MODULELOCATION@/SRPMS
 	/bin/cp $(RPM_SRPM)/* @MODULELOCATION@/RPMS
 	/bin/ls $(RPM_RPM)
-
-rpm: dist
-	/bin/mkdir -p $(RPM_DIRS)
-	/bin/cp -u @PACKAGE@-@VERSION@.tar.gz $(RPM_SOURCE)
-	/bin/cp $(SPEC_FILE) $(RPM_SPEC)
-	cd $(RPM_SPEC); \
-        /usr/bin/rpmbuild  --define "_topdir $(RPM_MAIN_DIR)" --nodeps -ba $(RPM_SPEC)/$(SPEC_FILE)
-	mkdir -p @DISTSOURCE@ @DISTBIN@
 
 stage:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
