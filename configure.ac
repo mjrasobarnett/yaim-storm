@@ -17,7 +17,7 @@
 #
 
 AC_PREREQ([2.59])
-AC_INIT([yaim storm], [4.2.2])
+AC_INIT([yaim storm], [4.2.3])
 AC_CONFIG_AUX_DIR([./project])
 AC_CONFIG_SRCDIR([defaults/se_storm_backend.pre])
 AM_INIT_AUTOMAKE
@@ -26,7 +26,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # Release number
 osdist=`cat /etc/redhat-release | awk 'BEGIN {FS="release "} {print $2}'| awk 'BEGIN {FS="."} {print $1}'`
 AC_SUBST([YAIM_STORM_SO], [sl$osdist])
-AC_SUBST([YAIM_STORM_AGE_NUMBER], [2])
+AC_SUBST([YAIM_STORM_AGE_NUMBER], [1])
 
 # Notices.
 AC_COPYRIGHT([See LICENCE file for details])

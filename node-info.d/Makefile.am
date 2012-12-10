@@ -14,7 +14,6 @@
 
 nodeconfdir = $(prefix)/yaim/node-info.d
 dist_nodeconf_DATA = se_storm_backend \
-   se_storm_checksum \
    se_storm_frontend \
    se_storm_gridftp \
    se_storm_gridhttps

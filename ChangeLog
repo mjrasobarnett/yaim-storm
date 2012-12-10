@@ -1,3 +1,8 @@
+
+10/12/2012 MicheleD
+* removed se_storm_checksum profile
+* fixed issue 305
+ 
 05/08/2011 Eli
 
 * changed glite-info-service script in glite-info-glue2-simple script
