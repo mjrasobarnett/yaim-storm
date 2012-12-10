@@ -1,0 +1,82 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_dir
+#
+# DESCRIPTION : This function configures the storage areas on a StoRM SE.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :       Check existence and permission of the Storage Areas
+#               served by StoRM and of the installation directory.
+#
+# YAIM MODULE:  yaim-storm
+#
+##############################################################################
+
+function config_storm_gridhttps_dir_check () {
+
+  requires $1 STORM_GRIDHTTPS_ENABLED STORM_DEFAULT_ROOT STORM_STORAGEAREA_LIST TOMCAT_USER
+  return $?
+
+}
+
+function config_storm_gridhttps_dir_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_gridhttps_dir () {
+
+  FUNCTION="config_storm_gridhttps_dir"
+
+  # Convert in lowercase
+  STORM_GRIDHTTPS_ENABLED=`echo ${STORM_GRIDHTTPS_ENABLED} | tr '[:upper:]' '[:lower:]'`
+  # Convert spaces to commas
+
+  if [ "x${STORM_GRIDHTTPS_ENABLED}" == "xtrue" ]; then
+	# Set Read Extended ACL for the service for the Storage Area directories
+	  for SA in $STORM_STORAGEAREA_LIST; do
+	    # Convert case
+	    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+	    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+	
+	    # Remove DNS-like characters from SA_UPP names
+	    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+	
+	    x=STORM_${SA_UPP}_ROOT
+	    dir=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
+	
+	    if [ -d ${dir} ]; then
+	      yaimlog DEBUG "${FUNCTION}: Setting Read Extended ACL to '${TOMCAT_USER}' group for ${dir}"; 
+	      setfacl -m g:${STORM_USER}:rx ${dir};
+	    else
+	      yaimlog ERROR "${FUNC}: Unable to use ${dir} as Storage Area root!"
+	      yestr ${YEX_NOSUCHFILE}
+	      yaimlog ERROR "${YERRORSTR}"
+	      exit ${YEX_NOSUCHFILE}
+	    fi
+	  done
+  fi
+  
+  # Exit with success
+  return 0
+
+}

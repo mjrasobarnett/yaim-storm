@@ -2,6 +2,8 @@
 * removed se_storm_checksum profile
 * fixed issue 305
 * added variables STORM_ANONYMOUS_HTTP_READ and STORM_<SA>_ANONYMOUS_HTTP_READ  
+* added function config_storm_gridhttps_dir to se_storm_backend profile
+
 05/08/2011 Eli
 
 * changed glite-info-service script in glite-info-glue2-simple script

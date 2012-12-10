@@ -46,6 +46,7 @@ config_mkgridmap
 config_vomsmap
 config_storm_generic
 config_storm_dir
+config_storm_gridhttps_dir
 config_storm_mysql
 config_rfio
 config_lcas_lcmaps_gt4
