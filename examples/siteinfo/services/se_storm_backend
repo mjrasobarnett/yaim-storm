@@ -150,9 +150,6 @@ STORM_DB_PWD=
 # GRIDFTP servers pool list. A comma separated list of hosts
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
 #STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
-# Storage Area anonymous read access via HTTP.
-# OPTIONAL - Available values: [true|false] - Default value: false
-#STORM_ANONYMOUS_HTTP_READ=false
 # Rfio server.
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST}
 #STORM_RFIO_HOST=${STORM_BACKEND_HOST}
