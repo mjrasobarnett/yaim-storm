@@ -19,7 +19,6 @@ dist_functionlocal_SCRIPTS = config_gip_glue2_storm \
     config_gip_storm \
     config_ntp \
     config_storm_backend \
-    config_storm_checksum \
     config_storm_dir \
     config_storm_frontend \
     config_storm_generic \

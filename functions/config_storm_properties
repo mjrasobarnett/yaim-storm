@@ -98,8 +98,6 @@ fi
   #==========================================================
   # Set default (not in defaults/ because use variables set in services/ file)
   STORM_SURL_ENDPOINT_LIST=${!STORM_SURL_ENDPOINT_LIST:-srm://${STORM_FRONTEND_PUBLIC_HOST}:${STORM_FRONTEND_PORT}${STORM_FRONTEND_PATH}}
-  # Convert in lowercase
-  STORM_CKSUM_SUPPORT=`echo ${STORM_CKSUM_SUPPORT} | tr '[:upper:]' '[:lower:]'`
   # Convert spaces to commas
   STORM_SURL_ENDPOINT_LIST=`echo ${STORM_SURL_ENDPOINT_LIST} | sed -e 's/ /,/g'`
 
@@ -112,27 +110,8 @@ fi
   set_value "proxy.home"                        "${STORM_PROXY_HOME}"                    ${FILE}
   set_value "storm.service.SURL.default-ports"  "${STORM_SERVICE_SURL_DEF_PORTS:-8444}"  ${FILE}
   set_value "storm.rest.services.port"		    "${STORM_BACKEND_REST_SERVICES_PORT}"    ${FILE}
+  set_value "checksum.enabled"                "false"        ${FILE}
   
-  if [ "x${STORM_CKSUM_SUPPORT}" == "xtrue" ]; then
-    HOSTNAMES=`echo ${STORM_CKSUM_SERVICE_LIST}     | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $1}' | sed s/[[:space:]]*,$//`
-    STATUS_PORTS=`echo ${STORM_CKSUM_SERVICE_LIST}  | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $2}' | sed s/[[:space:]]*,$//`
-    SERVICE_PORTS=`echo ${STORM_CKSUM_SERVICE_LIST} | awk 'BEGIN{FS=","; RS=" "; ORS=","}{print $3}' | sed s/[[:space:]]*,$//`
-    # Set default values
-    HOSTNAMES=${HOSTNAMES:-${STORM_BACKEND_HOST}}
-    STATUS_PORTS=${STATUS_PORTS:-9995}
-    SERVICE_PORTS=${SERVICE_PORTS:-9996}
-    STATUS_PORTS=`echo ${STATUS_PORTS} | \
-                  awk 'BEGIN {FS=","; ORS=","} {for (i=1; i<NF+1; i++) {if ($(i)=="") print("9995"); else print($(i));}}' | sed 's/,$//'`
-    SERVICE_PORTS=`echo ${SERVICE_PORTS} | \
-                   awk 'BEGIN {FS=","; ORS=","} {for (i=1; i<NF+1; i++) {if ($(i)=="") print("9996"); else print($(i));}}' | sed 's/,$//'`
-    set_value "checksum.enabled"                "${STORM_CKSUM_SUPPORT}"        ${FILE}
-    set_value "checksum.algorithm"              "${STORM_CKSUM_ALGORITHM}"      ${FILE}
-    set_value "checksum.server.hostnames"       "${HOSTNAMES}"                  ${FILE}
-    set_value "checksum.server.status_ports"    "${STATUS_PORTS}"               ${FILE}
-    set_value "checksum.server.service_ports"   "${SERVICE_PORTS}"              ${FILE}
-  else
-    set_value "checksum.enabled"                "false"        ${FILE}
-  fi
   
   # Gridhttps stuff
   

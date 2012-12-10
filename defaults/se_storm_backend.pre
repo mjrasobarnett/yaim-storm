@@ -128,20 +128,6 @@ STORM_GRIDHTTPS_SERVER_PORT=8088
 # COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
 #STORM_GRIDHTTPS_SERVER_GROUP_UID=
 
-# Checksum support
-#---------------------------------------------------------
-# Enable the support to checksum agents.
-# OPTIONAL - Default value: false
-STORM_CKSUM_SUPPORT=false
-# Algorithm used by checksum agents.
-# OPTIONAL - Available values: [Adler32|CRC32|MD2|MD5|SHA-1|SHA-256|SHA-384|SHA-512] - Default value: Adler32
-STORM_CKSUM_ALGORITHM="Adler32"
-# Checksum agents list.
-# ATTENTION: this variable define a list of three values comma-separated: hostname,status_port,service_port e.g.:
-# STORM_CKSUM_SERVICE_LIST="host1,status_port1,service_port1 host2,status_port2,service_port2"
-# OPTIONAL - Default value: ${STORM_BACKEND_HOST},9995,9996
-# NOTE: default value will be set in functions because use variables set in site-info.def file.
-
 # Storage Areas settings
 #---------------------------------------------------------
 # List of supported Storage Areas.
