@@ -141,6 +141,10 @@ function config_storm_frontend () {
   if ! test -z $STORM_ARGUS_PEPD_ENDPOINT ; then
     set_value "argus-pepd-endpoint"			"${STORM_ARGUS_PEPD_ENDPOINT}"               ${FILE}
   fi
+  if ! test -z ${STORM_PEPC_RESOURCEID} ; then
+    set_value "argus.resource-id"			"${STORM_PEPC_RESOURCEID}"                   ${FILE}
+  fi
+  
   set_value "monitoring.enabled"			"${STORM_FE_MONITORING_ENABLED}"             ${FILE}
   set_value "monitoring.timeInterval"		"${STORM_FE_MONITORING_TIME_INTERVAL}"       ${FILE}
   set_value "monitoring.detailed"			"${STORM_FE_MONITORING_DETAILED}"            ${FILE}

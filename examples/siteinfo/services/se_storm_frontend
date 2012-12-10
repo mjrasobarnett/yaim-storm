@@ -115,6 +115,9 @@ STORM_DB_PWD=
 # Argus PEP endpoints list
 # OPTIONAL - Mandatory if STORM_FE_USER_BLACKLISTING is true 
 #ARGUS_PEPD_ENDPOINTS= 
+# Argus StoRM resource identifier
+# OPTIONAL - Default value = storm
+#STORM_PEPC_RESOURCEID=storm
 
 # WSDL settings
 #---------------------------------------------------------
