@@ -3,6 +3,7 @@
 * fixed issue 305
 * added variables STORM_ANONYMOUS_HTTP_READ and STORM_<SA>_ANONYMOUS_HTTP_READ  
 * added function config_storm_gridhttps_dir to se_storm_backend profile
+* updated se_storm_gridhttps profile to StoRM GridHTTPs 2.0
 
 05/08/2011 Eli
 

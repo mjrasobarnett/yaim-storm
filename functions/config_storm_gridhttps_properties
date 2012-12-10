@@ -1,0 +1,101 @@
+##############################################################################
+# Copyright (c) Members of the EGEE Collaboration. 2004.
+# See http://www.eu-egee.org/partners/ for details on the copyright
+# holders.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS
+# OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
+#
+# NAME :        config_storm_gridhttps_properties
+#
+# DESCRIPTION : This function configures /etc/storm/gridhttps-server/server.conf file on a StoRM SE GridHTTPs.
+#
+# AUTHORS :     grid-release@infn.it
+#
+# NOTES :
+#
+# YAIM MODULE:  yaim-storm
+#
+##############################################################################
+
+function config_storm_gridhttps_properties_check () {
+
+  requires $1 STORM_GRIDHTTPS_USER
+}
+
+function config_storm_gridhttps_properties_setenv () {
+
+  yaimlog INFO "No enviroment variables to set."
+
+}
+
+function config_storm_gridhttps_properties () {
+
+  FUNCTION="config_storm_gridhttps_properties"
+  yaimlog INFO "${FUNCTION}: Configuration file"
+  #----------------------------------------------------------
+  # /etc/storm/gridhttps-server/server.conf - BEGIN
+  #----------------------------------------------------------
+  
+  
+  FILE="/etc/storm/gridhttps-server/server.conf"    # Configuration filename
+  FILE_T="${FILE}.template"                         # Template configuration filename
+  FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"        # Backup configuration filename (if needed)
+  FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"    # New configuration filename (if needed)
+  
+  #==========================================================
+  # Configuration file management
+  # If not exists, create it from template
+    yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+	if [ ! -f ${FILE} ]; then
+      yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} from template ${FILE_T}"
+      cp ${FILE_T} ${FILE}
+  	else
+	  yaimlog DEBUG "${FUNCTION}: Create ${FILE} from template ${FILE_T}"
+      yaimlog DEBUG "${FUNCTION}: Backup old configuration file in ${FILE_B}"
+      mv ${FILE} ${FILE_B}
+      cp ${FILE_T} ${FILE}
+    fi
+    # Remove oldest backup file
+    yaimlog DEBUG "${FUNCTION}: Removing old backup files."
+    find `dirname "${FILE}"` -ctime +2 -name 'server.conf.bkp*' -exec rm {} \;
+
+    # Set permissions
+    chmod 640 ${FILE}
+    chown ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${FILE}
+    
+    set_value "webapp-directory" "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER}"   ${FILE}
+    set_value "http.enabled" "${STORM_GRIDHTTPS_HTTP_ENABLED}"   ${FILE}
+    set_value "http.port" "${STORM_GRIDHTTPS_HTTP_PORT}"    ${FILE}
+    set_value "https.port" "${STORM_GRIDHTTPS_HTTPS_PORT}"   ${FILE}
+    set_value "x509.host-certificate" "${STORM_GRIDHTTPS_CERT_DIR}/hostcert.pem"   ${FILE}
+    set_value "x509.x509.host-key" "${STORM_GRIDHTTPS_CERT_DIR}/hostkey.pem"   ${FILE}
+    set_value "x509.truststore.directory" "${X509_CERT_DIR}"   ${FILE}
+    set_value "x509.truststore.refresh-interval" "${CANL_UPDATE_INTERVAL}"   ${FILE}
+    set_value "backend.hostname" "${STORM_BACKEND_HOSTNAME}"   ${FILE}
+    set_value "backend.authorization-service.port" "${STORM_BACKEND_REST_SERVICES_PORT}"   ${FILE}
+    set_value "backend.srm-service.port" "${STORM_BE_XMLRPC_PORT}"   ${FILE}
+    set_value "srm.endpoint" "${STORM_SRM_ENDPOINT}"   ${FILE}
+    yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
+  #==========================================================
+
+  
+  #----------------------------------------------------------
+  # /etc/storm/gridhttps-server/server.conf - END
+  #----------------------------------------------------------
+
+  # Exit with success
+  return ${YEX_OK}
+
+}

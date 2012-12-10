@@ -17,52 +17,53 @@
 # limitations under the License.
 ##############################################################################
 #
-# NAME :        config_storm_secure_tomcat
+# NAME :        config_storm_stop_gridhttps
 #
-# DESCRIPTION : This function configures tomcat
+# DESCRIPTION : This function stops gridhttps service
 #
 # AUTHORS :     michele.dibenedetto@cnaf.infn.it
 #
-# NOTES :       This function is taken from the config_secure_tomcat function written
-#               by Akos Frohner (Akos.Frohner@cern.ch) and Maria Alandes Pradillo (Maria.Alandes.Pradillo@cern.ch).
+# NOTES :     
 #
 # YAIM MODULE:  yaim-storm
 #                 
 ##############################################################################
 
-config_storm_stop_tomcat_check () {
+config_storm_stop_gridhttps_check () {
 
-  ret=0
-  detect_tomcat
-  if [ -z ${TOMCAT_VERSION} ]; then
-    yaimlog ERROR "Tomcat is probably not installed !"
-    yaimlog ERROR "${YERRORSTR}"
-    let "ret |= 1"
-  fi
-  return $ret
+  yaimlog INFO "No required variables to set."
 }
 
-config_storm_stop_tomcat_setenv () {
+config_storm_stop_gridhttps_setenv () {
 
   yaimlog INFO "No enviroment variables to set."
 }
 
-config_storm_stop_tomcat () {
+config_storm_stop_gridhttps () {
 
 
-####@ Check whether tomcat and java are installed
-
-yaimlog INFO "Check that java is installed"
-if [ ! -f /etc/java/java.conf ]; then
-  yestr ${YEX_NOSUCHFILE}
-  yaimlog ERROR "/etc/java/java.conf doesn't exist. Java is probably not installed !"
-  yaimlog ERROR "${YERRORSTR}"
-  exit ${YEX_NOSUCHFILE}
-fi
-
-yaimlog INFO "Stop tomcat in case it's running"
-service ${TOMCAT_VERSION} stop 
-
-return 0
+	####@ Check whether java are installed
+	
+	yaimlog INFO "Check that java is installed"
+	if [ ! -f /etc/java/java.conf ]; then
+	  yestr ${YEX_NOSUCHFILE}
+	  yaimlog ERROR "/etc/java/java.conf doesn't exist. Java is probably not installed !"
+	  yaimlog ERROR "${YERRORSTR}"
+	  exit ${YEX_NOSUCHFILE}
+	fi
+	
+	yaimlog INFO "Check that GridHTTPs is installed"
+	if [ ! -d /etc/storm/gridhttps-server ]; then
+	  yestr ${YEX_NOSUCHFILE}
+	  yaimlog ERROR "/etc/storm/gridhttps-server doesn't exist. StoRM GridHTTPs is probably not installed !"
+	  yaimlog ERROR "${YERRORSTR}"
+	  exit ${YEX_NOSUCHFILE}
+	fi
+	
+	yaimlog INFO "Stop GridHTTPs in case it's running"
+	service storm-gridhttps-server stop 
+	
+	# Exit with success
+	return ${YEX_OK}    
 
 }

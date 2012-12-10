@@ -23,17 +23,16 @@ dist_functionlocal_SCRIPTS = config_gip_glue2_storm \
     config_storm_frontend \
     config_storm_generic \
     config_storm_globus_gridftp \
+    config_storm_gridhttps_dir \
+    config_storm_gridhttps_generic \
     config_storm_gridhttps_plugin_properties \
-    config_storm_gridhttps_server_logging \
+    config_storm_gridhttps_properties \
     config_storm_mysql \
     config_storm_namespace \
     config_storm_properties \
     config_storm_rfio \
-    config_storm_secure_tomcat \
-    config_storm_sslkey \
-    config_storm_start_tomcat \
-    config_storm_stop_tomcat \
-    config_storm_tomcat_default_servlet \
+    config_storm_start_gridhttps \
+    config_storm_stop_gridhttps \
     config_storm_used_space
 
 MAINTAINERCLEANFILES = Makefile.in

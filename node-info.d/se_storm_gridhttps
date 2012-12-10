@@ -33,9 +33,8 @@
 se_storm_gridhttps_FUNCTIONS="
 config_crl
 config_host_certs
-config_storm_stop_tomcat
-config_storm_secure_tomcat
-config_storm_tomcat_default_servlet
-config_storm_gridhttps_server_logging
-config_storm_start_tomcat
+config_storm_stop_gridhttps
+config_storm_gridhttps_generic
+config_storm_gridhttps_properties
+config_storm_start_gridhttps
 "

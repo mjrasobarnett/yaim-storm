@@ -3,54 +3,64 @@
 ##########################################
 
 # The following variables will be considered only during
-# the configuration of the ig_SE_storm_gridhttps element.
+# the configuration of the se_storm_gridhttps element.
 #
-
-# Trustmanager settings
-#---------------------------------------------------------
-# Tomcat service user.
-# OPTIONAL - Default value: tomcat
-#TOMCAT_USER=tomcat
-# Tomcat http port.
-# OPTIONAL - Default value: 8088
-#STORM_GRIDHTTPS_SERVER_PORT=8088
-# Tomcat https port.
-# OPTIONAL - Default value: 8443
-#STORM_GRIDHTTPS_HTTPS_SERVER_PORT=8443
-# Host certificate for Trustmanager connector.
-# OPTIONAL - Default value: /usr/share/tomcat5/conf/hostcert.pem
-#TOMCAT_HOSTCERT_LOCATION=/usr/share/tomcat5/conf/hostcert.pem
-# Host key for Trustmanager connector.
-# OPTIONAL - Default value: /usr/share/tomcat5/conf/hostkey.pem
-#TOMCAT_HOSTKEY_LOCATION=/usr/share/tomcat5/conf/hostkey.pem
-# Trustmanager connector crl update time interval.
-# OPTIONAL - Default value: 2h
-#TRUSTMANAGER_CRL_UPDATE_INTERVAL=2h
 
 # General settings
 #---------------------------------------------------------
-# Truststore location
-# OPTIONAL - Default value: /etc/grid-security/certificates
-#X509_CERT_DIR=/etc/grid-security/certificates
+# GridhHTTPs service user.
+# OPTIONAL - Default value: gridhttps
+#STORM_GRIDHTTPS_USER=gridhttps
+# GridHTTPs context deploy folder
+# OPTIONAL - Default value: /var/lib/storm
+#STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER=/var/lib/storm
+
+# Http connector settings
+#---------------------------------------------------------
+# Enable http connections
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_GRIDHTTPS_HTTP_ENABLED=false
+# Gridhttps http port.
+# OPTIONAL - Default value: 8085
+#STORM_GRIDHTTPS_HTTP_PORT=8085
+
+# Https connector settings
+#---------------------------------------------------------
+# Gridhttps https port.
+# OPTIONAL - Default value: 8443
+#STORM_GRIDHTTPS_HTTPS_PORT=8443
 # Host certificate location
 # OPTIONAL - Default value: /etc/grid-security/hostcert.pem
 #X509_HOST_CERT=/etc/grid-security/hostcert.pem
 # Host certificate key location
 # OPTIONAL - Default value: /etc/grid-security/hostkey.pem
 #X509_HOST_KEY=/etc/grid-security/hostkey.pem
-# Tomcat context deploy folder
-# OPTIONAL - Default value: /usr/share/tomcat5/conf/Catalina/localhost
-#TOMCAT_CONTEXT_DEPLOY_FOLDER=/usr/share/tomcat5/conf/Catalina/localhost
-# StoRM user (equal for all services)
-# OPTIONAL - Default value: storm 
-#STORM_USER=storm
+# Host certificate folder for SSL connector.
+# OPTIONAL - Default value: /etc/grid-security/gridhttps
+#STORM_GRIDHTTPS_CERT_DIR=/etc/grid-security/${STORM_GRIDHTTPS_USER}
+# Truststore location
+# OPTIONAL - Default value: /etc/grid-security/certificates
+#X509_CERT_DIR=/etc/grid-security/certificates
+#????????????????????????????????????????????
+# Canl truststore update time interval expressed in milliseconds.
+# OPTIONAL - Default value: 60000 (1 minute)
+#CANL_UPDATE_INTERVAL=60000
+#???????????????????????????????????????????????????????
 
-# StoRM Backend settings 
+# StoRM settings 
 #---------------------------------------------------------
-# StoRM backend server host
-# COMPULSORY - No default value
-STORM_BACKEND_HOST=
-# StoRM backend server rest port
+# StoRM BackEnd server full hostname
+# Mandatory
+STORM_BACKEND_HOSTNAME=
+# StoRM BackEnd server REST port
 # OPTIONAL - Default value: 9998
 #STORM_BACKEND_REST_SERVICES_PORT=9998
-
+# StoRM BackEnd server XMLRPC port
+# OPTIONAL - Default value: 8080
+#STORM_BE_XMLRPC_PORT=8080
+# StoRM FrontEnd SRM port.
+# OPTIONAL - Default value: 8444
+#STORM_FRONTEND_PORT=8444
+# StoRM SRM EndPoint
+# OPTIONAL - Default value: STORM_BACKEND_HOSTNAME:${STORM_FRONTEND_PORT}
+#STORM_SRM_ENDPOINT=${STORM_BACKEND_HOSTNAME}:${STORM_FRONTEND_PORT}

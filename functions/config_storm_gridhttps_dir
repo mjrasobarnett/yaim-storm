@@ -32,7 +32,7 @@
 
 function config_storm_gridhttps_dir_check () {
 
-  requires $1 STORM_GRIDHTTPS_ENABLED STORM_DEFAULT_ROOT STORM_STORAGEAREA_LIST TOMCAT_USER
+  requires $1 STORM_DEFAULT_ROOT STORM_STORAGEAREA_LIST TOMCAT_USER
   return $?
 
 }
@@ -47,34 +47,29 @@ function config_storm_gridhttps_dir () {
 
   FUNCTION="config_storm_gridhttps_dir"
 
-  # Convert in lowercase
-  STORM_GRIDHTTPS_ENABLED=`echo ${STORM_GRIDHTTPS_ENABLED} | tr '[:upper:]' '[:lower:]'`
-  # Convert spaces to commas
 
-  if [ "x${STORM_GRIDHTTPS_ENABLED}" == "xtrue" ]; then
-	# Set Read Extended ACL for the service for the Storage Area directories
-	  for SA in $STORM_STORAGEAREA_LIST; do
-	    # Convert case
-	    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
-	    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
-	
-	    # Remove DNS-like characters from SA_UPP names
-	    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
-	
-	    x=STORM_${SA_UPP}_ROOT
-	    dir=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
-	
-	    if [ -d ${dir} ]; then
-	      yaimlog DEBUG "${FUNCTION}: Setting Read Extended ACL to '${TOMCAT_USER}' group for ${dir}"; 
-	      setfacl -m g:${STORM_USER}:rx ${dir};
-	    else
-	      yaimlog ERROR "${FUNC}: Unable to use ${dir} as Storage Area root!"
-	      yestr ${YEX_NOSUCHFILE}
-	      yaimlog ERROR "${YERRORSTR}"
-	      exit ${YEX_NOSUCHFILE}
-	    fi
-	  done
-  fi
+  # Set Read Extended ACL for the service for the Storage Area directories
+  for SA in $STORM_STORAGEAREA_LIST; do
+    # Convert case
+    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+
+    # Remove DNS-like characters from SA_UPP names
+    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+
+    x=STORM_${SA_UPP}_ROOT
+    dir=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
+
+    if [ -d ${dir} ]; then
+      yaimlog DEBUG "${FUNCTION}: Setting Read Extended ACL to '${TOMCAT_USER}' group for ${dir}"; 
+      setfacl -m g:${STORM_USER}:rx ${dir};
+    else
+      yaimlog ERROR "${FUNC}: Unable to use ${dir} as Storage Area root!"
+      yestr ${YEX_NOSUCHFILE}
+      yaimlog ERROR "${YERRORSTR}"
+      exit ${YEX_NOSUCHFILE}
+    fi
+  done
   
   # Exit with success
   return 0
