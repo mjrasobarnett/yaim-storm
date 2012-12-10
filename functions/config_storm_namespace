@@ -311,7 +311,7 @@ EOF
     if [ "${SA_FSTYPE}" == "gpfs" ] && [ "${SA_QUOTA}" == "true" ]; then
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} quota"
       # Check SA_QUOTA_DEVICE
-      if [ -z ${SA_QUOTA_DEVICE} ]; then
+      if [ -z "${SA_QUOTA_DEVICE}" ]; then
         yaimlog ERROR "${FUNCTION}: Missing quota device definition!"
         yaimlog ERROR "Please set \$STORM_${SA_UPP}_QUOTA_DEVICE variable"
         yestr ${YEX_CONFIG}
@@ -319,11 +319,11 @@ EOF
         exit ${YEX_CONFIG}
       fi
       # Between SA_QUOTA_USER, SA_QUOTA_GROUP, SA_QUOTA_FILESET consider only the first one set in this order
-      if [ ! -z ${SA_QUOTA_USER} ]; then
+      if [ ! -z "${SA_QUOTA_USER}" ]; then
         SA_QUOTA_ELEMENT="<userName>${SA_QUOTA_USER}</userName>"
-      elif [ ! -z ${SA_QUOTA_GROUP} ]; then
+      elif [ ! -z "${SA_QUOTA_GROUP}" ]; then
         SA_QUOTA_ELEMENT="<groupName>${SA_QUOTA_GROUP}</groupName>"
-      elif [ ! -z ${SA_QUOTA_FILESET} ]; then
+      elif [ ! -z "${SA_QUOTA_FILESET}" ]; then
         SA_QUOTA_ELEMENT="<filesetName>${SA_QUOTA_FILESET}</filesetName>"
       else
         yaimlog ERROR "${FUNCTION}: Missing quota definition!"
@@ -359,9 +359,12 @@ EOF
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (gsiftp)"
       # gsiftp entry could be multiple
       i=0
-      for SA_GRIDFTP_POOL in $(echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
-        if [ ! -z ${SA_GRIDFTP_POOL} ]; then
-          SA_GRIDFTP_POOL_HOST=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $1}'`
+      COUNTER=1
+	  COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
+	  while [ $COUNTER -le $COUNT ]; do
+      	SA_GRIDFTP_POOL=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+        if [ ! -z "${SA_GRIDFTP_POOL}" ]; then
+          SA_GRIDFTP_POOL_HOST=`echo ${SA_GRIDFTP_POOL} | awk '{print $1}'`
           cat >> ${FILE} << EOF
           <prot name="gsiftp">
             <id>$i</id>
@@ -371,6 +374,7 @@ EOF
           </prot>
 EOF
           ((i++))
+          let COUNTER=COUNTER+1
         fi
       done
     fi
@@ -435,24 +439,28 @@ EOF
       # 'weight' strategy case
       if [ ${SA_GRIDFTP_POOL_STRATEGY} = 'weight' ]; then
         i=0
-        for SA_GRIDFTP_POOL in $(echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
-          if [ ! -z ${SA_GRIDFTP_POOL} ]; then
-            SA_GRIDFTP_POOL_WEIGHT=`echo ${SA_GRIDFTP_POOL} | awk -F',' '{print $2}'`
+        COUNTER=1
+	    COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
+	    while [ $COUNTER -le $COUNT ]; do
+		  SA_GRIDFTP_POOL=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+          if [ ! -z "${SA_GRIDFTP_POOL}" ]; then
+            SA_GRIDFTP_POOL_WEIGHT=`echo ${SA_GRIDFTP_POOL} | awk '{print $2}'`
             # set to 1 if weight is null
-            if [ -z ${SA_GRIDFTP_POOL_WEIGHT} ]; then
+            if [ -z "${SA_GRIDFTP_POOL_WEIGHT}" ]; then
               SA_GRIDFTP_POOL_WEIGHT=100
             fi
             cat >> ${FILE} << EOF
             <member member-id="$i"><weight>${SA_GRIDFTP_POOL_WEIGHT}</weight></member>
 EOF
             ((i++))
+            let COUNTER=COUNTER+1
           fi
         done
       # other strategy cases
       else
         i=0
         for SA_GRIDFTP_POOL in $(echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
-          if [ ! -z ${SA_GRIDFTP_POOL} ]; then
+          if [ ! -z "${SA_GRIDFTP_POOL}" ]; then
             cat >> ${FILE} << EOF
             <member member-id="$i"></member>
 EOF
