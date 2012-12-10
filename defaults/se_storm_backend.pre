@@ -153,6 +153,9 @@ STORM_SIZE_LIMIT=true
 # Load balancing strategy for GRIDFTP servers pool.
 # OPTIONAL - Available values: [round-robin|smart-rr|random|weight] - Default value: round-robin
 STORM_GRIDFTP_POOL_STRATEGY=round-robin
+# Storage Area anonymous read access via HTTP.
+# OPTIONAL - Available values: [true|false] - Default value: false
+STORM_ANONYMOUS_HTTP_READ=false
 
 # Default resource bdii settings
 #---------------------------------------------------------

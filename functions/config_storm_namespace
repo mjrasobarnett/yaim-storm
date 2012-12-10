@@ -99,6 +99,7 @@ EOF
   STORM_INFO_ROOT_SUPPORT=`echo $STORM_INFO_ROOT_SUPPORT | tr '[:upper:]' '[:lower:]'`
   STORM_INFO_HTTP_SUPPORT=`echo $STORM_INFO_HTTP_SUPPORT | tr '[:upper:]' '[:lower:]'`
   STORM_INFO_HTTPS_SUPPORT=`echo $STORM_INFO_HTTPS_SUPPORT | tr '[:upper:]' '[:lower:]'`
+  STORM_ANONYMOUS_HTTP_READ=`echo $STORM_ANONYMOUS_HTTP_READ | tr '[:upper:]' '[:lower:]'`
 
   for SA in $STORM_STORAGEAREA_LIST; do
 
@@ -523,7 +524,7 @@ EOF
     SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
  
     x=STORM_${SA_UPP}_VONAME;                  SA_VONAME=${!x:-${SA_LOW}}
-
+    x=STORM_${SA_UPP}_ANONYMOUS_HTTP_READ;     SA_ANONYMOUS_HTTP_READ=${!x:-${STORM_ANONYMOUS_HTTP_READ}}
     yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} app-rule (${SA_LOW})"
     cat >> ${FILE} << EOF
     <app-rule name="${SA_LOW}-rule">
@@ -532,6 +533,7 @@ EOF
 	<vo-name>${SA_VONAME}</vo-name>
       </subjects>
       <approachable-fs>${SA_UPP}-FS</approachable-fs>
+      <anonymous-http-read>${SA_ANONYMOUS_HTTP_READ}</anonymous-http-read>    
     </app-rule>
 EOF
   done

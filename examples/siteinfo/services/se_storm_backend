@@ -150,6 +150,9 @@ STORM_DB_PWD=
 # GRIDFTP servers pool list. A comma separated list of hosts
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
 #STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
+# Storage Area anonymous read access via HTTP.
+# OPTIONAL - Available values: [true|false] - Default value: false
+#STORM_ANONYMOUS_HTTP_READ=false
 # Rfio server.
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST}
 #STORM_RFIO_HOST=${STORM_BACKEND_HOST}
@@ -182,6 +185,7 @@ STORM_DB_PWD=
 # STORM_SA1_FSTYPE:                 See STORM_FSTYPE definition. Default value: ${STORM_FSTYPE}
 # STORM_SA1_GRIDFTP_POOL_LIST:      See STORM_GRIDFTP_POOL_LIST definition. Default value: ${STORM_GRIDFTP_POOL_LIST}
 # STORM_SA1_GRIDFTP_POOL_STRATEGY:  See STORM_GRIDFTP_POOL_STRATEGY definition. Default value: ${STORM_GRIDFTP_POOL_STRATEGY}
+# STORM_SA1_ANONYMOUS_HTTP_READ:    See STORM_ANONYMOUS_HTTP_READ definition. Default value: ${STORM_ANONYMOUS_HTTP_READ}
 # STORM_SA1_QUOTA:                  Enables the quota management for the Storage Area and it works only on GPFS filesystem.
 #                                   Available values: [true|false] - Default value: false
 #   **COMPULSORY** variables if STORM_SA1_QUOTA is set:
