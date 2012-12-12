@@ -45,11 +45,11 @@ function config_storm_gridhttps_properties () {
   FUNCTION="config_storm_gridhttps_properties"
   yaimlog INFO "${FUNCTION}: Configuration file"
   #----------------------------------------------------------
-  # /etc/storm/gridhttps-server/server.conf - BEGIN
+  # /etc/storm/gridhttps-server/server.ini - BEGIN
   #----------------------------------------------------------
   
   
-  FILE="/etc/storm/gridhttps-server/server.conf"    # Configuration filename
+  FILE="/etc/storm/gridhttps-server/server.ini"    # Configuration filename
   FILE_T="${FILE}.template"                         # Template configuration filename
   FILE_B="${FILE}.bkp_`date +%Y%m%d_%H%M%S`"        # Backup configuration filename (if needed)
   FILE_N="${FILE}.yaimnew_`date +%Y%m%d_%H%M%S`"    # New configuration filename (if needed)
@@ -69,7 +69,7 @@ function config_storm_gridhttps_properties () {
     fi
     # Remove oldest backup file
     yaimlog DEBUG "${FUNCTION}: Removing old backup files."
-    find `dirname "${FILE}"` -ctime +2 -name 'server.conf.bkp*' -exec rm {} \;
+    find `dirname "${FILE}"` -ctime +2 -name 'server.ini.bkp*' -exec rm {} \;
 
     # Set permissions
     chmod 640 ${FILE}
@@ -92,7 +92,7 @@ function config_storm_gridhttps_properties () {
 
   
   #----------------------------------------------------------
-  # /etc/storm/gridhttps-server/server.conf - END
+  # /etc/storm/gridhttps-server/server.ini - END
   #----------------------------------------------------------
 
   # Exit with success
