@@ -31,7 +31,8 @@
 
 function config_storm_gridhttps_properties_check () {
 
-  requires $1 STORM_GRIDHTTPS_USER
+  requires $1 STORM_GRIDHTTPS_USER STORM_BACKEND_HOSTNAME
+  return $?
 }
 
 function config_storm_gridhttps_properties_setenv () {
@@ -75,18 +76,38 @@ function config_storm_gridhttps_properties () {
     chmod 640 ${FILE}
     chown ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${FILE}
     
-    set_value "webapp-directory" "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER}"   ${FILE}
-    set_value "http.enabled" "${STORM_GRIDHTTPS_HTTP_ENABLED}"   ${FILE}
-    set_value "http.port" "${STORM_GRIDHTTPS_HTTP_PORT}"    ${FILE}
-    set_value "https.port" "${STORM_GRIDHTTPS_HTTPS_PORT}"   ${FILE}
-    set_value "x509.host-certificate" "${STORM_GRIDHTTPS_CERT_DIR}/hostcert.pem"   ${FILE}
-    set_value "x509.x509.host-key" "${STORM_GRIDHTTPS_CERT_DIR}/hostkey.pem"   ${FILE}
-    set_value "x509.truststore.directory" "${X509_CERT_DIR}"   ${FILE}
-    set_value "x509.truststore.refresh-interval" "${CANL_UPDATE_INTERVAL}"   ${FILE}
+    if ! [ -z "$STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER" ] || [ "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER+xxx}" = "xxx" ]; then
+       set_value "webapp-directory" "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER}"   ${FILE}
+	fi
+	if ! [ -z "$STORM_GRIDHTTPS_HTTP_ENABLED" ] || [ "${STORM_GRIDHTTPS_HTTP_ENABLED+xxx}" = "xxx" ]; then
+       set_value "http.enabled" "${STORM_GRIDHTTPS_HTTP_ENABLED}"   ${FILE}
+    fi
+    if ! [ -z "$STORM_GRIDHTTPS_HTTP_PORT" ] || [ "${STORM_GRIDHTTPS_HTTP_PORT+xxx}" = "xxx" ]; then
+       set_value "http.port" "${STORM_GRIDHTTPS_HTTP_PORT}"    ${FILE}
+    fi
+    if ! [ -z "$STORM_GRIDHTTPS_HTTPS_PORT" ] || [ "${STORM_GRIDHTTPS_HTTPS_PORT+xxx}" = "xxx" ]; then
+       set_value "https.port" "${STORM_GRIDHTTPS_HTTPS_PORT}"   ${FILE}
+    fi
+    if ! [ -z "$STORM_GRIDHTTPS_CERT_DIR" ] || [ "${STORM_GRIDHTTPS_CERT_DIR+xxx}" = "xxx" ]; then
+       set_value "x509.host-certificate" "${STORM_GRIDHTTPS_CERT_DIR}/hostcert.pem"   ${FILE}
+       set_value "x509.x509.host-key" "${STORM_GRIDHTTPS_CERT_DIR}/hostkey.pem"   ${FILE}
+    fi
+    if ! [ -z "$X509_CERT_DIR" ] || [ "${X509_CERT_DIR+xxx}" = "xxx" ]; then
+       set_value "x509.truststore.directory" "${X509_CERT_DIR}"   ${FILE}
+    fi
+    if ! [ -z "$CANL_UPDATE_INTERVAL" ] || [ "${CANL_UPDATE_INTERVAL+xxx}" = "xxx" ]; then
+       set_value "x509.truststore.refresh-interval" "${CANL_UPDATE_INTERVAL}"   ${FILE}
+    fi
     set_value "backend.hostname" "${STORM_BACKEND_HOSTNAME}"   ${FILE}
-    set_value "backend.authorization-service.port" "${STORM_BACKEND_REST_SERVICES_PORT}"   ${FILE}
-    set_value "backend.srm-service.port" "${STORM_BE_XMLRPC_PORT}"   ${FILE}
-    set_value "srm.endpoint" "${STORM_SRM_ENDPOINT}"   ${FILE}
+    if ! [ -z "$STORM_BACKEND_REST_SERVICES_PORT" ] || [ "${STORM_BACKEND_REST_SERVICES_PORT+xxx}" = "xxx" ]; then
+       set_value "backend.authorization-service.port" "${STORM_BACKEND_REST_SERVICES_PORT}"   ${FILE}
+    fi
+    if ! [ -z "$STORM_BE_XMLRPC_PORT" ] || [ "${STORM_BE_XMLRPC_PORT+xxx}" = "xxx" ]; then
+       set_value "backend.srm-service.port" "${STORM_BE_XMLRPC_PORT}"   ${FILE}
+    fi
+    if ! [ -z "$STORM_SRM_ENDPOINT" ] || [ "${STORM_SRM_ENDPOINT+xxx}" = "xxx" ]; then
+       set_value "srm.endpoint" "${STORM_SRM_ENDPOINT}"   ${FILE}
+    fi
     yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
   #==========================================================
 
