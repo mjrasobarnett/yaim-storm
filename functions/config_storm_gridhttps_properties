@@ -31,7 +31,7 @@
 
 function config_storm_gridhttps_properties_check () {
 
-  requires $1 STORM_GRIDHTTPS_USER STORM_BACKEND_HOSTNAME
+  requires $1 STORM_GRIDHTTPS_USER STORM_BACKEND_HOST
   return $?
 }
 
@@ -98,7 +98,7 @@ function config_storm_gridhttps_properties () {
     if ! [ -z "$CANL_UPDATE_INTERVAL" ] || [ "${CANL_UPDATE_INTERVAL+xxx}" = "xxx" ]; then
        set_value "x509.truststore.refresh-interval" "${CANL_UPDATE_INTERVAL}"   ${FILE}
     fi
-    set_value "backend.hostname" "${STORM_BACKEND_HOSTNAME}"   ${FILE}
+    set_value "backend.hostname" "${STORM_BACKEND_HOST}"   ${FILE}
     if ! [ -z "$STORM_BACKEND_REST_SERVICES_PORT" ] || [ "${STORM_BACKEND_REST_SERVICES_PORT+xxx}" = "xxx" ]; then
        set_value "backend.authorization-service.port" "${STORM_BACKEND_REST_SERVICES_PORT}"   ${FILE}
     fi

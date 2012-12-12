@@ -31,7 +31,7 @@
 
 config_storm_start_gridhttps_check () {
 
-
+  yaimlog INFO "No required variables to set."
 }
 
 config_storm_start_gridhttps_setenv () {
