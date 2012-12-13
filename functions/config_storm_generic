@@ -69,7 +69,7 @@ function config_storm_generic () {
   if ( getent group "edguser" >/dev/null ); then
     usermod -a -G edguser $STORM_USER
   else
-    yaimlog ERROR "${FUNCTION}: Group 'edguser' doesn't exit"
+    yaimlog ERROR "${FUNCTION}: Group 'edguser' doesn't exist"
     yestr ${YEX_CONFIG}
     yaimlog ERROR "${YERRORSTR}"
     return ${YEX_CONFIG}
@@ -83,7 +83,7 @@ function config_storm_generic () {
   if ( getent group "${storm_group}" >/dev/null ); then
     usermod -a -G $storm_group edguser
   else
-    yaimlog ERROR "${FUNCTION}: Group 'storm_group' doesn't exit"
+    yaimlog ERROR "${FUNCTION}: Group 'storm_group' doesn't exist"
     yestr ${YEX_CONFIG}
     yaimlog ERROR "${YERRORSTR}"
     return ${YEX_CONFIG}
