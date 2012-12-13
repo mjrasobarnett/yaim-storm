@@ -65,7 +65,7 @@ config_storm_stop_gridhttps () {
 	id ${STORM_GRIDHTTPS_USER} >& /dev/null
 	if [  $? -ne 0 ]; then
 	  yestr ${YEX_NOUSER}
-	  yaimlog ERROR User ${STORM_GRIDHTTPS_USER} doesn't exist. StoRM GridHTTPs is probably not configured !"
+	  yaimlog ERROR "User ${STORM_GRIDHTTPS_USER} doesn't exist. StoRM GridHTTPs is probably not configured !"
 	  yaimlog ERROR "${YERRORSTR}"
 	  exit ${YEX_NOUSER}
 	fi
