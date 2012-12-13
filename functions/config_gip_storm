@@ -74,7 +74,7 @@ function get_size () {
     yaimlog ERROR "Please set: Verify the number of parameters passed to the ${FUNCTION} function"
     yestr ${YEX_SOFTWARE}
     yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_SOFTWARE}
+    return ${YEX_SOFTWARE}
   fi
 
   SIZE=`/usr/bin/curl -s http://$2:$3/info/status/$1`

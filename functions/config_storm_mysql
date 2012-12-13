@@ -92,7 +92,7 @@ EOF
       yaimlog ERROR "${FUNCTION}: Maybe \$MYSQL_PASSWORD for 'root' is wrong!"
       yestr ${YEX_CONFIG}
       yaimlog ERROR "${YERRORSTR}"
-      exit ${YEX_CONFIG}
+      return ${YEX_CONFIG}
     fi
   fi
   rm -f ${FILE}

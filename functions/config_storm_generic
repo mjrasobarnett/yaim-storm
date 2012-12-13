@@ -50,7 +50,7 @@ function config_storm_generic () {
     yaimlog ERROR "${FUNCTION}: \$STORM_USER can't be root!"
     yestr ${YEX_CONFIG}
     yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_CONFIG}
+    return ${YEX_CONFIG}
   else
     id ${STORM_USER} >& /dev/null \
       || (yaimlog INFO "${FUNCTION}: Adding system user '$STORM_USER'"; adduser -r ${STORM_USER})
@@ -72,7 +72,7 @@ function config_storm_generic () {
     yaimlog ERROR "${FUNCTION}: Group 'edguser' doesn't exit"
     yestr ${YEX_CONFIG}
     yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_CONFIG}
+    return ${YEX_CONFIG}
   fi
 
   # Add edguser to primary-group of STORM_USER,
@@ -86,7 +86,7 @@ function config_storm_generic () {
     yaimlog ERROR "${FUNCTION}: Group 'storm_group' doesn't exit"
     yestr ${YEX_CONFIG}
     yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_CONFIG}
+    return ${YEX_CONFIG}
   fi
 
   #Adding JAVA_HOME variable to service environment

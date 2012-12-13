@@ -194,14 +194,14 @@ EOF
          yaimlog ERROR "Please set: STORM_${SA_UPP}_NEARLINE_SIZE in GB"
          yestr ${YEX_CONFIG}
          yaimlog ERROR "${YERRORSTR}"
-         exit ${YEX_CONFIG}
+         return ${YEX_CONFIG}
       fi
       if [ "${SA_NEARLINE_SIZE}" == "0" ] || [ "${SA_NEARLINE_SIZE}" == "0.0" ]; then
          yaimlog ERROR "${FUNCTION}: Wrong nearline size!"
          yaimlog ERROR "Please set: STORM_${SA_UPP}_NEARLINE_SIZE > 0 GB"
          yestr ${YEX_CONFIG}
          yaimlog ERROR "${YERRORSTR}"
-         exit ${YEX_CONFIG}
+         return ${YEX_CONFIG}
       fi
       SA_NEARLINE_SIZE=$((${SA_NEARLINE_SIZE}*(1024*1024*1024)))
     else
@@ -217,14 +217,14 @@ EOF
        yaimlog ERROR "Please set: STORM_${SA_UPP}_ONLINE_SIZE in GB"
        yestr ${YEX_CONFIG}
        yaimlog ERROR "${YERRORSTR}"
-       exit ${YEX_CONFIG}
+       return ${YEX_CONFIG}
     fi
     if [ "${SA_ONLINE_SIZE}" == "0" ] || [ "${SA_ONLINE_SIZE}" == "0.0" ]; then
        yaimlog ERROR "${FUNCTION}: Wrong online size!"
        yaimlog ERROR "Please set: STORM_${SA_UPP}_ONLINE_SIZE > 0 GB"
        yestr ${YEX_CONFIG}
        yaimlog ERROR "${YERRORSTR}"
-       exit ${YEX_CONFIG}
+       return ${YEX_CONFIG}
     fi
     SA_ONLINE_SIZE=$((${SA_ONLINE_SIZE}*(1024*1024*1024)))
 
@@ -317,7 +317,7 @@ EOF
         yaimlog ERROR "Please set \$STORM_${SA_UPP}_QUOTA_DEVICE variable"
         yestr ${YEX_CONFIG}
         yaimlog ERROR "${YERRORSTR}"
-        exit ${YEX_CONFIG}
+        return ${YEX_CONFIG}
       fi
       # Between SA_QUOTA_USER, SA_QUOTA_GROUP, SA_QUOTA_FILESET consider only the first one set in this order
       if [ ! -z "${SA_QUOTA_USER}" ]; then
@@ -331,7 +331,7 @@ EOF
         yaimlog ERROR "Please set one between: \$STORM_${SA_UPP}_QUOTA_USER, \$STORM_${SA_UPP}_QUOTA_GROUP, \$STORM_${SA_UPP}_QUOTA_FILESET"
         yestr ${YEX_CONFIG}
         yaimlog ERROR "${YERRORSTR}"
-        exit ${YEX_CONFIG}
+        return ${YEX_CONFIG}
       fi
       cat >> ${FILE} << EOF
         <quota enabled="true">

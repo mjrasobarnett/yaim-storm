@@ -79,7 +79,7 @@ function config_storm_dir () {
       yaimlog ERROR "${FUNC}: Unable to use ${dir} as Storage Area root!"
       yestr ${YEX_NOSUCHFILE}
       yaimlog ERROR "${YERRORSTR}"
-      exit ${YEX_NOSUCHFILE}
+      return ${YEX_NOSUCHFILE}
     fi
   done
 

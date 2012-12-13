@@ -50,7 +50,7 @@ config_storm_stop_gridhttps () {
 	  yestr ${YEX_NOSUCHFILE}
 	  yaimlog ERROR "/etc/java/java.conf doesn't exist. Java is probably not installed !"
 	  yaimlog ERROR "${YERRORSTR}"
-	  exit ${YEX_NOSUCHFILE}
+	  return ${YEX_NOSUCHFILE}
 	fi
 	
 	yaimlog INFO "Check that GridHTTPs is installed"
@@ -58,7 +58,7 @@ config_storm_stop_gridhttps () {
 	  yestr ${YEX_NOSUCHFILE}
 	  yaimlog ERROR "/etc/storm/gridhttps-server doesn't exist. StoRM GridHTTPs is probably not installed !"
 	  yaimlog ERROR "${YERRORSTR}"
-	  exit ${YEX_NOSUCHFILE}
+	  return ${YEX_NOSUCHFILE}
 	fi
 	
 	yaimlog INFO "Check that GridHTTPs is configured"
@@ -67,7 +67,7 @@ config_storm_stop_gridhttps () {
 	  yestr ${YEX_NOUSER}
 	  yaimlog WARNING "User ${STORM_GRIDHTTPS_USER} doesn't exist. StoRM GridHTTPs is probably not configured !"
 	  yaimlog WARNING "${YERRORSTR}"
-	  exit ${YEX_OK}
+	  return ${YEX_OK}
 	fi
 	
 	yaimlog INFO "Stop GridHTTPs in case it's running"

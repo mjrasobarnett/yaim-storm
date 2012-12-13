@@ -62,13 +62,13 @@ function config_storm_frontend () {
       yaimlog INFO "${FUNCTION}: [...] -n se_storm_backend -n se_storm_frontend [...]"
       yestr ${YEX_CONFTARGET}
       yaimlog ERROR "${YERRORSTR}"
-      exit ${YEX_CONFTARGET}
+      return ${YEX_CONFTARGET}
     else
       yaimlog ERROR "${FUNCTION}: You are configuring only a StoRM frontend on this host"
       yaimlog ERROR "${FUNCTION}: Please ensure that StoRM backend is already configured on ${STORM_DB_HOST}"
       yestr ${YEX_CONFTARGET}
       yaimlog ERROR "${YERRORSTR}"
-      exit ${YEX_CONFTARGET}
+      return ${YEX_CONFTARGET}
     fi
   else
     yaimlog INFO "${FUNCTION}: Ok!"
@@ -79,7 +79,7 @@ function config_storm_frontend () {
 		      yaimlog ERROR "${FUNCTION}: To enable user blacklisting you have to provide the ARGUS PEP endpoint in ARGUS_PEPD_ENDPOINTS"
 			  yestr ${YEX_CONFTARGET}
 			  yaimlog ERROR "${YERRORSTR}"
-			  exit ${YEX_CONFTARGET}
+			  return ${YEX_CONFTARGET}
 		fi
 	fi 
 
@@ -166,7 +166,7 @@ function config_storm_frontend () {
     yaimlog ERROR "${FUNCTION}: StoRM frontend configuration directory prefix ${config_dir_prefix} doesn't exist"
     yestr ${YEX_NOSUCHFILE}
     yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_NOSUCHFILE}
+    return ${YEX_NOSUCHFILE}
   fi
   if [ -d ${config_dir} ]; then
     chown -R ${STORM_USER}:${STORM_USER} ${config_dir}
@@ -174,7 +174,7 @@ function config_storm_frontend () {
     yaimlog ERROR "${FUNCTION}: StoRM frontend configuration directory ${config_dir} doesn't exist"
     yestr ${YEX_NOSUCHFILE}
     yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_NOSUCHFILE}
+    return ${YEX_NOSUCHFILE}
   fi
 
   # Activate and restart service 

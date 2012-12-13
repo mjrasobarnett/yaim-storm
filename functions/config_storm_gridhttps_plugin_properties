@@ -63,7 +63,7 @@ function config_storm_gridhttps_plugin_properties () {
     yaimlog ERROR "${FUNCTION}: StoRM gridhttps plugin configuration directory ${config_dir} doesn't exist"
     yestr ${YEX_NOSUCHFILE}
     yaimlog ERROR "${YERRORSTR}"
-    exit ${YEX_NOSUCHFILE}
+    return ${YEX_NOSUCHFILE}
   fi
   
   FILE="/etc/storm/gridhttps-plugin/storm.gridhttps.plugin.properties"     # Configuration filename
