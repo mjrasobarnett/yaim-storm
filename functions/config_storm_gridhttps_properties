@@ -58,7 +58,7 @@ function config_storm_gridhttps_properties () {
   #==========================================================
   # Configuration file management
   # If not exists, create it from template
-    yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
+    yaimlog DEBUG "${FUNCTION}: Creating ${FILE} ..."
 	if [ ! -f ${FILE} ]; then
       yaimlog DEBUG "${FUNCTION}: First configuration, create ${FILE} from template ${FILE_T}"
       cp ${FILE_T} ${FILE}

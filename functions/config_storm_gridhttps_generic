@@ -53,24 +53,24 @@ function config_storm_gridhttps_generic () {
     return ${YEX_CONFIG}
   else
     id ${STORM_GRIDHTTPS_USER} >& /dev/null \
-      || (yaimlog INFO "${FUNCTION}: Adding system user ${STORM_GRIDHTTPS_USER}"; adduser -r ${STORM_GRIDHTTPS_USER})
-    yaimlog INFO "${FUNCTION}: Adding '$STORM_GRIDHTTPS_USER' to ${STORM_USER} group"
+      || (yaimlog DEBUG "${FUNCTION}: Adding system user ${STORM_GRIDHTTPS_USER}"; adduser -r ${STORM_GRIDHTTPS_USER})
+    yaimlog DEBUG "${FUNCTION}: Adding '$STORM_GRIDHTTPS_USER' to ${STORM_USER} group"
     usermod -a -G ${STORM_USER} ${STORM_GRIDHTTPS_USER}
   fi
 
   # Create ${STORM_GRIDHTTPS_CERT_DIR} directory and copy host certificate and key
-  yaimlog INFO "${FUNCTION}: Updating host certificate and key in ${STORM_GRIDHTTPS_CERT_DIR}"
+  yaimlog DEBUG "${FUNCTION}: Updating host certificate and key in ${STORM_GRIDHTTPS_CERT_DIR}"
   mkdir -p ${STORM_GRIDHTTPS_CERT_DIR}
   cp -f ${X509_HOST_CERT} ${STORM_GRIDHTTPS_CERT_DIR}
   cp -f ${X509_HOST_KEY} ${STORM_GRIDHTTPS_CERT_DIR}
   chown -R ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${STORM_GRIDHTTPS_CERT_DIR}
   
-  yaimlog INFO "${FUNCTION}: Setting ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} folder ownership"
+  yaimlog DEBUG "${FUNCTION}: Setting ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} folder ownership"
   chown ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} 
 
   config_dir="/etc/storm/gridhttps-server"
   # Change ownership to /etc/storm/gridhttps-server configuration directory
-  yaimlog INFO "${FUNCTION}: Setting ${config_dir} folder ownership"
+  yaimlog DEBUG "${FUNCTION}: Setting ${config_dir} folder ownership"
   if [ -d ${config_dir} ]; then
     chown -R ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${config_dir}
   else
@@ -91,7 +91,7 @@ function config_storm_gridhttps_generic () {
   	JAVA_HOME="/usr/java/latest"
   fi
   if [ ! -z ${JAVA_HOME} ] ; then
-  	yaimlog INFO "${FUNCTION}: Setting up JAVA environment"
+  	yaimlog DEBUG "${FUNCTION}: Setting up JAVA environment"
   	yaimgridenv_set JAVA_HOME ${JAVA_HOME}
   fi
   
