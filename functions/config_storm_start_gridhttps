@@ -31,7 +31,8 @@
 
 config_storm_start_gridhttps_check () {
 
-  yaimlog INFO "No required variables to set."
+    requires $1 STORM_GRIDHTTPS_USER
+  return $?
 }
 
 config_storm_start_gridhttps_setenv () {
@@ -58,6 +59,15 @@ config_storm_start_gridhttps () {
 	  yaimlog ERROR "/etc/storm/gridhttps-server doesn't exist. StoRM GridHTTPs is probably not installed !"
 	  yaimlog ERROR "${YERRORSTR}"
 	  exit ${YEX_NOSUCHFILE}
+	fi
+	
+    yaimlog INFO "Check that GridHTTPs is configured"
+	id ${STORM_GRIDHTTPS_USER} >& /dev/null
+	if [  $? -ne 0 ]; then
+	  yestr ${YEX_NOUSER}
+	  yaimlog ERROR User ${STORM_GRIDHTTPS_USER} doesn't exist. StoRM GridHTTPs is probably not configured !"
+	  yaimlog ERROR "${YERRORSTR}"
+	  exit ${YEX_NOUSER}
 	fi
 	
 	yaimlog INFO "Starting GridHTTPs"
