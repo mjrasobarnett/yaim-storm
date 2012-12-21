@@ -67,6 +67,10 @@ function config_storm_gridhttps_generic () {
   
   yaimlog DEBUG "${FUNCTION}: Setting ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} folder ownership"
   chown ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} 
+  
+  LOGGING_FOLDER="/var/log/storm"
+  yaimlog DEBUG "${FUNCTION}: Ensuring log folder ${LOGGING_FOLDER} ownership to STORM_USER ${STORM_USER}"
+  chown ${STORM_USER}:${STORM_USER} ${LOGGING_FOLDER} 
 
   config_dir="/etc/storm/gridhttps-server"
   # Change ownership to /etc/storm/gridhttps-server configuration directory
