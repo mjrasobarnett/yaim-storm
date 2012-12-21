@@ -21,7 +21,7 @@
 #
 # DESCRIPTION : This function configures the storage areas on a StoRM SE.
 #
-# AUTHORS :     grid-release@infn.it
+# AUTHORS :     storm-devel@lists.infn.it
 #
 # NOTES :       Check existence and permission of the Storage Areas
 #               served by StoRM and of the installation directory.
@@ -32,7 +32,7 @@
 
 function config_storm_gridhttps_dir_check () {
 
-  requires $1 STORM_DEFAULT_ROOT STORM_STORAGEAREA_LIST TOMCAT_USER
+  requires $1 STORM_DEFAULT_ROOT STORM_STORAGEAREA_LIST STORM_GRIDHTTPS_ENABLED
   return $?
 
 }
@@ -47,30 +47,37 @@ function config_storm_gridhttps_dir () {
 
   FUNCTION="config_storm_gridhttps_dir"
 
-
-  # Set Read Extended ACL for the service for the Storage Area directories
-  for SA in $STORM_STORAGEAREA_LIST; do
-    # Convert case
-    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
-    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
-
-    # Remove DNS-like characters from SA_UPP names
-    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
-
-    x=STORM_${SA_UPP}_ROOT
-    dir=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
-
-    if [ -d ${dir} ]; then
-      yaimlog DEBUG "${FUNCTION}: Setting Read Extended ACL to '${TOMCAT_USER}' group for ${dir}"; 
-      setfacl -m g:${STORM_USER}:rx ${dir};
-    else
-      yaimlog ERROR "${FUNC}: Unable to use ${dir} as Storage Area root!"
-      yestr ${YEX_NOSUCHFILE}
-      yaimlog ERROR "${YERRORSTR}"
-      return ${YEX_NOSUCHFILE}
-    fi
-  done
-  
+  # Convert in lowercase
+  STORM_GRIDHTTPS_ENABLED=`echo ${STORM_GRIDHTTPS_ENABLED} | tr '[:upper:]' '[:lower:]'`
+  if [ "x${STORM_GRIDHTTPS_ENABLED}" == "xtrue" ]; then
+     if [ -z "${STORM_GRIDHTTPS_SERVER_GROUP_UID}" ]; then
+     	  yaimlog ERROR "${FUNC}: Unable to set StoRM GridHTTPS group extended acl on SA ROOTs, missing STORM_GRIDHTTPS_SERVER_GROUP_UID!"
+	      yestr ${YEX_MISSINGVAR}
+	      yaimlog ERROR "${YERRORSTR}"
+	      return ${YEX_MISSINGVAR}
+     fi 
+     # Set Read Extended ACL for the service for the Storage Area directories
+     for SA in $STORM_STORAGEAREA_LIST; do
+       # Convert case
+       SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+       SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+       # Remove DNS-like characters from SA_UPP names
+       SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+	
+       x=STORM_${SA_UPP}_ROOT
+       dir=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
+	
+       if [ -d ${dir} ]; then
+         yaimlog DEBUG "${FUNCTION}: Setting Read Extended ACL to '${STORM_GRIDHTTPS_SERVER_GROUP_UID}' group for ${dir}"; 
+         setfacl -m g:${STORM_GRIDHTTPS_SERVER_GROUP_UID}:rx ${dir};
+       else
+         yaimlog ERROR "${FUNC}: Unable to set StoRM GridHTTPS group extended acl on ${dir}"
+         yestr ${YEX_NOSUCHFILE}
+         yaimlog ERROR "${YERRORSTR}"
+         return ${YEX_NOSUCHFILE}
+       fi
+     done
+  fi
   # Exit with success
   return 0
 
