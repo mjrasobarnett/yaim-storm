@@ -525,12 +525,42 @@ EOF
  
     x=STORM_${SA_UPP}_VONAME;                  SA_VONAME=${!x:-${SA_LOW}}
     x=STORM_${SA_UPP}_ANONYMOUS_HTTP_READ;     SA_ANONYMOUS_HTTP_READ=${!x:-${STORM_ANONYMOUS_HTTP_READ}}
+    SA_DN_REGEX=""
+    DN_REGEX_FIELD=STORM_${SA_UPP}_DN_C_REGEX
+    if [ ! "${!DN_REGEX_FIELD}x" == "x" ]; then
+       SA_DN_REGEX="${SA_DN_REGEX}/C=${!DN_REGEX_FIELD}"
+    fi
+    DN_REGEX_FIELD=STORM_${SA_UPP}_DN_O_REGEX
+    if [ ! "${!DN_REGEX_FIELD}x" == "x" ]; then
+       SA_DN_REGEX="${SA_DN_REGEX}/O=${!DN_REGEX_FIELD}"
+    fi
+    DN_REGEX_FIELD=STORM_${SA_UPP}_DN_OU_REGEX
+    if [ ! "${!DN_REGEX_FIELD}x" == "x" ]; then
+       SA_DN_REGEX="${SA_DN_REGEX}/OU=${!DN_REGEX_FIELD}"
+    fi
+    DN_REGEX_FIELD=STORM_${SA_UPP}_DN_L_REGEX
+    if [ ! "${!DN_REGEX_FIELD}x" == "x" ]; then
+       SA_DN_REGEX="${SA_DN_REGEX}/L=${!DN_REGEX_FIELD}"
+    fi
+    DN_REGEX_FIELD=STORM_${SA_UPP}_DN_CN_REGEX
+    if [ ! "${!DN_REGEX_FIELD}x" == "x" ]; then
+       SA_DN_REGEX="${SA_DN_REGEX}/CN=${!DN_REGEX_FIELD}"
+    fi
+    DN_REGEX_FIELD=STORM_${SA_UPP}_DN_DC_REGEX
+    if [ ! "${!DN_REGEX_FIELD}x" == "x" ]; then
+       SA_DN_REGEX="${SA_DN_REGEX}/DC=${!DN_REGEX_FIELD}"
+    fi
+    if [ -z "${SA_DN_REGEX}" ]; then
+       SA_DN_REGEX="*"
+    fi
+    
     yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} app-rule (${SA_LOW})"
+    
     cat >> ${FILE} << EOF
     <app-rule name="${SA_LOW}-rule">
       <subjects>
-        <dn>*</dn>
-	<vo-name>${SA_VONAME}</vo-name>
+        <dn>${SA_DN_REGEX}</dn>
+	    <vo-name>${SA_VONAME}</vo-name>
       </subjects>
       <approachable-fs>${SA_UPP}-FS</approachable-fs>
       <anonymous-http-read>${SA_ANONYMOUS_HTTP_READ}</anonymous-http-read>    
