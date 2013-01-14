@@ -178,7 +178,13 @@ STORM_DB_PWD=
 # STORM_SA1_AUTH:                   See STORM_AUTH definition. Default values: ${STORM_AUTH}
 # STORM_SA1_DEFAULT_ACL_LIST        A list of ACL entries that specifies a set of local groups with correspondig permissions (R,W,RW)
 #                                   using the following syntax: groupname1:permissions1 [groupname2:permissions2 [...]]. No default value.
-# STORM_SA1_FILE_SUPPORT   :
+# STORM_SA1_DN_C_REGEX     :        Regular expression specifying the format of C (Country) field of DNs allowed to access the Storage Area
+# STORM_SA1_DN_O_REGEX     :        Regular expression specifying the format of O (Organization name) field of DNs allowed to access the Storage Area
+# STORM_SA1_DN_OU_REGEX    :        Regular expression specifying the format of OU (Organizational Unit) field of DNs allowed to access the Storage Area
+# STORM_SA1_DN_L_REGEX     :        Regular expression specifying the format of L (Locality) field of DNs allowed to access the Storage Area
+# STORM_SA1_DN_CN_REGEX    :        Regular expression specifying the format of CN (Common Name) field of DNs allowed to access the Storage Area
+# STORM_SA1_DN_DC_REGEX    :        Regular expression specifying the format of DC (Domain Component) field of DNs allowed to access the Storage Area
+# STORM_SA1_FILE_SUPPORT
 # STORM_SA1_GRIDFTP_SUPPORT:        Enable the corresponding protocol.
 # STORM_SA1_RFIO_SUPPORT   :        Default value: ${STORM_INFO_<PROTOCOL>_SUPPORT}
 # STORM_SA1_ROOT_SUPPORT   :

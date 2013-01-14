@@ -11,7 +11,7 @@
 # GridhHTTPs service user.
 # OPTIONAL - Default value: gridhttps
 #STORM_GRIDHTTPS_USER=gridhttps
-# GridHTTPs context deploy folder
+# GridHTTPs web application deploy folder
 # OPTIONAL - Default value: /var/lib/storm
 #STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER=/var/lib/storm
 
@@ -62,5 +62,8 @@ STORM_BACKEND_HOST=
 # OPTIONAL - Default value: 8444
 #STORM_FRONTEND_PORT=8444
 # StoRM SRM EndPoint
-# OPTIONAL - Default value: STORM_BACKEND_HOST:${STORM_FRONTEND_PORT}
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}:${STORM_FRONTEND_PORT}
 #STORM_SRM_ENDPOINT=${STORM_BACKEND_HOST}:${STORM_FRONTEND_PORT}
+# StoRM BackEnd service user
+# OPTIONAL - Default value: storm
+#STORM_USER=storm
