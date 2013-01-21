@@ -112,15 +112,21 @@ STORM_GRIDHTTPS_ENABLED=false
 # Gridhttps pluigin implementation class.
 # OPTIONAL - Default value: it.grid.storm.https.HTTPSPluginInterfaceStub
 STORM_GRIDHTTPS_PLUGIN_CLASSNAME=it.grid.storm.https.HTTPSPluginInterfaceStub
-
-# Gridhttps plugin parameter
-#---------------------------------------------------------
 # StoRM Gridhttps server service host.
 # OPTIONAL - Default value: localhost
 STORM_GRIDHTTPS_SERVER_HOST=localhost
-# StoRM Gridhttps server mapping service port.
+# StoRM Gridhttps server http port.
 # OPTIONAL - Default value: 8085
 STORM_GRIDHTTPS_HTTP_PORT=8085
+# StoRM Gridhttps server https port.
+# OPTIONAL - Default value: 8443
+STORM_GRIDHTTPS_HTTPS_PORT=8443
+
+# Gridhttps plugin parameter
+#---------------------------------------------------------
+# StoRM Gridhttps server mapping service port.
+# OPTIONAL - Default value: 8086
+STORM_GRIDHTTPS_MAPPING_SERVICE_PORT=8086
 # StoRM Gridhttps server service user UID.
 # COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
 #STORM_GRIDHTTPS_SERVER_USER_UID=

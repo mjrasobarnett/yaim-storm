@@ -98,6 +98,9 @@ function config_storm_gridhttps_plugin_properties () {
     
     set_value "gridhttps.server.user.uid" "${STORM_GRIDHTTPS_SERVER_USER_UID}"    ${FILE}
     set_value "gridhttps.server.user.gid" "${STORM_GRIDHTTPS_SERVER_GROUP_UID}"   ${FILE}
+    if ! [ -z "$STORM_GRIDHTTPS_MAPPING_SERVICE_PORT" ] || [ "${STORM_GRIDHTTPS_MAPPING_SERVICE_PORT+xxx}" = "xxx" ]; then
+       set_value "gridhttps.mapping-service.port" "${STORM_GRIDHTTPS_MAPPING_SERVICE_PORT}"   ${FILE}
+    fi
     yaimlog INFO "${FUNCTION}: Successfully created ${FILE} !"
   else
     yaimlog DEBUG "${FUNCTION}: Gridhttps not enabled. No configuration file to produce"
