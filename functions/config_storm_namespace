@@ -157,8 +157,18 @@ EOF
     x=STORM_${SA_UPP}_RFIO_HOST;               SA_RFIO_HOST=${!x:-${STORM_RFIO_HOST}}
     x=STORM_${SA_UPP}_ROOT_HOST;               SA_ROOT_HOST=${!x:-${STORM_ROOT_HOST}}
     x=STORM_${SA_UPP}_HTTP_HOST;               SA_HTTP_HOST=${!x:-${STORM_GRIDHTTPS_SERVER_HOST}}
+    x=STORM_${SA_UPP}_GRIDHTTP_POOL_STRATEGY;  SA_GRIDHTTP_POOL_STRATEGY=${!x:-${STORM_GRIDHTTP_POOL_STRATEGY}}
+    x=STORM_${SA_UPP}_GRIDHTTP_POOL_LIST;      SA_GRIDHTTP_POOL_LIST=${!x:-${STORM_GRIDHTTP_POOL_LIST}};
+    if [ "${SA_GRIDHTTP_POOL_LIST}xxx" == "xxx" ]; then
+        SA_GRIDHTTP_POOL_LIST=${SA_HTTP_HOST}
+    fi
     x=STORM_${SA_UPP}_HTTP_PORT;               SA_HTTP_PORT=${!x:-${STORM_GRIDHTTPS_HTTP_PORT}}
     x=STORM_${SA_UPP}_HTTPS_HOST;              SA_HTTPS_HOST=${!x:-${STORM_GRIDHTTPS_SERVER_HOST}}
+    x=STORM_${SA_UPP}_GRIDHTTPS_POOL_STRATEGY; SA_GRIDHTTPS_POOL_STRATEGY=${!x:-${STORM_GRIDHTTPS_POOL_STRATEGY}}
+    x=STORM_${SA_UPP}_GRIDHTTPS_POOL_LIST;     SA_GRIDHTTPS_POOL_LIST=${!x:-${STORM_GRIDHTTPS_POOL_LIST}};
+    if [ "${SA_GRIDHTTPS_POOL_LIST}xxx" == "xxx" ]; then
+        SA_GRIDHTTPS_POOL_LIST=${SA_HTTPS_HOST}
+    fi
     x=STORM_${SA_UPP}_HTTPS_PORT;              SA_HTTPS_PORT=${!x:-${STORM_GRIDHTTPS_HTTPS_PORT}}
     x=STORM_${SA_UPP}_FILE_SUPPORT;            SA_FILE_SUPPORT=${!x:-${STORM_INFO_FILE_SUPPORT}}
     x=STORM_${SA_UPP}_GRIDFTP_SUPPORT;         SA_GRIDFTP_SUPPORT=${!x:-${STORM_INFO_GRIDFTP_SUPPORT}}
@@ -357,10 +367,10 @@ EOF
 EOF
     fi
 
+    PROTOCOL_ID=0
     if [ "${SA_GRIDFTP_SUPPORT}" == "true" ]; then
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (gsiftp)"
-      # gsiftp entry could be multiple
-      i=0
+      # gsiftp entry could be multiple  
       COUNTER=1
 	  COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
 	  while [ $COUNTER -le $COUNT ]; do
@@ -369,13 +379,13 @@ EOF
           SA_GRIDFTP_POOL_HOST=`echo ${SA_GRIDFTP_POOL} | awk '{print $1}'`
           cat >> ${FILE} << EOF
           <prot name="gsiftp">
-            <id>$i</id>
+            <id>$PROTOCOL_ID</id>
             <schema>gsiftp</schema>
             <host>${SA_GRIDFTP_POOL_HOST}</host>
             <port>2811</port>
           </prot>
 EOF
-          ((i++))
+          ((PROTOCOL_ID++))
           let COUNTER=COUNTER+1
         fi
       done
@@ -402,33 +412,58 @@ EOF
           </prot>
 EOF
     fi
-    
-        if [ "${SA_HTTP_SUPPORT}" == "true" ]; then
+     
+    if [ "${SA_HTTP_SUPPORT}" == "true" ]; then
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (http)"
-      cat >> ${FILE} << EOF
+      # gsiftp entry could be multiple
+      COUNTER=1
+	  COUNT=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -F ',' '{print NF}')
+	  while [ $COUNTER -le $COUNT ]; do
+      	SA_GRIDHTTP_POOL=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+        if [ ! -z "${SA_GRIDHTTP_POOL}" ]; then
+          SA_GRIDHTTP_POOL_HOST=`echo ${SA_GRIDHTTP_POOL} | awk '{print $1}'`
+          cat >> ${FILE} << EOF
           <prot name="http">
+            <id>$PROTOCOL_ID</id>
             <schema>http</schema>
-            <host>${SA_HTTP_HOST}</host>
+            <host>${SA_GRIDHTTP_POOL_HOST}</host>
             <port>${SA_HTTP_PORT}</port>
           </prot>
 EOF
+          ((PROTOCOL_ID++))
+          let COUNTER=COUNTER+1
+        fi
+      done
     fi
+
 
     if [ "${SA_HTTPS_SUPPORT}" == "true" ]; then
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (https)"
-      cat >> ${FILE} << EOF
+      # gsiftp entry could be multiple
+      COUNTER=1
+	  COUNT=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -F ',' '{print NF}')
+	  while [ $COUNTER -le $COUNT ]; do
+      	SA_GRIDHTTPS_POOL=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+        if [ ! -z "${SA_GRIDHTTPS_POOL}" ]; then
+          SA_GRIDHTTPS_POOL_HOST=`echo ${SA_GRIDHTTPS_POOL} | awk '{print $1}'`
+          cat >> ${FILE} << EOF
           <prot name="https">
+            <id>$PROTOCOL_ID</id>
             <schema>https</schema>
-            <host>${SA_HTTPS_HOST}</host>
+            <host>${SA_GRIDHTTPS_POOL_HOST}</host>
             <port>${SA_HTTPS_PORT}</port>
           </prot>
 EOF
+          ((PROTOCOL_ID++))
+          let COUNTER=COUNTER+1
+        fi
+      done
     fi
-    
 
     cat >> ${FILE} << EOF
         </trans-prot>
 EOF
+    PROTOCOL_ID=0
     # gsiftp entry could be use a load balancing strategy
     SA_GRIDFTP_POOL_NUMBER=`echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{print NF}'`
     if [[ ${SA_GRIDFTP_POOL_NUMBER} > 1 ]]; then
@@ -440,7 +475,6 @@ EOF
 EOF
       # 'weight' strategy case
       if [ ${SA_GRIDFTP_POOL_STRATEGY} = 'weight' ]; then
-        i=0
         COUNTER=1
 	    COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
 	    while [ $COUNTER -le $COUNT ]; do
@@ -452,9 +486,9 @@ EOF
               SA_GRIDFTP_POOL_WEIGHT=100
             fi
             cat >> ${FILE} << EOF
-            <member member-id="$i"><weight>${SA_GRIDFTP_POOL_WEIGHT}</weight></member>
+            <member member-id="$PROTOCOL_ID"><weight>${SA_GRIDFTP_POOL_WEIGHT}</weight></member>
 EOF
-            ((i++))
+            ((PROTOCOL_ID++))
             let COUNTER=COUNTER+1
           fi
         done
@@ -464,9 +498,9 @@ EOF
         for SA_GRIDFTP_POOL in $(echo ${SA_GRIDFTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
           if [ ! -z "${SA_GRIDFTP_POOL}" ]; then
             cat >> ${FILE} << EOF
-            <member member-id="$i"></member>
+            <member member-id="$PROTOCOL_ID"></member>
 EOF
-            ((i++))
+            ((PROTOCOL_ID++))
           fi
         done
       fi
@@ -474,6 +508,102 @@ EOF
           </members>
        </pool>
 EOF
+    elif [[ ${SA_GRIDFTP_POOL_NUMBER} == 1 ]]; then
+      ((PROTOCOL_ID++))
+    fi
+    # http entry could be use a load balancing strategy
+    SA_GRIDHTTP_POOL_NUMBER=`echo ${SA_GRIDHTTP_POOL_LIST} | awk 'BEGIN{FS=","}{print NF}'`
+    if [[ ${SA_GRIDHTTP_POOL_NUMBER} > 1 ]]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} http pool"
+      cat >> ${FILE} << EOF
+        <pool>
+          <balance-strategy>${SA_GRIDHTTP_POOL_STRATEGY}</balance-strategy>
+          <members>
+EOF
+      # 'weight' strategy case
+      if [ ${SA_GRIDHTTP_POOL_STRATEGY} = 'weight' ]; then
+        COUNTER=1
+	    COUNT=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -F ',' '{print NF}')
+	    while [ $COUNTER -le $COUNT ]; do
+		  SA_GRIDHTTP_POOL=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+          if [ ! -z "${SA_GRIDHTTP_POOL}" ]; then
+            SA_GRIDHTTP_POOL_WEIGHT=`echo ${SA_GRIDHTTP_POOL} | awk '{print $2}'`
+            # set to 1 if weight is null
+            if [ -z "${SA_GRIDHTTP_POOL_WEIGHT}" ]; then
+              SA_GRIDHTTP_POOL_WEIGHT=100
+            fi
+            cat >> ${FILE} << EOF
+            <member member-id="$PROTOCOL_ID"><weight>${SA_GRIDHTTP_POOL_WEIGHT}</weight></member>
+EOF
+            ((PROTOCOL_ID++))
+            let COUNTER=COUNTER+1
+          fi
+        done
+      # other strategy cases
+      else
+        i=0
+        for SA_GRIDHTTP_POOL in $(echo ${SA_GRIDHTTP_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
+          if [ ! -z "${SA_GRIDHTTP_POOL}" ]; then
+            cat >> ${FILE} << EOF
+            <member member-id="$PROTOCOL_ID"></member>
+EOF
+            ((PROTOCOL_ID++))
+          fi
+        done
+      fi
+      cat >> ${FILE} << EOF
+          </members>
+       </pool>
+EOF
+    elif [[ ${SA_GRIDHTTP_POOL_NUMBER} == 1 ]]; then
+      ((PROTOCOL_ID++))
+    fi
+    # https entry could be use a load balancing strategy
+    SA_GRIDHTTPS_POOL_NUMBER=`echo ${SA_GRIDHTTPS_POOL_LIST} | awk 'BEGIN{FS=","}{print NF}'`
+    if [[ ${SA_GRIDHTTPS_POOL_NUMBER} > 1 ]]; then
+      yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} https pool"
+      cat >> ${FILE} << EOF
+        <pool>
+          <balance-strategy>${SA_GRIDHTTPS_POOL_STRATEGY}</balance-strategy>
+          <members>
+EOF
+      # 'weight' strategy case
+      if [ ${SA_GRIDHTTPS_POOL_STRATEGY} = 'weight' ]; then
+        COUNTER=1
+	    COUNT=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -F ',' '{print NF}')
+	    while [ $COUNTER -le $COUNT ]; do
+		  SA_GRIDHTTPS_POOL=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+          if [ ! -z "${SA_GRIDHTTPS_POOL}" ]; then
+            SA_GRIDHTTPS_POOL_WEIGHT=`echo ${SA_GRIDHTTPS_POOL} | awk '{print $2}'`
+            # set to 1 if weight is null
+            if [ -z "${SA_GRIDHTTPS_POOL_WEIGHT}" ]; then
+              SA_GRIDHTTPS_POOL_WEIGHT=100
+            fi
+            cat >> ${FILE} << EOF
+            <member member-id="$PROTOCOL_ID"><weight>${SA_GRIDHTTPS_POOL_WEIGHT}</weight></member>
+EOF
+            ((PROTOCOL_ID++))
+            let COUNTER=COUNTER+1
+          fi
+        done
+      # other strategy cases
+      else
+        i=0
+        for SA_GRIDHTTPS_POOL in $(echo ${SA_GRIDHTTPS_POOL_LIST} | awk 'BEGIN{FS=","}{for (i=1; i<=NF; i++) print $i}'); do
+          if [ ! -z "${SA_GRIDHTTPS_POOL}" ]; then
+            cat >> ${FILE} << EOF
+            <member member-id="$PROTOCOL_ID"></member>
+EOF
+            ((PROTOCOL_ID++))
+          fi
+        done
+      fi
+      cat >> ${FILE} << EOF
+          </members>
+       </pool>
+EOF
+    elif [[ ${SA_GRIDHTTPS_POOL_NUMBER} == 1 ]]; then
+      ((PROTOCOL_ID++))
     fi
     cat >> ${FILE} << EOF
       </capabilities>

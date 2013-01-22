@@ -91,9 +91,15 @@ STORM_DB_PWD=
 # Protocol: root
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_INFO_ROOT_SUPPORT=false
+# GRIDHTTP servers pool list. A comma separated list of hosts
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
+#STORM_GRIDHTTP_POOL_LIST=${STORM_BACKEND_HOST}
 # Protocol: http
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_INFO_HTTP_SUPPORT=false
+# GRIDHTTPS servers pool list. A comma separated list of hosts
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
+#STORM_GRIDHTTPS_POOL_LIST=${STORM_BACKEND_HOST}
 # Protocol: https
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_INFO_HTTPS_SUPPORT=false
@@ -159,6 +165,12 @@ STORM_DB_PWD=
 # Load balancing strategy for GRIDFTP servers pool.
 # OPTIONAL - Available values: [round-robin|smart-rr|random|weight] - Default value: round-robin
 #STORM_GRIDFTP_POOL_STRATEGY=round-robin
+# Load balancing strategy for GRIDHTTP servers pool.
+# OPTIONAL - Available values: [round-robin|smart-rr|random|weight] - Default value: round-robin
+#STORM_GRIDHTTP_POOL_STRATEGY=round-robin
+# Load balancing strategy for GRIDHTTPS servers pool.
+# OPTIONAL - Available values: [round-robin|smart-rr|random|weight] - Default value: round-robin
+#STORM_GRIDHTTPS_POOL_STRATEGY=round-robin
 # GRIDFTP servers pool list. A comma separated list of hosts
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
 #STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
