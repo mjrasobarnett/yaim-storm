@@ -57,7 +57,7 @@ srpm: dist
 	/usr/bin/rpmbuild  --define "_topdir $(RPM_MAIN_DIR)" --nodeps -bs $(RPM_SPEC)/$(SPEC_FILE)
 
 rpm: srpm
-	/usr/bin/rpmbuild  --rebuild --define "_topdir $(RPM_MAIN_DIR)" --define "dist .@YAIM_STORM_SO@"  $(RPM_SRPM)/@PACKAGE@-@VERSION@-@YAIM_STORM_AGE_NUMBER@.src.rpm
+	/usr/bin/rpmbuild  --rebuild --define "_topdir $(RPM_MAIN_DIR)" --define "dist .@YAIM_STORM_SO@"  $(RPM_SRPM)/@PACKAGE@-@VERSION@-@YAIM_STORM_AGE_NUMBER@*.src.rpm
 
 packaging: dist
 	/bin/mkdir -p $(RPM_DIRS)
