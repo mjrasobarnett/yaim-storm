@@ -500,7 +500,7 @@ EOF
           </members>
        </pool>
 EOF
-    elif [[ ${SA_GRIDFTP_POOL_NUMBER} == 1 ]]; then
+    elif [ "${SA_GRIDFTP_SUPPORT}" == "true" ] && [ ${SA_GRIDFTP_POOL_NUMBER} == 1 ]; then
       ((PROTOCOL_ID++))
     fi
     # http entry could be use a load balancing strategy
@@ -547,7 +547,7 @@ EOF
           </members>
        </pool>
 EOF
-    elif [[ ${SA_GRIDHTTP_POOL_NUMBER} == 1 ]]; then
+    elif [ "${SA_GRIDHTTP_SUPPORT}" == "true" ] && [ ${SA_GRIDHTTP_POOL_NUMBER} == 1 ]; then
       ((PROTOCOL_ID++))
     fi
     # https entry could be use a load balancing strategy
@@ -594,7 +594,7 @@ EOF
           </members>
        </pool>
 EOF
-    elif [[ ${SA_GRIDHTTPS_POOL_NUMBER} == 1 ]]; then
+    elif [ "${SA_GRIDHTTPS_SUPPORT}" == "true" ] && [ ${SA_GRIDHTTPS_POOL_NUMBER} == 1 ]; then
       ((PROTOCOL_ID++))
     fi
     cat >> ${FILE} << EOF
