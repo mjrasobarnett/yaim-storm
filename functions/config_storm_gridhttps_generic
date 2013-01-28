@@ -63,10 +63,10 @@ function config_storm_gridhttps_generic () {
   mkdir -p ${STORM_GRIDHTTPS_CERT_DIR}
   cp -f ${X509_HOST_CERT} ${STORM_GRIDHTTPS_CERT_DIR}
   cp -f ${X509_HOST_KEY} ${STORM_GRIDHTTPS_CERT_DIR}
-  chown -R ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${STORM_GRIDHTTPS_CERT_DIR}
+  chown -R ${STORM_GRIDHTTPS_USER}:${STORM_USER} ${STORM_GRIDHTTPS_CERT_DIR}
   
   yaimlog DEBUG "${FUNCTION}: Setting ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} folder ownership"
-  chown ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} 
+  chown ${STORM_GRIDHTTPS_USER}:${STORM_USER} ${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER} 
   
   LOGGING_FOLDER="/var/log/storm"
   yaimlog DEBUG "${FUNCTION}: Ensuring log folder ${LOGGING_FOLDER} ownership to STORM_USER ${STORM_USER}"
@@ -76,7 +76,7 @@ function config_storm_gridhttps_generic () {
   # Change ownership to /etc/storm/gridhttps-server configuration directory
   yaimlog DEBUG "${FUNCTION}: Setting ${config_dir} folder ownership"
   if [ -d ${config_dir} ]; then
-    chown -R ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${config_dir}
+    chown -R ${STORM_GRIDHTTPS_USER}:${STORM_USER} ${config_dir}
   else
     yaimlog ERROR "${FUNCTION}: StoRM GridHTTPs  configuration directory ${config_dir} doesn't exist"
     yestr ${YEX_NOSUCHFILE}

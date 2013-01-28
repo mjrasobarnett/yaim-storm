@@ -31,7 +31,7 @@
 
 function config_storm_gridhttps_properties_check () {
 
-  requires $1 STORM_GRIDHTTPS_USER STORM_BACKEND_HOST
+  requires $1 STORM_GRIDHTTPS_USER STORM_USER STORM_BACKEND_HOST
   return $?
 }
 
@@ -74,7 +74,7 @@ function config_storm_gridhttps_properties () {
 
     # Set permissions
     chmod 640 ${FILE}
-    chown ${STORM_GRIDHTTPS_USER}:${STORM_GRIDHTTPS_USER} ${FILE}
+    chown ${STORM_GRIDHTTPS_USER}:${STORM_USER} ${FILE}
     
     if ! [ -z "$STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER" ] || [ "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER+xxx}" = "xxx" ]; then
        set_value "webapp-directory" "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER}"   ${FILE}
