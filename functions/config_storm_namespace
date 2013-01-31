@@ -112,6 +112,7 @@ EOF
 
     x=STORM_${SA_UPP}_ROOT;                    SA_ROOT=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
     x=STORM_${SA_UPP}_FSTYPE;                  SA_FSTYPE=${!x:-${STORM_FSTYPE}}
+    x=STORM_${SA_UPP}_USE_GPFS_PREALLOCATION;  SA_USE_GPFS_PREALLOCATION=${!x:-${STORM_INFO_USE_GPFS_PREALLOCATION}}
     y=`echo ${SA_FSTYPE} | tr '[:upper:]' '[:lower:]'`
     case "$y" in
       posixfs)
@@ -122,7 +123,11 @@ EOF
       gpfs)
         SA_FSTYPE=gpfs
         SA_FSDRIVER=gpfs
-        SA_FSSPACESYSTEM=GPFSSpaceSystem
+        if [ "${SA_USE_GPFS_PREALLOCATION}xxx" == "falsexxx" ] || [ "${SA_USE_GPFS_PREALLOCATION}xxx" == "xxx" ]; then
+           SA_FSSPACESYSTEM=MockSpaceSystem
+        else
+           SA_FSSPACESYSTEM=GPFSSpaceSystem
+        fi 
         ;;
       *)
         yaimlog ERROR "${FUNCTION}: Invalid filesystem type '${SA_FSTYPE}'"

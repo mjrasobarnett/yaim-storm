@@ -103,6 +103,9 @@ STORM_DB_PWD=
 # Protocol: https
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_INFO_HTTPS_SUPPORT=false
+# In case of gpfs filesystem enables the preallocation of space on srmPrepareToPut calls
+# OPTIONAL - Available values: [true|false] - Default value: false
+STORM_INFO_USE_GPFS_PREALLOCATION=false
 
 # Gridhttps support
 #---------------------------------------------------------
@@ -209,7 +212,8 @@ STORM_DB_PWD=
 # STORM_SA1_GRIDFTP_SUPPORT:        Enable the corresponding protocol.
 # STORM_SA1_RFIO_SUPPORT   :        Default value: ${STORM_INFO_<PROTOCOL>_SUPPORT}
 # STORM_SA1_ROOT_SUPPORT   :
-# STORM_SA1_FSTYPE:                 See STORM_FSTYPE definition. Default value: ${STORM_FSTYPE}
+# STORM_SA1_FSTYPE         :        See STORM_FSTYPE definition. Default value: ${STORM_FSTYPE}
+# STORM_SA1_USE_GPFS_PREALLOCATION: See STORM_INFO_USE_GPFS_PREALLOCATION definition. Default value: ${STORM_INFO_USE_GPFS_PREALLOCATION}  
 # STORM_SA1_GRIDFTP_POOL_LIST:      See STORM_GRIDFTP_POOL_LIST definition. Default value: ${STORM_GRIDFTP_POOL_LIST}
 # STORM_SA1_GRIDFTP_POOL_STRATEGY:  See STORM_GRIDFTP_POOL_STRATEGY definition. Default value: ${STORM_GRIDFTP_POOL_STRATEGY}
 # STORM_SA1_ANONYMOUS_HTTP_READ:    See STORM_ANONYMOUS_HTTP_READ definition. Default value: ${STORM_ANONYMOUS_HTTP_READ}
