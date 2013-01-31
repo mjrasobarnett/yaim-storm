@@ -34,6 +34,12 @@ function config_storm_gridhttps_plugin_properties_check () {
   requires $1 STORM_GRIDHTTPS_ENABLED
   if [ "x${STORM_GRIDHTTPS_ENABLED}" == "xtrue" ]; then
   	requires $1 STORM_GRIDHTTPS_SERVER_USER_UID STORM_GRIDHTTPS_SERVER_GROUP_UID
+  	if [ $? -ne 0 ]; then
+  	  yestr ${YEX_MISSINGVAR}
+	  yaimlog WARNING "GridHTTPs service user uid or gid not specified,unable to configure StoRM GridHTTPs-plugin. Probably you need to update your YAIM input file with missing information"
+	  yaimlog WARNING "${YERRORSTR}"
+	  return ${YEX_OK}
+  	fi
   fi
   return $?
 
@@ -96,8 +102,22 @@ function config_storm_gridhttps_plugin_properties () {
     chmod 640 ${FILE}
     chown ${STORM_USER}:${STORM_USER} ${FILE}
     
-    set_value "gridhttps.server.user.uid" "${STORM_GRIDHTTPS_SERVER_USER_UID}"    ${FILE}
-    set_value "gridhttps.server.user.gid" "${STORM_GRIDHTTPS_SERVER_GROUP_UID}"   ${FILE}
+    if [ ! "x${STORM_GRIDHTTPS_SERVER_USER_UID}" == "x" ]; then
+      set_value "gridhttps.server.user.uid" "${STORM_GRIDHTTPS_SERVER_USER_UID}"    ${FILE}
+    else
+      yestr ${YEX_MISSINGVAR}
+	  yaimlog WARNING "GridHTTPs service user uid not specified,unable to configure StoRM GridHTTPs-plugin. Probably you need to update your YAIM input file with missing information"
+	  yaimlog WARNING "${YERRORSTR}"
+	  return ${YEX_OK}
+    fi
+    if [ ! "x${STORM_GRIDHTTPS_SERVER_GROUP_UID}" == "x" ]; then
+      set_value "gridhttps.server.user.gid" "${STORM_GRIDHTTPS_SERVER_GROUP_UID}"   ${FILE}
+    else
+      yestr ${YEX_MISSINGVAR}
+	  yaimlog WARNING "GridHTTPs service user gid not specified,unable to configure StoRM GridHTTPs-plugin. Probably you need to update your YAIM input file with missing information"
+	  yaimlog WARNING "${YERRORSTR}"
+	  return ${YEX_OK}
+    fi
     if ! [ -z "$STORM_GRIDHTTPS_MAPPING_SERVICE_PORT" ] || [ "${STORM_GRIDHTTPS_MAPPING_SERVICE_PORT+xxx}" = "xxx" ]; then
        set_value "gridhttps.mapping-service.port" "${STORM_GRIDHTTPS_MAPPING_SERVICE_PORT}"   ${FILE}
     fi
