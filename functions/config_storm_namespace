@@ -211,7 +211,7 @@ EOF
          yaimlog ERROR "${YERRORSTR}"
          return ${YEX_CONFIG}
       fi
-      SA_NEARLINE_SIZE=$((${SA_NEARLINE_SIZE}*(1024*1024*1024)))
+      SA_NEARLINE_SIZE=$((${SA_NEARLINE_SIZE}*(1000*1000*1000)))
     else
       if [ ! -z "${SA_NEARLINE_SIZE}" ] && [ "${SA_NEARLINE_SIZE}" -ne "0" ]; then
          yaimlog DEBUG "${FUNCTION}: Wrong Nearline Size setting!"
@@ -234,7 +234,7 @@ EOF
        yaimlog ERROR "${YERRORSTR}"
        return ${YEX_CONFIG}
     fi
-    SA_ONLINE_SIZE=$((${SA_ONLINE_SIZE}*(1024*1024*1024)))
+    SA_ONLINE_SIZE=$((${SA_ONLINE_SIZE}*(1000*1000*1000)))
 
     # Check the STORAGECLASS
     SA_RETENTION_POLICY="replica"   # default
