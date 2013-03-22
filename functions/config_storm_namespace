@@ -82,7 +82,7 @@ function config_storm_namespace () {
   find `dirname "${FILE}"` -ctime +2 -name 'namespace.xml.bkp*' -exec rm {} \;
 
   # Set permissions
-  chmod 640 ${FILE}
+  chmod 644 ${FILE}
 
   #==========================================================
   # Configuration file creation

@@ -73,7 +73,7 @@ function config_storm_used_space () {
   find `dirname "${FILE}"` -ctime +2 -name "${FILE_NAME}.bkp*" -exec rm {} \;
 
   # Set permissions
-  chmod 640 ${FILE}
+  chmod 644 ${FILE}
 
   #==========================================================
   # Configuration file creation
