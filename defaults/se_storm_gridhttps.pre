@@ -15,7 +15,7 @@ STORM_GRIDHTTPS_USER=gridhttps
 # Http connector settings
 #---------------------------------------------------------
 # Enable http connections
-# OPTIONAL - Available values: [true|false] - Default value: false
+# OPTIONAL - Available values: [true|false] - Default value: true
 STORM_GRIDHTTPS_HTTP_ENABLED=true
 # Gridhttps http port.
 # OPTIONAL - Default value: 8085
