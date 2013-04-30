@@ -11,9 +11,6 @@
 # GridhHTTPs service user.
 # OPTIONAL - Default value: gridhttps
 STORM_GRIDHTTPS_USER=gridhttps
-# GridHTTPs web application deploy folder
-# OPTIONAL - Default value: /var/lib/storm
-STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER=/var/lib/storm
 
 # Http connector settings
 #---------------------------------------------------------
@@ -31,10 +28,10 @@ STORM_GRIDHTTPS_HTTP_PORT=8085
 STORM_GRIDHTTPS_HTTPS_PORT=8443
 # Host certificate location
 # OPTIONAL - Default value: /etc/grid-security/hostcert.pem
-#X509_HOST_CERT=/etc/grid-security/hostcert.pem
+X509_HOST_CERT=/etc/grid-security/hostcert.pem
 # Host certificate key location
 # OPTIONAL - Default value: /etc/grid-security/hostkey.pem
-#X509_HOST_KEY=/etc/grid-security/hostkey.pem
+X509_HOST_KEY=/etc/grid-security/hostkey.pem
 # Host certificate folder for SSL connector.
 # OPTIONAL - Default value: /etc/grid-security/gridhttps
 STORM_GRIDHTTPS_CERT_DIR=/etc/grid-security/${STORM_GRIDHTTPS_USER}

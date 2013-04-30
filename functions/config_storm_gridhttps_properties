@@ -19,7 +19,7 @@
 #
 # NAME :        config_storm_gridhttps_properties
 #
-# DESCRIPTION : This function configures /etc/storm/gridhttps-server/server.conf file on a StoRM SE GridHTTPs.
+# DESCRIPTION : This function configures /etc/storm/gridhttps-server/server.ini file on a StoRM SE GridHTTPs.
 #
 # AUTHORS :     grid-release@infn.it
 #
@@ -76,9 +76,6 @@ function config_storm_gridhttps_properties () {
     chmod 640 ${FILE}
     chown ${STORM_GRIDHTTPS_USER}:${STORM_USER} ${FILE}
     
-    if ! [ -z "$STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER" ] || [ "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER+xxx}" = "xxx" ]; then
-       set_value "webapp-directory" "${STORM_GRIDHTTPS_WEBAPP_DEPLOY_FOLDER}"   ${FILE}
-	fi
 	if ! [ -z "$STORM_GRIDHTTPS_HTTP_ENABLED" ] || [ "${STORM_GRIDHTTPS_HTTP_ENABLED+xxx}" = "xxx" ]; then
        set_value "http.enabled" "${STORM_GRIDHTTPS_HTTP_ENABLED}"   ${FILE}
     fi
@@ -90,7 +87,7 @@ function config_storm_gridhttps_properties () {
     fi
     if ! [ -z "$STORM_GRIDHTTPS_CERT_DIR" ] || [ "${STORM_GRIDHTTPS_CERT_DIR+xxx}" = "xxx" ]; then
        set_value "x509.host-certificate" "${STORM_GRIDHTTPS_CERT_DIR}/hostcert.pem"   ${FILE}
-       set_value "x509.x509.host-key" "${STORM_GRIDHTTPS_CERT_DIR}/hostkey.pem"   ${FILE}
+       set_value "x509.host-key" "${STORM_GRIDHTTPS_CERT_DIR}/hostkey.pem"   ${FILE}
     fi
     if ! [ -z "$X509_CERT_DIR" ] || [ "${X509_CERT_DIR+xxx}" = "xxx" ]; then
        set_value "x509.truststore.directory" "${X509_CERT_DIR}"   ${FILE}
