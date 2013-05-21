@@ -68,6 +68,10 @@ function config_storm_dir () {
     if [ ! -d ${dir} ]; then
       yaimlog INFO "${FUNCTION}: Creating storage area folder ${dir}"; 
       mkdir -p ${dir};
+      yaimlog DEBUG "${FUNCTION}: Recursively set '${STORM_USER}:${STORM_USER}' ownership for ${dir}"; 
+      chown -RL ${STORM_USER}:${STORM_USER} ${dir};
+      yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}, adding group read permission"; 
+      chmod -R o-rwx,g+r ${dir}
     fi
 
     if [ ! -d ${dir} ]; then
