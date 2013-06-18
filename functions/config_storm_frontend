@@ -127,14 +127,14 @@ function config_storm_frontend () {
   set_value "fe.port"                       "${STORM_FRONTEND_PORT}"                     ${FILE}
   set_value "fe.threadpool.threads.number"  "${STORM_FE_THREADS_NUMBER}"                 ${FILE}
   set_value "fe.gsoap.maxpending"           "${STORM_FE_GSOAP_MAXPENDING}"               ${FILE}
-  #set_value "log.filename"                  "${STORM_FE_LOG_FILE}"                       ${FILE}
+  #set_value "log.filename"                 "${STORM_FE_LOG_FILE}"						 ${FILE}
   set_value "log.debuglevel"                "${STORM_FE_LOG_LEVEL}"                      ${FILE}
-  #set_value "security.enable.mapping"       "${STORM_FE_ENABLE_MAPPING}"                 ${FILE}
-  #set_value "security.enable.vomscheck"     "${STORM_FE_ENABLE_VOMSCHECK}"               ${FILE}
+  #set_value "security.enable.mapping"      "${STORM_FE_ENABLE_MAPPING}"                 ${FILE}
+  #set_value "security.enable.vomscheck"    "${STORM_FE_ENABLE_VOMSCHECK}"               ${FILE}
   set_value "be.recalltable.port"           "${STORM_BACKEND_REST_SERVICES_PORT}"		 ${FILE}
-  set_value "be.xmlrpc.host"                "${STORM_FE_BE_XMLRPC_HOST}"                 ${FILE}
-  set_value "be.xmlrpc.port"                "${STORM_FE_BE_XMLRPC_PORT}"                 ${FILE}
-  set_value "be.xmlrpc.path"                "${STORM_FE_BE_XMLRPC_PATH}"                 ${FILE}
+  set_value "be.xmlrpc.host"                "${STORM_BACKEND_HOST}"                 	 ${FILE}
+  set_value "be.xmlrpc.port"                "${STORM_BE_XMLRPC_PORT}"                 	 ${FILE}
+  set_value "be.xmlrpc.path"                "${STORM_BE_XMLRPC_PATH}"                 	 ${FILE}
   set_value "check.user.blacklisting"		"${STORM_FE_USER_BLACKLISTING}"              ${FILE}
   #Storm currently manages a single argus pepd endpoint
   STORM_ARGUS_PEPD_ENDPOINT=$(echo ${ARGUS_PEPD_ENDPOINTS} | awk '{print $1}')

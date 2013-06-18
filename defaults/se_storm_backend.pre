@@ -39,6 +39,9 @@ STORM_FRONTEND_PATH=/srm/managerv2
 # StoRM backend server rest port
 # OPTIONAL - Default value: 9998
 STORM_BACKEND_REST_SERVICES_PORT=9998
+# StoRM Backend XMLRPC server port.
+# OPTIONAL - Default value: 8080
+STORM_BE_XMLRPC_PORT=8080
 
 # Java settings
 #---------------------------------------------------------

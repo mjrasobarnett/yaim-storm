@@ -82,15 +82,12 @@ STORM_FE_ENABLE_VOMSCHECK=false
 
 # Backend XMLRPC server settings
 #---------------------------------------------------------
-# StoRM Backend XMLRPC server hostname.
-# OPTIONAL - Default value: localhost
-STORM_FE_BE_XMLRPC_HOST=localhost
 # StoRM Backend XMLRPC server port.
 # OPTIONAL - Default value: 8080
-STORM_FE_BE_XMLRPC_PORT=8080
+STORM_BE_XMLRPC_PORT=8080
 # StoRM Backend XMLRPC server path.
 # OPTIONAL - Default value: /RPC2
-STORM_FE_BE_XMLRPC_PATH=/RPC2
+STORM_BE_XMLRPC_PATH=/RPC2
 
 # Backend REST server settings
 #---------------------------------------------------------
