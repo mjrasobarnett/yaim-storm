@@ -143,7 +143,6 @@ function config_gip_glue2_storm_setenv () {
   yaimgridenv_set STORM_FRONTEND_PORT ${STORM_FRONTEND_PORT}
   yaimgridenv_set STORM_FRONTEND_PATH ${STORM_FRONTEND_PATH}
   yaimgridenv_set STORM_ENDPOINT_QUALITY_LEVEL ${STORM_ENDPOINT_QUALITY_LEVEL}
-  yaimgridenv_set STORM_ENDPOINT_SERVING_STATE ${STORM_ENDPOINT_SERVING_STATE}
   yaimgridenv_set STORM_ENDPOINT_CAPABILITY ${STORM_ENDPOINT_CAPABILITY}
 
 }
@@ -188,7 +187,7 @@ EOF
   # ${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf - BEGIN
   #---------------------------------------------------------------------
   # Configuration file for SRM v2.2 service reporter
-  FILE="${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf"
+  SERVICEFILE="${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf"
   yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
 
   if [ "${STORM_ENDPOINT_QUALITY_LEVEL}" -eq "1" ]; then
@@ -199,22 +198,18 @@ EOF
       QUALITY_LEVEL=pre-production
   elif [ "${STORM_ENDPOINT_QUALITY_LEVEL}" -eq "4" ]; then
       QUALITY_LEVEL=production
-  fi
+  else
+      yaimlog ERROR "${FUNCTION}: Quality Level is not set properly: its valid values are 1, 2, 3, 4"
+      QUALITY_LEVEL="UNDEFINEDVALUE:Level${STORM_ENDPOINT_QUALITY_LEVEL}"
+  fi   
 
-  if [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "1" ]; then
-      SERVING_STATE=closed
-  elif [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "2" ]; then
-      SERVING_STATE=draining
-  elif [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "3" ]; then
-      SERVING_STATE=queueing
-  elif [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "4" ]; then
-      SERVING_STATE=production
-  fi
+  STORM_SERVING_STATE=1
+  STORM_SERVING_STATE_VALUE=close
 
   ENDPOINT_QUALITY_LEVEL=`echo ${STORM_ENDPOINT_QUALITY_LEVEL}`
-  ENDPOINT_SERVING_STATE=`echo ${STORM_ENDPOINT_SERVING_STATE}`
+  ENDPOINT_SERVING_STATE=`echo ${STORM_SERVING_STATE}`
 
-  cat > ${FILE} << EOF
+  cat > ${SERVICEFILE} << EOF
 init = /usr/libexec/storm-dynamic-info-provider/glite-info-service-storm init
 service_type = SRM
 get_version = echo \${GLITE_INFO_SERVICE_VERSION}
@@ -224,7 +219,7 @@ WSDL_URL = http://sdm.lbl.gov/srm-wg/srm.v2.2.wsdl
 semantics_URL = http://sdm.lbl.gov/srm-wg/doc/SRM.v2.2.html
 get_starttime = perl -e '@st=stat("/var/run/storm-backend-server.pid");print "@st[10]\n";'
 
-get_capabilities = echo -e 'data.management.storage'
+get_capabilities = echo $STORM_ENDPOINT_CAPABILITY
 get_implementor = echo emi
 get_implementationname = echo StoRM
 get_implementationversion = rpm -qa | grep storm-backend-server | cut -d- -f4
@@ -235,10 +230,14 @@ get_services = echo
 EOF
 
   # Run function to complete file
-  l_write_vo_info ${FILE}
+  l_write_vo_info ${SERVICEFILE}
   #-------------------------------------------------------------------------
   # ${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf - END
   #-------------------------------------------------------------------------
+
+  chown ldap:root ${INFO_SERVICE_CONFIG}
+  chown ldap:ldap ${SERVICEFILE}
+
 
   yaimlog INFO "${FUNCTION}: Static storage information"
   #----------------------------------------------------------------
@@ -386,7 +385,7 @@ objectClass: GLUE2Service
 objectClass: GLUE2StorageService
 GLUE2ServiceId: ${STORM_FRONTEND_PUBLIC_HOST}
 GLUE2ServiceCapability: ${STORM_ENDPOINT_CAPABILITY}
-GLUE2ServiceType: Storage
+GLUE2ServiceType: SRM
 GLUE2ServiceQualityLevel: ${QUALITY_LEVEL}
 GLUE2ServiceStatusInfo: http://${STORM_FRONTEND_PUBLIC_HOST}/get-status
 GLUE2ServiceAdminDomainForeignKey: ${MY_DOMAIN}
@@ -447,7 +446,7 @@ objectClass: GLUE2Endpoint
 objectClass: GLUE2StorageEndpoint
 GLUE2EndpointId: ${STORM_FRONTEND_PUBLIC_HOST}/srm/2.2.0
 GLUE2EndpointURL: ${STORM_FRONTEND_ENDPOINT}
-GLUE2EndpointCapability: Storage Management
+GLUE2EndpointCapability: ${STORM_ENDPOINT_CAPABILITY}
 GLUE2EndpointTechnology: webservice
 GLUE2EndpointInterfaceName: SRM
 GLUE2EndpointInterfaceVersion: 2.2.0
@@ -459,12 +458,12 @@ GLUE2EndpointImplementor: emi.storm
 GLUE2EndpointImplementationName: StoRM
 GLUE2EndpointImplementationVersion: `rpm -q --queryformat='%{VERSION}' storm-backend-server`
 GLUE2EndpointQualityLevel: ${QUALITY_LEVEL}
-GLUE2EndpointHealthState: OK
+GLUE2EndpointHealthState: ok
 GLUE2EndpointHealthStateInfo: No Problems for storm-backend-server
-GLUE2EndpointServingState: ${SERVING_STATE}
-#GLUE2EndpointIssuerCA: to be defined
+GLUE2EndpointServingState: ${STORM_SERVING_STATE_VALUE}
+GLUE2EndpointIssuerCA: `openssl x509 -issuer -noout -in /etc/grid-security/hostcert.pem | sed 's/^[^/]*//'`
 #GLUE2EndpointTrustedCA: to be defined
-GLUE2EndpointDowntimeAnnounce: No
+#GLUE2EndpointDowntimeAnnounce: No
 GLUE2EndpointServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}
 GLUE2StorageEndpointStorageServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}
 
@@ -505,7 +504,7 @@ EOF
     x=STORM_${SA_UPP}_TOKEN;           SA_TOKEN=${!x}
     x=STORM_${SA_UPP}_VONAME;          SA_VONAME=${!x:-${SA_LOW}}
     x=STORM_${SA_UPP}_STORAGECLASS;    SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
-    x=STORM_${SA_UPP}_SERVINGSTATE;    SA_SERVING_STATE=${!x:-${SERVING_STATE}}
+    x=STORM_${SA_UPP}_SERVINGSTATE;    SA_SERVING_STATE=${!x:-${STORM_SERVING_STATE_VALUE}}
     # Convert in uppercase
     SA_STORAGECLASS=`echo ${SA_STORAGECLASS} | tr '[:lower:]' '[:upper:]'`
 
@@ -582,8 +581,8 @@ GLUE2StorageShareSharingID: ${SA_VONAME}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATE
 GLUE2StorageShareAccessLatency: ${SA_ACCESS_LATENCY}
 GLUE2StorageShareRetentionPolicy: ${SA_RETENTION_POLICY}
 GLUE2StorageShareExpirationMode: neverexpire
-GLUE2StorageShareDefaultLifeTime: -1
-GLUE2StorageShareMaximumLifeTime: -1
+#GLUE2StorageShareDefaultLifeTime: -1
+#GLUE2StorageShareMaximumLifeTime: -1
 GLUE2StorageShareTag: ${SA_LOW}
 GLUE2ShareServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}
 GLUE2StorageShareStorageServiceForeignKey: ${STORM_FRONTEND_PUBLIC_HOST}/${SA_LOW}
