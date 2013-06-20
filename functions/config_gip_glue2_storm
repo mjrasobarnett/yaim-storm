@@ -191,6 +191,26 @@ EOF
   FILE="${INFO_SERVICE_CONFIG}/glite-info-service-glue2-srm-storm-v2.conf"
   yaimlog INFO "${FUNCTION}: Creating ${FILE} ..."
 
+  if [ "${STORM_ENDPOINT_QUALITY_LEVEL}" -eq "1" ]; then
+      QUALITY_LEVEL=development
+  elif [ "${STORM_ENDPOINT_QUALITY_LEVEL}" -eq "2" ]; then
+      QUALITY_LEVEL=testing
+  elif [ "${STORM_ENDPOINT_QUALITY_LEVEL}" -eq "3" ]; then
+      QUALITY_LEVEL=pre-production
+  elif [ "${STORM_ENDPOINT_QUALITY_LEVEL}" -eq "4" ]; then
+      QUALITY_LEVEL=production
+  fi
+
+  if [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "1" ]; then
+      SERVING_STATE=closed
+  elif [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "2" ]; then
+      SERVING_STATE=draining
+  elif [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "3" ]; then
+      SERVING_STATE=queueing
+  elif [ "${STORM_ENDPOINT_SERVING_STATE}" -eq "4" ]; then
+      SERVING_STATE=production
+  fi
+
   ENDPOINT_QUALITY_LEVEL=`echo ${STORM_ENDPOINT_QUALITY_LEVEL}`
   ENDPOINT_SERVING_STATE=`echo ${STORM_ENDPOINT_SERVING_STATE}`
 
@@ -367,7 +387,7 @@ objectClass: GLUE2StorageService
 GLUE2ServiceId: ${STORM_FRONTEND_PUBLIC_HOST}
 GLUE2ServiceCapability: ${STORM_ENDPOINT_CAPABILITY}
 GLUE2ServiceType: Storage
-GLUE2ServiceQualityLevel: ${STORM_ENDPOINT_QUALITY_LEVEL}
+GLUE2ServiceQualityLevel: ${QUALITY_LEVEL}
 GLUE2ServiceStatusInfo: http://${STORM_FRONTEND_PUBLIC_HOST}/get-status
 GLUE2ServiceAdminDomainForeignKey: ${MY_DOMAIN}
 
@@ -438,10 +458,10 @@ GLUE2EndpointSemantics: http://sdm.lbl.gov/srm-wg/doc/srm.v2.2.wsdl
 GLUE2EndpointImplementor: emi.storm
 GLUE2EndpointImplementationName: StoRM
 GLUE2EndpointImplementationVersion: `rpm -q --queryformat='%{VERSION}' storm-backend-server`
-GLUE2EndpointQualityLevel: Testing
+GLUE2EndpointQualityLevel: ${QUALITY_LEVEL}
 GLUE2EndpointHealthState: OK
 GLUE2EndpointHealthStateInfo: No Problems for storm-backend-server
-GLUE2EndpointServingState: emi.storm.backend
+GLUE2EndpointServingState: ${SERVING_STATE}
 #GLUE2EndpointIssuerCA: to be defined
 #GLUE2EndpointTrustedCA: to be defined
 GLUE2EndpointDowntimeAnnounce: No
@@ -485,7 +505,7 @@ EOF
     x=STORM_${SA_UPP}_TOKEN;           SA_TOKEN=${!x}
     x=STORM_${SA_UPP}_VONAME;          SA_VONAME=${!x:-${SA_LOW}}
     x=STORM_${SA_UPP}_STORAGECLASS;    SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
-    x=STORM_${SA_UPP}_SERVINGSTATE;    SA_SERVING_STATE=${!x:-${STORM_ENDPOINT_SERVING_STATE}}
+    x=STORM_${SA_UPP}_SERVINGSTATE;    SA_SERVING_STATE=${!x:-${SERVING_STATE}}
     # Convert in uppercase
     SA_STORAGECLASS=`echo ${SA_STORAGECLASS} | tr '[:lower:]' '[:upper:]'`
 
@@ -561,7 +581,7 @@ GLUE2StorageSharePath: ${SA_ACCESSPOINT}
 GLUE2StorageShareSharingID: ${SA_VONAME}:${SA_RETENTION_POLICY}:${SA_ACCESS_LATENCY}
 GLUE2StorageShareAccessLatency: ${SA_ACCESS_LATENCY}
 GLUE2StorageShareRetentionPolicy: ${SA_RETENTION_POLICY}
-GLUE2StorageShareExpirationMode: neverExpire
+GLUE2StorageShareExpirationMode: neverexpire
 GLUE2StorageShareDefaultLifeTime: -1
 GLUE2StorageShareMaximumLifeTime: -1
 GLUE2StorageShareTag: ${SA_LOW}
