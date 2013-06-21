@@ -71,6 +71,25 @@ function config_storm_backend () {
   set_value     "STORM_BE_USER" "${STORM_USER}" "${SYSCONF_FILE}"
   yaimlog INFO "${FUNCTION}: set STORM_BE_USER as ${STORM_USER}"
 
+  #Change ownership to storm-backend configuration directory
+  if [ -d ${config_dir_prefix} ]; then
+    #NOTE: this is not recursive
+    chown ${STORM_USER}:${STORM_USER} ${config_dir_prefix}
+  else
+    yaimlog ERROR "${FUNCTION}: StoRM backend configuration directory prefix ${config_dir_prefix} doesn't exist"
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "${YERRORSTR}"
+    return ${YEX_NOSUCHFILE}
+  fi
+  if [ -d ${config_dir} ]; then
+    chown -R ${STORM_USER}:${STORM_USER} ${config_dir}
+  else
+    yaimlog ERROR "${FUNCTION}: StoRM backend configuration directory ${config_dir} doesn't exist"
+    yestr ${YEX_NOSUCHFILE}
+    yaimlog ERROR "${YERRORSTR}"
+    return ${YEX_NOSUCHFILE}
+  fi
+
   # Activate and restart service
   /sbin/chkconfig --add storm-backend-server
   /sbin/chkconfig storm-backend-server on
