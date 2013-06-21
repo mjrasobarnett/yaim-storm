@@ -96,6 +96,10 @@ function config_storm_gridhttps_generic () {
   	yaimgridenv_set JAVA_HOME ${JAVA_HOME}
   fi
   
+  # Register service to start at boottime
+  /sbin/chkconfig --add storm-gridhttps-server
+  /sbin/chkconfig storm-gridhttps-server on
+  
   # Exit with success
   return ${YEX_OK}    
 
