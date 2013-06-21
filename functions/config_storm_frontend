@@ -177,6 +177,11 @@ function config_storm_frontend () {
     return ${YEX_NOSUCHFILE}
   fi
 
+  # Set user on sysconfig file
+  SYSCONF_FILE="/etc/sysconfig/storm-frontend-server"
+  set_value	"STORM_FE_USER"	"${STORM_USER}"	"${SYSCONF_FILE}"
+  yaimlog INFO "${FUNCTION}: set STORM_FE_USER as ${STORM_USER}"
+
   # Activate and restart service 
   /sbin/chkconfig --add storm-frontend-server
   /sbin/chkconfig storm-frontend-server on

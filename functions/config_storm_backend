@@ -66,6 +66,11 @@ function config_storm_backend () {
   #     config_storm_dir. This note can be usefull in case of the edit/remotion of that function 
   #yaimgridenv_set JAVA_HOME ${JAVA_LOCATION}
 
+  # Set user on sysconfig file
+  SYSCONF_FILE="/etc/sysconfig/storm-backend-server"
+  set_value     "STORM_BE_USER" "${STORM_USER}" "${SYSCONF_FILE}"
+  yaimlog INFO "${FUNCTION}: set STORM_BE_USER as ${STORM_USER}"
+
   # Activate and restart service
   /sbin/chkconfig --add storm-backend-server
   /sbin/chkconfig storm-backend-server on
