@@ -188,8 +188,5 @@ STORM_INFO_USE_GPFS_PREALLOCATION=false
 #---------------------------------------------------------
 # Endpoint maturity
 STORM_ENDPOINT_QUALITY_LEVEL="2" 
-# Endpoint state
-#STORM_ENDPOINT_SERVING_STATE="production"
-STORM_ENDPOINT_SERVING_STATE="4"
 # Capability according to OGSA
 STORM_ENDPOINT_CAPABILITY="data.management.storage"
