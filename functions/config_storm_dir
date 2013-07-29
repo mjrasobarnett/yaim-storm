@@ -73,12 +73,17 @@ function config_storm_dir () {
       yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}, adding group read permission"; 
       chmod -R o-rwx,g+r ${dir}
     else
-      owner=`ls -l ${STORM_DEFAULT_ROOT} | grep ${SA_LOW} | head -n 1 | awk '{print \$3}'`
+      parent=`dirname ${dir}`
+      entryname=`basename ${dir}`
+      owner=`ls -latr ${parent} | grep " ${entryname}$" | awk '{print $3}'`
       yaimlog INFO "${FUNCTION}: $dir is owned by $owner"
-      if [ "$owner"!="${STORM_USER}" ]; then
-        chown -RL ${STORM_USER}:${STORM_USER} ${dir};
-      	chmod -R o-rwx,g+r ${dir}
-      	yaimlog INFO "${FUNCTION}: Recursively unset world permissions for ${dir}, adding group read permission";
+      idowner=`id -u ${owner}`
+      idstorm=`id -u ${STORM_USER}`
+      if ((${idowner}==${idstorm})); then
+         yaimlog INFO "${FUNCTION}: $owner is the right owner of ${dir}"
+      else
+         yaimlog ERROR "${FUNCTION}: ${dir} has the wrong owner!"
+         return 1
       fi
     fi
 
