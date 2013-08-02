@@ -73,9 +73,7 @@ function config_storm_dir () {
       yaimlog DEBUG "${FUNCTION}: Recursively unset world permissions for ${dir}, adding group read permission"; 
       chmod -R o-rwx,g+r ${dir}
     else
-      parent=`dirname ${dir}`
-      entryname=`basename ${dir}`
-      owner=`ls -latr ${parent} | grep " ${entryname}$" | awk '{print $3}'`
+      owner=`ls -ldatr ${dir} | awk '{print $3}'`
       yaimlog INFO "${FUNCTION}: $dir is owned by $owner"
       idowner=`id -u ${owner}`
       idstorm=`id -u ${STORM_USER}`
