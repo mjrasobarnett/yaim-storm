@@ -140,12 +140,6 @@ STORM_GRIDHTTPS_MAPPING_SERVICE_PORT=8086
 # COMPULSORY if STORM_GRIDHTTPS_ENABLED is true - No default value.
 #STORM_GRIDHTTPS_SERVER_GROUP_UID=
 
-# Checksum support
-#---------------------------------------------------------
-# Algorithm used by file-transfer agents to compute checksum.
-# OPTIONAL - Available values: [Adler32] - Default value: Adler32
-STORM_CKSUM_ALGORITHM="Adler32"
-
 # Storage Areas settings
 #---------------------------------------------------------
 # List of supported Storage Areas.

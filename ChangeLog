@@ -1,3 +1,6 @@
+09/08/2013 EnricoV
+* removed STORM_CKSUM_ALGORITHM
+
 10/12/2012 MicheleD
 * removed se_storm_checksum profile
 * fixed issue 305
