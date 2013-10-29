@@ -45,6 +45,14 @@ function config_storm_generic () {
 
   FUNCTION="config_storm_generic"
 
+  # check compulstory variable is set
+  if [ -z "${STORM_BE_XMLRPC_TOKEN}" ]; then
+    yaimlog ERROR "${FUNC}: The STORM_BE_XMLRPC_TOKEN varialble MUST be set"
+    yestr ${YEX_MISSINGVAR}
+    yaimlog ERROR "${YERRORSTR}"
+    return ${YEX_MISSINGVAR}
+  fi
+
   # Add STORM_USER if missing
   if [ "${STORM_USER}" = "root" ]; then
     yaimlog ERROR "${FUNCTION}: \$STORM_USER can't be root!"

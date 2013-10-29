@@ -135,6 +135,7 @@ function config_storm_frontend () {
   set_value "be.xmlrpc.host"                "${STORM_BACKEND_HOST}"                 	 ${FILE}
   set_value "be.xmlrpc.port"                "${STORM_BE_XMLRPC_PORT}"                 	 ${FILE}
   set_value "be.xmlrpc.path"                "${STORM_BE_XMLRPC_PATH}"                 	 ${FILE}
+  set_value "be.xmlrpc.token"               "${STORM_BE_XMLRPC_TOKEN}"               ${FILE}
   set_value "check.user.blacklisting"		"${STORM_FE_USER_BLACKLISTING}"              ${FILE}
   #Storm currently manages a single argus pepd endpoint
   STORM_ARGUS_PEPD_ENDPOINT=$(echo ${ARGUS_PEPD_ENDPOINTS} | awk '{print $1}')
