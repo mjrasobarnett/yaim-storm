@@ -112,6 +112,7 @@ fi
   set_value "storm.service.SURL.default-ports"  "${STORM_SERVICE_SURL_DEF_PORTS:-8444}"  ${FILE}
   set_value "storm.rest.services.port"		    "${STORM_BACKEND_REST_SERVICES_PORT}"    ${FILE}
   set_value "synchcall.xmlrpc.unsecureServerPort"	"${STORM_BE_XMLRPC_PORT}"   		 ${FILE}
+  set_value "synchcall.xmlrpc.security.enabled"	"true"   		 ${FILE}
   set_value "synchcall.xmlrpc.security.token"	"${STORM_BE_XMLRPC_TOKEN}"   		 ${FILE}
   
 
