@@ -102,6 +102,9 @@ function config_storm_gridhttps_properties () {
     if ! [ -z "$STORM_BE_XMLRPC_PORT" ] || [ "${STORM_BE_XMLRPC_PORT+xxx}" = "xxx" ]; then
        set_value "backend.srm-service.port" "${STORM_BE_XMLRPC_PORT}"   ${FILE}
     fi
+	  if ! [ -z "$STORM_BE_XMLRPC_TOKEN" ] || [ "${STORM_BE_XMLRPC_TOKEN+xxx}" = "xxx" ]; then
+	     set_value "backend.xmlrpc.token" "${STORM_BE_XMLRPC_TOKEN}"   ${FILE}
+	  fi
     if ! [ -z "$STORM_SRM_ENDPOINT" ] || [ "${STORM_SRM_ENDPOINT+xxx}" = "xxx" ]; then
        set_value "srm.endpoint" "${STORM_SRM_ENDPOINT}"   ${FILE}
     fi

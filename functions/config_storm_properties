@@ -32,7 +32,8 @@
 function config_storm_properties_check () {
 
   requires $1 STORM_DB_HOST STORM_DB_PWD STORM_DB_USER \
-              STORM_FRONTEND_HOST_LIST STORM_PROXY_HOME STORM_BACKEND_REST_SERVICES_PORT STORM_GRIDHTTPS_ENABLED
+              STORM_FRONTEND_HOST_LIST STORM_PROXY_HOME STORM_BACKEND_REST_SERVICES_PORT STORM_GRIDHTTPS_ENABLED \
+              STORM_FRONTEND_PORT
   return $?
 
 }
@@ -112,7 +113,10 @@ fi
   set_value "storm.service.SURL.default-ports"  "${STORM_SERVICE_SURL_DEF_PORTS:-8444}"  ${FILE}
   set_value "storm.rest.services.port"		    "${STORM_BACKEND_REST_SERVICES_PORT}"    ${FILE}
   set_value "synchcall.xmlrpc.unsecureServerPort"	"${STORM_BE_XMLRPC_PORT}"   		 ${FILE}
-  
+  set_value "synchcall.xmlrpc.security.enabled"	"true"   		 ${FILE}
+  set_value "synchcall.xmlrpc.security.token"	"${STORM_BE_XMLRPC_TOKEN}"   		 ${FILE}
+  set_value "storm.service.port"                "${STORM_FRONTEND_PORT}"                ${FILE}
+
   # Gridhttps stuff
   
   # Convert in lowercase
