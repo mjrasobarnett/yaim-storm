@@ -17,7 +17,7 @@
 #
 
 AC_PREREQ([2.59])
-AC_INIT([yaim storm], [4.3.4])
+AC_INIT([yaim storm], [4.3.5])
 AC_CONFIG_AUX_DIR([./project])
 AC_CONFIG_SRCDIR([defaults/se_storm_backend.pre])
 AM_INIT_AUTOMAKE

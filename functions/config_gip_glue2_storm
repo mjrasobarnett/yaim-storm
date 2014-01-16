@@ -342,7 +342,8 @@ EOF
     # Add VONAME if missing
     if ! [[ "${PERVO_VONAMES}" =~ "${SA_VONAME}" ]]; then
       PERVO_VONAMES="${PERVO_VONAMES} ${SA_VONAME}"
-      x=STORM_${SA_UPP}_ACCESSPOINT;   hash_insert PERVO_ACCESSPOINT ${PERVO_VONAME_INDEX} ${!x:-/${SA_LOW}}
+      x=STORM_${SA_UPP}_ACCESSPOINT; sa_access_points=${!x:-/${SA_LOW}}
+      hash_insert PERVO_ACCESSPOINT ${PERVO_VONAME_INDEX} "$(echo ${sa_access_points} | awk '{print $1}')"
     fi
     # Sum size values for VONAME and global(in GB)
     x=`hash_find PERVO_USED_ONLINE_SIZE_GB ${PERVO_VONAME_INDEX}`
@@ -499,8 +500,7 @@ EOF
 
     # Remove DNS-like characters from SA_UPP names
     SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
-
-    x=STORM_${SA_UPP}_ACCESSPOINT;     SA_ACCESSPOINT=${!x:-/${SA_LOW}}
+    x=STORM_${SA_UPP}_ACCESSPOINT; sa_access_points=${!x:-/${SA_LOW}}; SA_ACCESSPOINT="$(echo ${sa_access_points} | awk '{print $1}')"
     x=STORM_${SA_UPP}_TOKEN;           SA_TOKEN=${!x}
     x=STORM_${SA_UPP}_VONAME;          SA_VONAME=${!x:-${SA_LOW}}
     x=STORM_${SA_UPP}_STORAGECLASS;    SA_STORAGECLASS=${!x:-${STORM_STORAGECLASS}}
