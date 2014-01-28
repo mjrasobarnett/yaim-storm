@@ -30,13 +30,46 @@
 ##############################################################################
 
 # Get from config_gip_dpm in glite-yaim-dpm-4.0.6-1 and modified for StoRM
+function storeunique(){
+  for name in ${SA_VOS} ; do
+    if [ "$1" = "$name" ]
+      then return 0 ;
+    fi ;
+  done
+
+  SA_VOS="$1 ${SA_VOS}" ;
+}
+
+function is_vo_listed() {
+  [[ $VOS =~ (^| )$1($| ) ]] && echo 1 || echo 0 ;
+}
+
+function sa_vos () {
+  for SA in ${STORM_STORAGEAREA_LIST}; do
+
+    # Convert case
+    SA_UPP=`echo ${SA} | tr '[:lower:]' '[:upper:]'`
+    SA_LOW=`echo ${SA} | tr '[:upper:]' '[:lower:]'`
+
+   # Remove DNS-like characters from SA_UPP names
+    SA_UPP=`echo ${SA_UPP} | sed -e 's/-//g' -e 's/\.//g'`
+
+    x=STORM_${SA_UPP}_VONAME;
+    SA_VONAME=${!x:-${SA_LOW}}
+
+    if [ $(is_vo_listed ${SA_VONAME}) -eq 1 ] && [ "${SA_VONAME}" != "*" ]; then
+      storeunique ${SA_VONAME};
+    fi ;
+  done
+}
+
 function l_write_vo_info () {
 
   tofile=$1
   # get_owner
   echo -n "get_owner =" >> ${tofile}
   nvo=0
-  for VO in ${VOS}; do
+  for VO in ${SA_VOS}; do
     echo -n " echo ${VO};" >> ${tofile}
     nvo=1
   done
@@ -48,7 +81,7 @@ function l_write_vo_info () {
   # get_acbr
   echo -n "get_acbr =" >> ${tofile}
   nvo=0
-  for VO in ${VOS}; do
+  for VO in ${SA_VOS}; do
     echo -n " echo VO:${VO};" >> ${tofile}
     nvo=1
   done
@@ -229,6 +262,7 @@ get_data = echo
 get_services = echo
 EOF
 
+  sa_vos
   # Run function to complete file
   l_write_vo_info ${SERVICEFILE}
   #-------------------------------------------------------------------------
