@@ -408,16 +408,22 @@ EOF
   done
 
   #==========================================================
-  # Create GLUE2ServiceId entries
+  # Create GLUE2StorageService entries
 
-  yaimlog DEBUG "${FUNCTION}: Creating GLUE2ServiceId entries"
+  CURRENT_DATETIME=`date -u +%FT%TZ`
+  yaimlog INFO "${FUNCTION}: CURRENT_DATETIME = ${CURRENT_DATETIME}"
+
+  yaimlog DEBUG "${FUNCTION}: Creating GLUE2StorageService entries"
   cat >> ${FILE} << EOF
 #
-# GLUE2ServiceId
+# GLUE2StorageService
 #
 dn: GLUE2ServiceId=${STORM_FRONTEND_PUBLIC_HOST},GLUE2GroupID=resource,o=glue
 objectClass: GLUE2Service
 objectClass: GLUE2StorageService
+GLUE2EntityCreationTime: ${CURRENT_DATETIME}
+GLUE2EntityOtherInfo: ProfileName=EGI
+GLUE2EntityOtherInfo: ProfileVersion=1.0
 GLUE2ServiceId: ${STORM_FRONTEND_PUBLIC_HOST}
 GLUE2ServiceCapability: ${STORM_ENDPOINT_CAPABILITY}
 GLUE2ServiceType: SRM
