@@ -426,7 +426,7 @@ GLUE2EntityOtherInfo: ProfileName=EGI
 GLUE2EntityOtherInfo: ProfileVersion=1.0
 GLUE2ServiceId: ${STORM_FRONTEND_PUBLIC_HOST}
 GLUE2ServiceCapability: ${STORM_ENDPOINT_CAPABILITY}
-GLUE2ServiceType: SRM
+GLUE2ServiceType: it.grid.storm
 GLUE2ServiceQualityLevel: ${QUALITY_LEVEL}
 GLUE2ServiceStatusInfo: http://${STORM_FRONTEND_PUBLIC_HOST}/get-status
 GLUE2ServiceAdminDomainForeignKey: ${MY_DOMAIN}
