@@ -58,6 +58,5 @@ config_storm_used_space
 config_storm_gridhttps_plugin_properties
 config_storm_backend
 config_gip_storm
-config_gip_glue2_storm
 config_bdii_5.2
 config_gip_service_release"
