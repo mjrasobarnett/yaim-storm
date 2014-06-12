@@ -184,3 +184,6 @@ STORM_INFO_USE_GPFS_PREALLOCATION=false
 STORM_ENDPOINT_QUALITY_LEVEL="2" 
 # Capability according to OGSA
 STORM_ENDPOINT_CAPABILITY="data.management.storage"
+
+# Default PTG ACL setup strategy
+STORM_PTG_SKIP_ACL_SETUP="false"

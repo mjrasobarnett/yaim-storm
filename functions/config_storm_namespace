@@ -22,7 +22,7 @@
 # DESCRIPTION : This function configures storage area namespaces on a StoRM SE.
 #
 # AUTHORS :     grid-release@infn.it
-#		M. David (david@lip.pt)
+#       M. David (david@lip.pt)
 #
 # NOTES :
 #
@@ -180,7 +180,7 @@ EOF
     SA_SIZE_LIMIT=`echo ${SA_SIZE_LIMIT} | tr '[:upper:]' '[:lower:]'`
     # Convert in uppercase
     SA_STORAGECLASS=`echo ${SA_STORAGECLASS} | tr '[:lower:]' '[:upper:]'`
-     
+
     x=STORM_${SA_UPP}_ONLINE_SIZE;           SA_ONLINE_SIZE=${!x}
     x=STORM_${SA_UPP}_NEARLINE_SIZE;         SA_NEARLINE_SIZE=${!x}
 
@@ -191,7 +191,7 @@ EOF
 
     if ! [ -z "${SA_TOKEN}" ]; then
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} space-token-description (${SA_TOKEN})"
-      cat >> ${FILE} << EOF	
+      cat >> ${FILE} << EOF 
       <space-token-description>${SA_TOKEN}</space-token-description>
 EOF
     fi
@@ -369,9 +369,9 @@ EOF
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (gsiftp)"
       # gsiftp entry could be multiple  
       COUNTER=1
-	  COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
-	  while [ $COUNTER -le $COUNT ]; do
-      	SA_GRIDFTP_POOL=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+      COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
+      while [ $COUNTER -le $COUNT ]; do
+        SA_GRIDFTP_POOL=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
         if [ ! -z "${SA_GRIDFTP_POOL}" ]; then
           SA_GRIDFTP_POOL_HOST=`echo ${SA_GRIDFTP_POOL} | awk '{print $1}'`
           cat >> ${FILE} << EOF
@@ -414,9 +414,9 @@ EOF
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (http)"
       # gsiftp entry could be multiple
       COUNTER=1
-	  COUNT=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -F ',' '{print NF}')
-	  while [ $COUNTER -le $COUNT ]; do
-      	SA_GRIDHTTP_POOL=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+      COUNT=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -F ',' '{print NF}')
+      while [ $COUNTER -le $COUNT ]; do
+        SA_GRIDHTTP_POOL=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
         if [ ! -z "${SA_GRIDHTTP_POOL}" ]; then
           SA_GRIDHTTP_POOL_HOST=`echo ${SA_GRIDHTTP_POOL} | awk '{print $1}'`
           cat >> ${FILE} << EOF
@@ -438,9 +438,9 @@ EOF
       yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} prot (https)"
       # gsiftp entry could be multiple
       COUNTER=1
-	  COUNT=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -F ',' '{print NF}')
-	  while [ $COUNTER -le $COUNT ]; do
-      	SA_GRIDHTTPS_POOL=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+      COUNT=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -F ',' '{print NF}')
+      while [ $COUNTER -le $COUNT ]; do
+        SA_GRIDHTTPS_POOL=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
         if [ ! -z "${SA_GRIDHTTPS_POOL}" ]; then
           SA_GRIDHTTPS_POOL_HOST=`echo ${SA_GRIDHTTPS_POOL} | awk '{print $1}'`
           cat >> ${FILE} << EOF
@@ -473,9 +473,9 @@ EOF
       # 'weight' strategy case
       if [ ${SA_GRIDFTP_POOL_STRATEGY} = 'weight' ]; then
         COUNTER=1
-	    COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
-	    while [ $COUNTER -le $COUNT ]; do
-		  SA_GRIDFTP_POOL=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+        COUNT=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -F ',' '{print NF}')
+        while [ $COUNTER -le $COUNT ]; do
+          SA_GRIDFTP_POOL=$(echo ${SA_GRIDFTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
           if [ ! -z "${SA_GRIDFTP_POOL}" ]; then
             SA_GRIDFTP_POOL_WEIGHT=`echo ${SA_GRIDFTP_POOL} | awk '{print $2}'`
             # set to 1 if weight is null
@@ -520,9 +520,9 @@ EOF
       # 'weight' strategy case
       if [ ${SA_GRIDHTTP_POOL_STRATEGY} = 'weight' ]; then
         COUNTER=1
-	    COUNT=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -F ',' '{print NF}')
-	    while [ $COUNTER -le $COUNT ]; do
-		  SA_GRIDHTTP_POOL=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+        COUNT=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -F ',' '{print NF}')
+        while [ $COUNTER -le $COUNT ]; do
+          SA_GRIDHTTP_POOL=$(echo ${SA_GRIDHTTP_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
           if [ ! -z "${SA_GRIDHTTP_POOL}" ]; then
             SA_GRIDHTTP_POOL_WEIGHT=`echo ${SA_GRIDHTTP_POOL} | awk '{print $2}'`
             # set to 1 if weight is null
@@ -567,9 +567,9 @@ EOF
       # 'weight' strategy case
       if [ ${SA_GRIDHTTPS_POOL_STRATEGY} = 'weight' ]; then
         COUNTER=1
-	    COUNT=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -F ',' '{print NF}')
-	    while [ $COUNTER -le $COUNT ]; do
-		  SA_GRIDHTTPS_POOL=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
+        COUNT=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -F ',' '{print NF}')
+        while [ $COUNTER -le $COUNT ]; do
+          SA_GRIDHTTPS_POOL=$(echo ${SA_GRIDHTTPS_POOL_LIST} | awk -v current_index=$COUNTER -F ',' '{print $current_index}')
           if [ ! -z "${SA_GRIDHTTPS_POOL}" ]; then
             SA_GRIDHTTPS_POOL_WEIGHT=`echo ${SA_GRIDHTTPS_POOL} | awk '{print $2}'`
             # set to 1 if weight is null
@@ -627,14 +627,20 @@ EOF
     x=STORM_${SA_UPP}_ROOT;                    SA_ROOT=${!x:-${STORM_DEFAULT_ROOT}/${SA_LOW}}
     x=STORM_${SA_UPP}_ACCESSPOINT;             SA_ACCESSPOINT=${!x:-/${SA_LOW}}
 
-    yaimlog DEBUG "${FUNCTION}: Create SA ${SA_UPP} map-rule (${SA_LOW})"
-    cat >> ${FILE} << EOF
-    <map-rule name="${SA_LOW}-maprule">
-      <stfn-root>${SA_ACCESSPOINT}</stfn-root>
-      <mapped-fs>${SA_UPP}-FS</mapped-fs>
+    access_point_counter=0
+    
+    for access_point in ${SA_ACCESSPOINT}; do
+        map_rule_name="${SA_LOW}-maprule-${access_point_counter}"
+        yaimlog DEBUG "${FUNCTION}: Creating ${SA_UPP} map-rule (${map_rule_name}) for access point: ${access_point}"
+
+        cat >> ${FILE} << EOF
+    <map-rule name="${map_rule_name}">
+        <stfn-root>${access_point}</stfn-root>
+        <mapped-fs>${SA_UPP}-FS</mapped-fs>
     </map-rule>
 EOF
-
+        access_point_counter=$((access_point_counter+1))
+    done
   done
 
   cat >> ${FILE} << EOF
@@ -688,7 +694,7 @@ EOF
     <app-rule name="${SA_LOW}-rule">
       <subjects>
         <dn>${SA_DN_REGEX}</dn>
-	    <vo-name>${SA_VONAME}</vo-name>
+        <vo-name>${SA_VONAME}</vo-name>
       </subjects>
       <approachable-fs>${SA_UPP}-FS</approachable-fs>
       <anonymous-http-read>${SA_ANONYMOUS_HTTP_READ}</anonymous-http-read>    

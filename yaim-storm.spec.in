@@ -90,7 +90,6 @@ rm -rf $RPM_BUILD_ROOT
 %{default_prefix}/yaim/node-info.d
 
 %changelog
-
-* Fri Jan 20 2012 Elisabetta Ronchieri <elisabetta.ronchieri@cnaf.infn.it> - 4.7.1-1.sl5
-- changed packaging
-
+* Thu Jan 16 2014 Andrea Ceccanti <andrea.ceccanti@cnaf.infn.it> - 4.3.5-1
+- Fix for https://issues.infn.it/jira/browse/STOR-560
+- Fix for https://issues.infn.it/jira/browse/STOR-506

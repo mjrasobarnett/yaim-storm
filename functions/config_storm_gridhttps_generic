@@ -57,6 +57,10 @@ function config_storm_gridhttps_generic () {
     yaimlog DEBUG "${FUNCTION}: Adding '$STORM_GRIDHTTPS_USER' to ${STORM_USER} group"
     usermod -a -G ${STORM_USER} ${STORM_GRIDHTTPS_USER}
   fi
+  
+  # Set ${STORM_GRIDHTTPS_USER} environment variable
+  yaimlog DEBUG "${FUNCTION}: Setting up ${STORM_GRIDHTTPS_USER} environment variable"
+  yaimgridenv_set STORM_GRIDHTTPS_USER ${STORM_GRIDHTTPS_USER}
 
   # Create ${STORM_GRIDHTTPS_CERT_DIR} directory and copy host certificate and key
   yaimlog DEBUG "${FUNCTION}: Updating host certificate and key in ${STORM_GRIDHTTPS_CERT_DIR}"

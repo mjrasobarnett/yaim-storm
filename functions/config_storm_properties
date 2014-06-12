@@ -116,6 +116,7 @@ fi
   set_value "synchcall.xmlrpc.security.enabled"	"true"   		 ${FILE}
   set_value "synchcall.xmlrpc.security.token"	"${STORM_BE_XMLRPC_TOKEN}"   		 ${FILE}
   set_value "storm.service.port"                "${STORM_FRONTEND_PORT}"                ${FILE}
+  set_value "ptg.skip-acl-setup"                "${STORM_PTG_SKIP_ACL_SETUP}"                ${FILE}
 
   # Gridhttps stuff
   
