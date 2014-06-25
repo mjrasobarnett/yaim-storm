@@ -9,9 +9,9 @@
 # (look at "SE StoRM Backend" section)
 
 # StoRM backend host
-STORM_BACKEND_HOST=my-storm-backend.$MY_DOMAIN
+STORM_BACKEND_HOST="<%= @storm_backend_host %>"
 # StoRM storage path
-STORM_DEFAULT_ROOT=/storage
+STORM_DEFAULT_ROOT="<%= @storm_default_root %>"
 
 # General settings
 #---------------------------------------------------------
@@ -20,17 +20,17 @@ STORM_DEFAULT_ROOT=/storage
 #STORM_USER=storm
 # Host certificate directory for StoRM Backend service.
 # OPTIONAL - Default value: /etc/grid-security/${STORM_USER}
-#STORM_CERT_DIR=/etc/grid-security/${STORM_USER}
+#STORM_CERT_DIR="/etc/grid-security/${STORM_USER}"
 # Directory used to exchange proxies.
 # OPTIONAL - Default value: /etc/storm/tmp
 #STORM_PROXY_HOME=/etc/storm/tmp
 # StoRM Frontend service public host.
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST}
-#STORM_FRONTEND_PUBLIC_HOST=${STORM_BACKEND_HOST}
-# StoRM Frontend service host list: SRM endpoints can be more than one virtual host, also different than STORM_FRONTEND_PUBLIC_HOSTi
+STORM_FRONTEND_PUBLIC_HOST=${STORM_BACKEND_HOST}
+# StoRM Frontend service host list: SRM endpoints can be more than one virtual host, also different than STORM_FRONTEND_PUBLIC_HOST
 # (e.g. dynamic DNS for multiple StoRM Frontend).
 # OPTIONAL - Default value: ${STORM_FRONTEND_PUBLIC_HOST}
-#STORM_FRONTEND_HOST_LIST=${STORM_FRONTEND_PUBLIC_HOST}
+STORM_FRONTEND_HOST_LIST=${STORM_BACKEND_HOST}
 # StoRM Frontend service port.
 # OPTIONAL - Default value: 8444
 #STORM_FRONTEND_PORT=8444
@@ -45,7 +45,7 @@ STORM_DEFAULT_ROOT=/storage
 #STORM_BACKEND_REST_SERVICES_PORT=9998
 # List of supported Virtual Organizations.
 #EXAMPLE: VOS="dteam infngrid"
-VOS=
+VOS="<%= @vos %>"
 
 # Database settings
 #---------------------------------------------------------
@@ -57,7 +57,7 @@ VOS=
 #STORM_DB_USER=storm
 # Password for database connection.
 # COMPULSORY - No default value.
-STORM_DB_PWD=
+STORM_DB_PWD="<%= @storm_db_pwd %>"
 
 # Configuration files settings
 #---------------------------------------------------------
@@ -92,13 +92,13 @@ STORM_DB_PWD=
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_INFO_ROOT_SUPPORT=false
 # GRIDHTTP servers pool list. A comma separated list of hosts
-# OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
 #STORM_GRIDHTTP_POOL_LIST=${STORM_BACKEND_HOST}
 # Protocol: http
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_INFO_HTTP_SUPPORT=false
 # GRIDHTTPS servers pool list. A comma separated list of hosts
-# OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
+# OPTIONAL - Default value: ${STORM_BACKEND_HOST}
 #STORM_GRIDHTTPS_POOL_LIST=${STORM_BACKEND_HOST}
 # Protocol: https
 # OPTIONAL - Available values: [true|false] - Default value: false
@@ -139,7 +139,7 @@ STORM_INFO_USE_GPFS_PREALLOCATION=false
 # List of supported Storage Areas.
 # Usually at least one Storage Area for each VO specified in VOS should be created. (e.g. STORM_STORAGEAREA_LIST="SA1 SA2 SA3").
 # OPTIONAL - Default value: ${VOS}
-#STORM_STORAGEAREA_LIST=${VOS}
+STORM_STORAGEAREA_LIST="<%= @storm_storagearea_list %>"
 
 # Default Storage Areas settings
 #---------------------------------------------------------
@@ -167,7 +167,7 @@ STORM_INFO_USE_GPFS_PREALLOCATION=false
 #STORM_GRIDHTTPS_POOL_STRATEGY=round-robin
 # GRIDFTP servers pool list. A comma separated list of hosts
 # OPTIONAL - Default value: ${STORM_BACKEND_HOST} 
-#STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
+STORM_GRIDFTP_POOL_LIST=${STORM_BACKEND_HOST}
 # Storage Area anonymous read access via HTTP.
 # OPTIONAL - Available values: [true|false] - Default value: false
 #STORM_ANONYMOUS_HTTP_READ=false
@@ -179,7 +179,7 @@ STORM_INFO_USE_GPFS_PREALLOCATION=false
 #STORM_ROOT_HOST=${STORM_BACKEND_HOST}
 # Storage Class type.
 # OPTIONAL - Available values: [T0D1|T1D0|T1D1|<null>] - No default value.
-#STORM_STORAGECLASS=
+STORM_STORAGECLASS="<%= @storm_storageclass %>"
 
 # Optional Storage Areas settings
 #---------------------------------------------------------
@@ -228,26 +228,76 @@ STORM_INFO_USE_GPFS_PREALLOCATION=false
 #
 ##############################################################################
 # Modified by M. David (david@lip.pt) on 12 Oct. 2010
-# added the variable STORM_<SA>_ONLINE_SIZE 
+# added the variable STORM_<SA>_ONLINE_SIZE
 # to be a configurable parameter for the total online size of any given SA
 #
 ##############################################################################
 # STORM_SA1_ONLINE_SIZE: 	    value XXXX in GB. No default value.
 
 #-------------------------------------------------------
-# Example for a Storage Area "INFNGRID":
-#STORM_STORAGEAREA_LIST="infngrid"
-# **COMPULSORY** variables
-#STORM_INFNGRID_VONAME=infngrid
-# **OPTIONAL** variables
-#STORM_INFNGRID_ROOT=$STORM_DEFAULT_ROOT/infngrid
-#STORM_INFNGRID_ACCESSPOINT=/infngrid
-#STORM_INFNGRID_TOKEN=INFNGRID_TOKEN
-#STORM_INFNGRID_FSTYPE=posixfs
-#STORM_INFNGRID_ACLMODE=aot
-#STORM_INFNGRID_GRIDFTP=my-storm-gridftp.$MY_DOMAIN
-#STORM_INFNGRID_RFIO=my-rfio.$MY_DOMAIN
-#STORM_INFNGRID_STORAGECLASS=T1D1
-#STORM_INFNGRID_QUOTA=true
-#STORM_INFNGRID_QUOTA_DEVICE=gpfs
-#STORM_INFNGRID_ONLINE_SIZE=1000
+STORM_DTEAM_VONAME=dteam
+STORM_DTEAM_ACCESSPOINT=<%= @storm_dteam_accesspoint %>
+STORM_DTEAM_ROOT=$STORM_DEFAULT_ROOT<%= @storm_dteam_accesspoint %>
+STORM_DTEAM_ONLINE_SIZE=<%= @storm_dteam_online_size %>
+
+#-------------------------------------------------------
+STORM_OPS_VONAME=ops
+STORM_OPS_ACCESSPOINT=<%= @storm_ops_accesspoint %>
+STORM_OPS_ROOT=$STORM_DEFAULT_ROOT<%= @storm_ops_accesspoint %>
+STORM_OPS_ONLINE_SIZE=<%= @storm_ops_online_size %>
+
+#-------------------------------------------------------
+STORM_ATLASHOTDISK_VONAME=atlas
+STORM_ATLASHOTDISK_ACCESSPOINT=<%= @storm_atlashotdisk_accesspoint %>
+STORM_ATLASHOTDISK_ROOT=$STORM_DEFAULT_ROOT<%= @storm_atlashotdisk_accesspoint %>
+STORM_ATLASHOTDISK_TOKEN=<%= @storm_atlashotdisk_token %>
+STORM_ATLASHOTDISK_ONLINE_SIZE=<%= @storm_atlashotdisk_online_size %>
+STORM_ATLASHOTDISK_DEFAULT_ACL_LIST="<%= @storm_atlashotdisk_default_acl_list %>"
+
+#-------------------------------------------------------
+STORM_ATLASDATADISK_VONAME=atlas
+STORM_ATLASDATADISK_ACCESSPOINT=<%= @storm_atlasdatadisk_accesspoint %>
+STORM_ATLASDATADISK_ROOT=$STORM_DEFAULT_ROOT<%= @storm_atlasdatadisk_accesspoint %>
+STORM_ATLASDATADISK_TOKEN=<%= @storm_atlasdatadisk_token %>
+STORM_ATLASDATADISK_ONLINE_SIZE=<%= @storm_atlasdatadisk_online_size %>
+STORM_ATLASDATADISK_DEFAULT_ACL_LIST="<%= @storm_atlasdatadisk_default_acl_list %>"
+
+#-------------------------------------------------------
+STORM_ATLASGROUPDISK_VONAME=atlas
+STORM_ATLASGROUPDISK_ACCESSPOINT=<%= @storm_atlasgroupdisk_accesspoint %>
+STORM_ATLASGROUPDISK_ROOT=$STORM_DEFAULT_ROOT<%= @storm_atlasgroupdisk_accesspoint %>
+STORM_ATLASGROUPDISK_TOKEN=<%= @storm_atlasgroupdisk_token %>
+STORM_ATLASGROUPDISK_ONLINE_SIZE=<%= @storm_atlasgroupdisk_online_size %>
+
+#-------------------------------------------------------
+STORM_ATLASLOCALGROUPDISK_VONAME=atlas
+STORM_ATLASLOCALGROUPDISK_ACCESSPOINT=<%= @storm_atlaslocalgroupdisk_accesspoint %>
+STORM_ATLASLOCALGROUPDISK_ROOT=$STORM_DEFAULT_ROOT<%= @storm_atlaslocalgroupdisk_accesspoint %>
+STORM_ATLASLOCALGROUPDISK_TOKEN=<%= @storm_atlaslocalgroupdisk_token %>
+STORM_ATLASLOCALGROUPDISK_ONLINE_SIZE=<%= @storm_atlaslocalgroupdisk_online_size %>
+
+#-------------------------------------------------------
+STORM_ATLASPRODDISK_VONAME=atlas
+STORM_ATLASPRODDISK_ACCESSPOINT=<%= @storm_atlasproddisk_accesspoint %>
+STORM_ATLASPRODDISK_ROOT=$STORM_DEFAULT_ROOT<%= @storm_atlasproddisk_accesspoint %>
+STORM_ATLASPRODDISK_TOKEN=<%= @storm_atlasproddisk_token %>
+STORM_ATLASPRODDISK_ONLINE_SIZE=<%= @storm_atlasproddisk_online_size %>
+
+#-------------------------------------------------------
+STORM_ATLASSCRATCHDISK_VONAME=atlas
+STORM_ATLASSCRATCHDISK_ACCESSPOINT=<%= @storm_atlasscratchdisk_accesspoint %>
+STORM_ATLASSCRATCHDISK_ROOT=$STORM_DEFAULT_ROOT<%= @storm_atlasscratchdisk_accesspoint %>
+STORM_ATLASSCRATCHDISK_TOKEN=<%= @storm_atlasscratchdisk_token %>
+STORM_ATLASSCRATCHDISK_ONLINE_SIZE=<%= @storm_atlasscratchdisk_online_size %>
+
+#-------------------------------------------------------
+STORM_ATLAS_VONAME=atlas
+STORM_ATLAS_ACCESSPOINT=<%= @storm_atlas_accesspoint %>
+STORM_ATLAS_ROOT=$STORM_DEFAULT_ROOT<%= @storm_atlas_accesspoint %>
+STORM_ATLAS_ONLINE_SIZE=<%= @storm_atlas_online_size %>
+
+#-------------------------------------------------------
+STORM_SNOPLUS_VONAME=snoplus.snolab.ca
+STORM_SNOPLUS_ACCESSPOINT=<%= @storm_snoplus_accesspoint %>
+STORM_SNOPLUS_ROOT=$STORM_DEFAULT_ROOT<%= @storm_snoplus_accesspoint %>
+STORM_SNOPLUS_ONLINE_SIZE=<%= @storm_snoplus_online_size %>
